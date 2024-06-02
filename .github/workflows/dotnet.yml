@@ -1,0 +1,71 @@
+name: Build & Test World
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.sln'
+      - '**/*.props'
+      - '**/*.targets'
+      - '.github/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'documentation/**'
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DotNetVersion: 8.0.x
+
+defaults:
+  run:
+    working-directory: source
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    
+    runs-on: ${{matrix.os}}
+
+    permissions:
+      pull-requests: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DotNetVersion }}
+    - name: Restore
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test 
+      if: matrix.os == 'windows-latest'
+      run: dotnet test --configuration Release --no-build
+    - name: Test with Code Coverage
+      if: matrix.os == 'ubuntu-latest'
+      run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory ./coverage
+    - name: Create Coverage Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        filename: ./source/coverage/**/coverage.cobertura.xml
+        badge: true
+        format: markdown
+        fail_below_min: false
+        hide_branch_rate: false
+        hide_complexity: false
+        thresholds: '60 80'
+        indicators: true
+        output: both
+    - name: Add Coverage as PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: code-coverage-results.md
