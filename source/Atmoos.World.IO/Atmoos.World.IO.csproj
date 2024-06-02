@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Atmoos.World.Build.props" />
+  <Import Project="../Atmoos.World.Pack.targets" />
+
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+    <Description>Atmoos World IO: Interaction with The World through input/output.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
+  </ItemGroup>
+
+</Project>

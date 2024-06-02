@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Atmoos.World.Build.props" />
+  <Import Project="../Atmoos.World.Pack.targets" />
+
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+    <Description>Atmoos World Time: Access to the most fundamental worldly experience of all.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Atmoos.World.Build.props" />
+  <Import Project="../Atmoos.World.Pack.targets" />
+
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+    <Description>Atmoos World: An abstraction over all worldly goodness.</Description>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Atmoos.World.Build.props" />
+  <Import Project="../Atmoos.World.Pack.targets" />
+
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+    <Description>Atmoos World InMemory: In memory representation of The World.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
+  </ItemGroup>
+
+</Project>
