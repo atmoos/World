@@ -4,6 +4,8 @@ public interface IFileSystem
     static abstract IDirectoryInfo CurrentDirectory { get; }
     static abstract IFileInfo Create(in NewFile file);
     static abstract IDirectoryInfo Create(in NewDirectory directory);
+
+    // ToDo: Copy should be async...
     static abstract IFileInfo Copy(IFileInfo source, IFileInfo destination);
     static abstract IFileInfo Copy(IFileInfo source, in NewFile destination);
     static abstract IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination);

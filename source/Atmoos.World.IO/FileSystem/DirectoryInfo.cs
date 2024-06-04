@@ -4,8 +4,8 @@ internal sealed record class DirectoryInfo(System.IO.DirectoryInfo directoryInfo
 {
     public DirectoryName Name { get; } = new() { Name = directoryInfo.Name };
     public Boolean Exists => directoryInfo.Exists;
-    public IDirectoryInfo? Parent => directoryInfo.Parent switch {
-        null => null,
+    public IDirectoryInfo Parent => directoryInfo.Parent switch {
+        null => Root,
         var parent => new DirectoryInfo(parent)
     };
     public IDirectoryInfo Root => new DirectoryInfo(directoryInfo.Root);
