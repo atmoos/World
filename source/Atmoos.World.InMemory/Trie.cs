@@ -12,11 +12,31 @@ internal sealed class Trie<TKey, TValue>
 
     public TValue this[TKey key]
     {
-        get => this.TryGetChild(key, out var child) ? child.value : throw new KeyNotFoundException($"There is no key '{key}' in the trie.");
-        set => this.children[key] = new Trie<TKey, TValue>(value);
+        get => this.Node(key).Value;
+        set => this.Add(key, value);
     }
 
     public TValue this[IEnumerable<TKey> key] => this.Node(key).value;
+
+    public Trie<TKey, TValue> Add(TKey key, TValue value)
+    {
+        return this.children[key] = new Trie<TKey, TValue>(value);
+    }
+
+    public void CopyTo(Trie<TKey, TValue> other)
+    {
+        foreach (var (key, value) in this.children) {
+            other.children[key] = value;
+        }
+    }
+
+    public Trie<TKey, TValue> Node(TKey key)
+    {
+        if (this.TryGetChild(key, out var node)) {
+            return node;
+        }
+        throw new KeyNotFoundException($"There is no key '{key}]' in the trie.");
+    }
 
     public Trie<TKey, TValue> Node(IEnumerable<TKey> key)
     {

@@ -3,8 +3,9 @@
 public sealed class UnixFileSystem<Time> : IFileSystem
     where Time : ITime
 {
-    private static readonly FileSystem fileSystem = new(new DirectoryName { Name = "/" });
+    private static readonly FileSystem fileSystem = new(new DirectoryName { Name = "/" }, Time.Now);
     private static IDirectoryInfo currentDirectory = fileSystem.Root;
+
     public static IDirectoryInfo CurrentDirectory
     {
         get => currentDirectory;
@@ -40,6 +41,6 @@ public sealed class UnixFileSystem<Time> : IFileSystem
 
     public static IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination)
     {
-        throw new NotImplementedException();
+        return fileSystem.Move(source, in destination, Time.Now);
     }
 }

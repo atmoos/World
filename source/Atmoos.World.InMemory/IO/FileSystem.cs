@@ -8,9 +8,9 @@ internal sealed class FileSystem
     public File this[IFileInfo file] => this[file.Directory][file];
     public Directory this[IDirectoryInfo directory] => this.directories[Path(directory)];
 
-    public FileSystem(DirectoryName rootName)
+    public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
-        var root = new Directory(new RootDirectory(rootName));
+        var root = new Directory(new RootDirectory(rootName, creationTime));
         this.directories = new Trie<IDirectoryInfo, Directory>(root);
     }
 
@@ -23,7 +23,7 @@ internal sealed class FileSystem
     public IDirectoryInfo Add(in NewDirectory directory, DateTime creationTime)
     {
         var node = this.Node(directory.Parent);
-        var info = new DirectoryInfo(directory.Parent, directory.Name);
+        var info = new DirectoryInfo(directory.Parent, directory.Name) { CreationTime = creationTime };
         node[info] = new Directory(info);
         return info;
     }
@@ -45,6 +45,18 @@ internal sealed class FileSystem
     {
         var node = this.Node(directory.Parent);
         node.Remove(directory);
+    }
+
+    public IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination, DateTime creationTime)
+    {
+        var parentNode = this.Node(source.Parent);
+        var sourceNode = parentNode.Node(source);
+        var destinationInfo = new DirectoryInfo(destination.Parent, destination.Name) { CreationTime = creationTime };
+        var destinationNode = parentNode.Add(destinationInfo, new Directory(destinationInfo));
+        sourceNode.Value.CopyTo(destinationNode.Value);
+        sourceNode.CopyTo(destinationNode);
+        parentNode.Remove(source);
+        return destinationInfo;
     }
 
     private Trie<IDirectoryInfo, Directory> Node(IDirectoryInfo directory)

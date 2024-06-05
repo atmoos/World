@@ -8,6 +8,9 @@ public interface IFileSystem
     // ToDo: Copy should be async...
     static abstract IFileInfo Copy(IFileInfo source, IFileInfo destination);
     static abstract IFileInfo Copy(IFileInfo source, in NewFile destination);
+
+    // ToDo: Copy directories
+
     static abstract IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination);
     static abstract void Delete(IFileInfo file);
     static abstract void Delete(IDirectoryInfo directory, Boolean recursive = false);

@@ -6,7 +6,7 @@ internal sealed record class FileInfo(IDirectoryInfo directoryInfo, System.IO.Fi
     public IDirectoryInfo Directory => directoryInfo;
     public Boolean Exists => fileInfo.Exists;
     public Boolean IsReadOnly => fileInfo.IsReadOnly;
-    public DateTime CreationTime => fileInfo.CreationTime.ToUniversalTime();
+    public DateTime CreationTime => fileInfo.CreationTimeUtc;
 
     internal static FileInfo Of(String file) => Of(new System.IO.FileInfo(file));
     internal static FileInfo Of(System.IO.FileInfo fileInfo)

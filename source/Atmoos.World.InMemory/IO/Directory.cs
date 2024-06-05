@@ -15,5 +15,12 @@ internal sealed class Directory
         return fileInfo;
     }
 
+    public void CopyTo(Directory other)
+    {
+        foreach (var (info, file) in this.files) {
+            other.files[info] = file;
+        }
+    }
+
     public Boolean Remove(IFileInfo file) => this.files.Remove(file);
 }
