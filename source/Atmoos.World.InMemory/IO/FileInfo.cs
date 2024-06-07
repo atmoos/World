@@ -1,15 +1,11 @@
 
 namespace Atmoos.World.InMemory.IO;
 
-internal sealed class FileInfo : IFileInfo
+internal sealed class FileInfo(Directory directory) : IFileInfo
 {
     public required FileName Name { get; init; }
-
-    public Boolean Exists => throw new NotImplementedException();
-
+    public Boolean Exists => directory.Id.Exists && directory.Contains(this);
     public Boolean IsReadOnly => throw new NotImplementedException();
-
+    public IDirectoryInfo Directory => directory.Id;
     public required DateTime CreationTime { get; init; }
-
-    public required IDirectoryInfo Directory { get; init; }
 }

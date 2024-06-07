@@ -10,6 +10,15 @@ public static class Extensions
         }
         return antecedents;
     }
+    public static IEnumerable<IDirectoryInfo> Path(this IDirectoryInfo tail, IDirectoryInfo until)
+    {
+        var antecedents = new Stack<IDirectoryInfo>();
+        for (IDirectoryInfo current = tail; current != until && current != tail.Root; current = current.Parent) {
+            antecedents.Push(current);
+        }
+        return antecedents;
+    }
+
     public static IEnumerable<IDirectoryInfo> Antecedents(this IDirectoryInfo tail)
     {
         var antecedents = new Stack<IDirectoryInfo>();
@@ -27,7 +36,7 @@ public static class Extensions<TFileSystem>
     /// Creates a file in the current directory.
     /// </summary>
     public static IFileInfo Create(String name, String extension)
-        => Create(new FileName { Name = name, Extension = extension });
+        => Create(new FileName(name, extension));
 
     /// <summary>
     /// Creates a file in the current directory.
@@ -57,13 +66,13 @@ public static class Extensions<TFileSystem>
         => TFileSystem.Create(new NewFile { Parent = parent, Name = name });
     public static IFileInfo Create(IDirectoryInfo root, in FileName name, String antecedent)
     {
-        IDirectoryInfo parent = Create(root, new DirectoryName { Value = antecedent });
+        IDirectoryInfo parent = Create(root, new DirectoryName(antecedent));
         return Create(parent, in name);
     }
     public static IFileInfo Create(IDirectoryInfo root, in FileName name, String grandparent, String parent)
     {
-        IDirectoryInfo grandparentDir = Create(root, new DirectoryName { Value = grandparent });
-        IDirectoryInfo antecedent = Create(grandparentDir, new DirectoryName { Value = parent });
+        IDirectoryInfo grandparentDir = Create(root, new DirectoryName(grandparent));
+        IDirectoryInfo antecedent = Create(grandparentDir, new DirectoryName(parent));
         return Create(antecedent, in name);
     }
     public static IFileInfo Create(IDirectoryInfo root, in FileName name, params String[] antecedents)
@@ -73,7 +82,7 @@ public static class Extensions<TFileSystem>
     /// Creates a directory in the current directory.
     /// </summary>
     public static IDirectoryInfo Create(String name)
-        => Create(new DirectoryName { Value = name });
+        => Create(new DirectoryName(name));
 
     /// <summary>
     /// Creates a directory in the current directory.
@@ -103,13 +112,13 @@ public static class Extensions<TFileSystem>
         => TFileSystem.Create(new NewDirectory { Parent = parent, Name = name });
     public static IDirectoryInfo Create(IDirectoryInfo root, in DirectoryName name, String antecedent)
     {
-        IDirectoryInfo antecedentDir = Create(root, new DirectoryName { Value = antecedent });
+        IDirectoryInfo antecedentDir = Create(root, new DirectoryName(antecedent));
         return Create(antecedentDir, in name);
     }
     public static IDirectoryInfo Create(IDirectoryInfo root, in DirectoryName name, String grandparent, String parent)
     {
-        IDirectoryInfo grandparentDir = Create(root, new DirectoryName { Value = grandparent });
-        IDirectoryInfo parentDir = Create(grandparentDir, new DirectoryName { Value = parent });
+        IDirectoryInfo grandparentDir = Create(root, new DirectoryName(grandparent));
+        IDirectoryInfo parentDir = Create(grandparentDir, new DirectoryName(parent));
         return Create(parentDir, in name);
     }
     public static IDirectoryInfo Create(IDirectoryInfo root, in DirectoryName name, params String[] antecedents)
@@ -119,7 +128,7 @@ public static class Extensions<TFileSystem>
     {
         IDirectoryInfo parent = root;
         foreach (var dir in antecedents) {
-            parent = Create(parent, new DirectoryName { Value = dir });
+            parent = Create(parent, new DirectoryName(dir));
         }
         return parent;
     }

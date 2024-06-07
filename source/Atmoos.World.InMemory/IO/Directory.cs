@@ -10,7 +10,8 @@ internal sealed class Directory
 
     public IFileInfo Add(in NewFile file, DateTime creationTime)
     {
-        var fileInfo = new FileInfo { Name = file.Name, CreationTime = creationTime, Directory = Id };
+        // ToDo: Throw an exception if the file already exists?
+        var fileInfo = new FileInfo(this) { Name = file.Name, CreationTime = creationTime };
         this.files[fileInfo] = new File(fileInfo);
         return fileInfo;
     }
@@ -21,6 +22,8 @@ internal sealed class Directory
             other.files[info] = file;
         }
     }
+
+    public Boolean Contains(FileInfo file) => this.files.ContainsKey(file);
 
     public Boolean Remove(IFileInfo file) => this.files.Remove(file);
 }

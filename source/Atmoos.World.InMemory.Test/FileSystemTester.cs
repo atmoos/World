@@ -68,4 +68,28 @@ public class FileSystemTester<FileSystem, Time>() : IFileSystemTest
 
         Assert.Equal(firstAntecedents, secondAntecedents);
     }
+
+    public void RemoveDirectoryRecursivelyRemovesEverything()
+    {
+        var parent = Extensions<FileSystem>.Create("Parent");
+        var toDelete = Extensions<FileSystem>.Create(parent, new DirectoryName("DeleteMe"));
+        var firstChild = Extensions<FileSystem>.Create(toDelete, new DirectoryName("FirstChild"));
+        var secondChild = Extensions<FileSystem>.Create(toDelete, new DirectoryName("SecondChild"));
+        var firstFile = Extensions<FileSystem>.Create(firstChild, new FileName("FirstFile", "txt"));
+        var secondFile = Extensions<FileSystem>.Create(toDelete, new FileName("SecondFile", "txt"));
+
+        Assert.True(firstFile.Exists);
+        Assert.True(secondFile.Exists);
+        Assert.True(secondChild.Exists);
+        Assert.All(firstChild.Path(), d => Assert.True(d.Exists));
+
+        FileSystem.Delete(toDelete, true);
+
+        Assert.True(parent.Exists, "Parent should still exist");
+        Assert.False(toDelete.Exists, "Deleted directory should not exist");
+        Assert.All(firstChild.Path(until: parent), d => Assert.False(d.Exists));
+        Assert.All(secondChild.Path(until: parent), d => Assert.False(d.Exists));
+        Assert.False(firstFile.Exists, "First file should not exist");
+        Assert.False(secondFile.Exists, "Second file should not exist");
+    }
 }

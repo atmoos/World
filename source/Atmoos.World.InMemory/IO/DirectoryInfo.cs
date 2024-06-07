@@ -14,8 +14,8 @@ internal sealed class DirectoryInfo : IDirectoryInfo
     private readonly Trie<IDirectoryInfo, Directory> parent;
     public DirectoryName Name { get; }
     public Boolean Exists => Parent.Exists && this.parent.Contains(this);
+    public IDirectoryInfo Root => Parent.Root;
     public IDirectoryInfo Parent => this.parent.Value.Id;
-    public IDirectoryInfo Root => this.parent.Value.Id.Root;
     public required DateTime CreationTime { get; init; }
 
     public DirectoryInfo(Trie<IDirectoryInfo, Directory> parent, DirectoryName name)

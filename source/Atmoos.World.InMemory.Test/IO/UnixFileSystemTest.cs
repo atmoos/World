@@ -25,4 +25,7 @@ public class UnixFileSystemTest : IFileSystemTest
 
     [Fact]
     public void AntecedentDirectoriesAreNotOverwritten() => tester.AntecedentDirectoriesAreNotOverwritten();
+
+    [Fact]
+    public void RemoveDirectoryRecursivelyRemovesEverything() => tester.RemoveDirectoryRecursivelyRemovesEverything();
 }
