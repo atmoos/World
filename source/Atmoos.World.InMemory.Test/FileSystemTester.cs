@@ -52,4 +52,20 @@ public class FileSystemTester<FileSystem, Time>() : IFileSystemTest
         var actualAntecedents = directoryInfo.Antecedents().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
+
+    public void AntecedentDirectoriesAreNotOverwritten()
+    {
+        var first = new DirectoryName { Value = "FirstDir" };
+        var second = new DirectoryName { Value = "SecondDir" };
+        String[] antecedents = ["some", "antecedent", "directory"];
+        var firstDir = Extensions<FileSystem>.Create(in first, antecedents);
+        var secondDir = Extensions<FileSystem>.Create(in second, antecedents);
+
+        Assert.NotEqual(first, second);
+
+        var firstAntecedents = firstDir.Antecedents().ToArray();
+        var secondAntecedents = secondDir.Antecedents().ToArray();
+
+        Assert.Equal(firstAntecedents, secondAntecedents);
+    }
 }

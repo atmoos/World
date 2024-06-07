@@ -1,13 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Atmoos.World.InMemory;
-internal sealed class Trie<TKey, TValue>
+internal sealed class Trie<TKey, TValue> : ICountable<(TKey key, TValue value)>
     where TKey : notnull
     where TValue : notnull
 {
     private readonly TValue value;
     private readonly Dictionary<TKey, Trie<TKey, TValue>> children = [];
     public TValue Value => this.value;
+    public Int32 Count => this.children.Count;
     public Trie(TValue value) => this.value = value;
 
     public TValue this[TKey key]
@@ -22,6 +23,8 @@ internal sealed class Trie<TKey, TValue>
     {
         return this.children[key] = new Trie<TKey, TValue>(value);
     }
+
+    public Boolean Contains(TKey key) => this.children.ContainsKey(key);
 
     public void CopyTo(Trie<TKey, TValue> other)
     {
@@ -67,4 +70,5 @@ internal sealed class Trie<TKey, TValue>
         }
     }
 
+    public IEnumerator<(TKey key, TValue value)> GetEnumerator() => this.children.Select(kv => (kv.Key, kv.Value.Value)).GetEnumerator();
 }

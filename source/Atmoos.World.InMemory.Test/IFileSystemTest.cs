@@ -6,4 +6,5 @@ public interface IFileSystemTest
     void CreateFileInAntecedentDirs();
     void CreateDirectoryInCurrentDir();
     void CreateDirectoryInAntecedentDirs();
+    void AntecedentDirectoriesAreNotOverwritten();
 }

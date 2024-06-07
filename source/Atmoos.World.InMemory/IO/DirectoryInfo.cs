@@ -9,11 +9,19 @@ internal sealed class RootDirectory(DirectoryName name, DateTime creationTime) :
     public DateTime CreationTime => creationTime;
 }
 
-internal sealed class DirectoryInfo(IDirectoryInfo parent, DirectoryName name) : IDirectoryInfo
+internal sealed class DirectoryInfo : IDirectoryInfo
 {
-    public Boolean Exists => throw new NotImplementedException();
-    public DirectoryName Name => name;
-    public IDirectoryInfo Parent => parent;
-    public IDirectoryInfo Root => parent.Root;
+    private readonly Trie<IDirectoryInfo, Directory> parent;
+    public DirectoryName Name { get; }
+    public Boolean Exists => Parent.Exists && this.parent.Contains(this);
+    public IDirectoryInfo Parent => this.parent.Value.Id;
+    public IDirectoryInfo Root => this.parent.Value.Id.Root;
     public required DateTime CreationTime { get; init; }
+
+    public DirectoryInfo(Trie<IDirectoryInfo, Directory> parent, DirectoryName name)
+    {
+        Name = name;
+        this.parent = parent;
+        parent[this] = new Directory(this);
+    }
 }

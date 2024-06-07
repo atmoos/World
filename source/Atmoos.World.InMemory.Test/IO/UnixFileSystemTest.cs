@@ -22,4 +22,7 @@ public class UnixFileSystemTest : IFileSystemTest
 
     [Fact]
     public void CreateDirectoryInAntecedentDirs() => tester.CreateDirectoryInAntecedentDirs();
+
+    [Fact]
+    public void AntecedentDirectoriesAreNotOverwritten() => tester.AntecedentDirectoriesAreNotOverwritten();
 }
