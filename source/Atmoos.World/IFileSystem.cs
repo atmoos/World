@@ -1,7 +1,10 @@
 namespace Atmoos.World;
 public interface IFileSystem
 {
+    // ToDo: Should I include the Root on the FileSystem?
+    //       Should it be a directory, volume of device?
     static abstract IDirectoryInfo CurrentDirectory { get; }
+
     static abstract IFileInfo Create(in NewFile file);
     static abstract IDirectoryInfo Create(in NewDirectory directory);
 

@@ -3,7 +3,7 @@
 public sealed class UnixFileSystem<Time> : IFileSystem
     where Time : ITime
 {
-    private static readonly FileSystem fileSystem = new(new DirectoryName { Name = "/" }, Time.Now);
+    private static readonly FileSystem fileSystem = new(new DirectoryName { Value = "/" }, Time.Now);
     private static IDirectoryInfo currentDirectory = fileSystem.Root;
 
     public static IDirectoryInfo CurrentDirectory

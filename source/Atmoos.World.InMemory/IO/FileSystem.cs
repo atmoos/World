@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class FileSystem
@@ -6,7 +8,10 @@ internal sealed class FileSystem
     public IDirectoryInfo Root => this.directories.Value.Id;
 
     public File this[IFileInfo file] => this[file.Directory][file];
-    public Directory this[IDirectoryInfo directory] => this.directories[Path(directory)];
+    public Directory this[IDirectoryInfo directory] => directory switch {
+        var dir when dir == Root => this.directories.Value,
+        _ => this.directories[Path(directory)]
+    };
 
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
@@ -73,7 +78,6 @@ internal sealed class FileSystem
             directories.Push(directory);
             directory = directory.Parent;
         }
-        directories.Push(Root);
         return directories;
     }
 }

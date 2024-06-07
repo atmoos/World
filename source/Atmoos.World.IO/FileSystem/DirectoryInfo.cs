@@ -2,7 +2,7 @@ namespace Atmoos.World.IO.FileSystem;
 
 internal sealed record class DirectoryInfo(System.IO.DirectoryInfo directoryInfo) : IDirectoryInfo
 {
-    public DirectoryName Name { get; } = new() { Name = directoryInfo.Name };
+    public DirectoryName Name { get; } = new() { Value = directoryInfo.Name };
     public Boolean Exists => directoryInfo.Exists; // ToDo: Implement this via File.Exists!
     public IDirectoryInfo Parent => directoryInfo.Parent switch {
         null => Root,

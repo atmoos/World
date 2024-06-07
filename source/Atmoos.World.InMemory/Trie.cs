@@ -32,7 +32,7 @@ internal sealed class Trie<TKey, TValue>
 
     public Trie<TKey, TValue> Node(TKey key)
     {
-        if (this.TryGetChild(key, out var node)) {
+        if (this.TryGetNode(key, out var node)) {
             return node;
         }
         throw new KeyNotFoundException($"There is no key '{key}]' in the trie.");
@@ -48,7 +48,7 @@ internal sealed class Trie<TKey, TValue>
 
     public Boolean Remove(TKey key) => this.children.Remove(key);
 
-    private Boolean TryGetChild(TKey key, [MaybeNullWhen(false)] out Trie<TKey, TValue> child)
+    private Boolean TryGetNode(TKey key, [MaybeNullWhen(false)] out Trie<TKey, TValue> child)
         => this.children.TryGetValue(key, out child);
 
     private Boolean TryGetNode(IEnumerable<TKey> key, [MaybeNullWhen(false)] out Trie<TKey, TValue> value)
@@ -60,7 +60,7 @@ internal sealed class Trie<TKey, TValue>
         {
             value = default;
             Trie<TKey, TValue>? trie = this;
-            while (key.MoveNext() && trie.TryGetChild(key.Current, out trie)) {
+            while (key.MoveNext() && trie.TryGetNode(key.Current, out trie)) {
 
             }
             return (value = trie) is not null;
