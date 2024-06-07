@@ -7,11 +7,7 @@ internal sealed class FileSystem
     public IDirectoryInfo Root => this.root;
 
     public File this[IFileInfo file] => this[file.Directory][file];
-    public Directory this[IDirectoryInfo directory] => directory switch {
-        var dir when dir == Root => this.directories.Value,
-        _ => this.directories[directory.Path()]
-    };
-
+    public Directory this[IDirectoryInfo directory] => Trie(directory).Value;
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
         var root = this.root = new RootDirectory(rootName, creationTime);
@@ -27,7 +23,7 @@ internal sealed class FileSystem
     public IDirectoryInfo Add(in NewDirectory directory, DateTime creationTime)
     {
         var name = directory.Name;
-        var parent = Node(directory.Parent);
+        var parent = Trie(directory.Parent);
         return parent.Select(kv => kv.key).FirstOrDefault(info => info.Name == name) switch {
             null => new DirectoryInfo(parent, name) { CreationTime = creationTime },
             var existing => existing
@@ -43,31 +39,30 @@ internal sealed class FileSystem
     public void Remove(IDirectoryInfo directory)
     {
         // ToDo: Throw an exception if the directory is not empty...
-        var node = Node(directory.Parent);
+        var node = Trie(directory.Parent);
         node.Remove(directory);
     }
 
     public void RemoveRecursively(IDirectoryInfo directory)
     {
-        var node = Node(directory.Parent);
+        var node = Trie(directory.Parent);
         node.Remove(directory);
     }
 
     public IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination, DateTime creationTime)
     {
-        var sourceParent = Node(source.Parent);
+        var sourceParent = Trie(source.Parent);
         var sourceNode = sourceParent.Node(source);
         var destinationDir = Add(destination, creationTime);
-        var destinationNode = Node(destinationDir);
+        var destinationNode = Trie(destinationDir);
         sourceNode.Value.CopyTo(destinationNode.Value);
         sourceNode.CopyTo(destinationNode);
         sourceParent.Remove(source);
         return destinationDir;
     }
 
-    private Trie<IDirectoryInfo, Directory> Node(IDirectoryInfo directory)
-    {
-        var path = directory.Path();
-        return this.directories.Node(path);
-    }
+    private Trie<IDirectoryInfo, Directory> Trie(IDirectoryInfo directory) => directory switch {
+        var dir when dir == this.root => this.directories,
+        var dir => Trie(dir.Parent).Node(dir)
+    };
 }
