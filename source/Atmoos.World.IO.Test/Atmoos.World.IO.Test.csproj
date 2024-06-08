@@ -5,6 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Atmoos.World.IO\Atmoos.World.IO.csproj" />
     <ProjectReference Include="..\Atmoos.World.FileSystemTests\Atmoos.World.FileSystemTests.csproj" />
+    <ProjectReference Include="..\Atmoos.World.Time\Atmoos.World.Time.csproj" />
   </ItemGroup>
 
 </Project>

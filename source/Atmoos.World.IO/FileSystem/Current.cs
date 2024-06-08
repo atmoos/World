@@ -24,7 +24,7 @@ public sealed class Current : IFileSystem
     public static IDirectoryInfo Create(in NewDirectory directory)
     {
         var fullPath = directory.FullPath();
-        return new DirectoryInfo(Directory.CreateDirectory(fullPath));
+        return DirectoryInfo.Of(Directory.CreateDirectory(fullPath));
     }
 
     public static IFileInfo Create(in NewFile file)

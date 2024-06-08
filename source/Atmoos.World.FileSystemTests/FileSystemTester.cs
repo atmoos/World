@@ -2,11 +2,11 @@ using Xunit;
 
 namespace Atmoos.World.FileSystemTests;
 
-public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSystemTest
+public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan tol) : IFileSystemTest
     where FileSystem : IFileSystem
     where Time : ITime
 {
-    public FileSystemTester() : this(FileSystem.CurrentDirectory) { }
+    public FileSystemTester() : this(FileSystem.CurrentDirectory, TimeSpan.Zero) { }
 
     public void CreateFile()
     {
@@ -14,7 +14,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSyst
         var fileInfo = Extensions<FileSystem>.Create(root, in name);
 
         Assert.Equal(name, fileInfo.Name);
-        Assert.Equal(Time.Now, fileInfo.CreationTime);
+        Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
         Assert.Equal(root, fileInfo.Directory);
     }
 
@@ -25,7 +25,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSyst
         var fileInfo = Extensions<FileSystem>.Create(root, in name, antecedents);
 
         Assert.Equal(name, fileInfo.Name);
-        Assert.Equal(Time.Now, fileInfo.CreationTime);
+        Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
 
         var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
         var actualAntecedents = fileInfo.Directory.Path().Select(a => a.Name.Value).ToArray();
@@ -38,7 +38,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSyst
         var directoryInfo = Extensions<FileSystem>.Create(root, in name);
 
         Assert.Equal(name, directoryInfo.Name);
-        Assert.Equal(Time.Now, directoryInfo.CreationTime);
+        Assert.Equal(Time.Now, directoryInfo.CreationTime, tol);
         Assert.Equal(root, directoryInfo.Parent);
     }
 
@@ -49,7 +49,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSyst
         var directoryInfo = Extensions<FileSystem>.Create(root, in name, antecedents);
 
         Assert.Equal(name, directoryInfo.Name);
-        Assert.Equal(Time.Now, directoryInfo.CreationTime);
+        Assert.Equal(Time.Now, directoryInfo.CreationTime, tol);
 
         var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
         var actualAntecedents = directoryInfo.Antecedents().Select(a => a.Name.Value).ToArray();
