@@ -1,7 +1,14 @@
-﻿namespace Atmoos.World.Time;
+﻿using System.Diagnostics;
+
+namespace Atmoos.World.Time;
 
 public sealed class Current : ITime
 {
+    private static readonly Stopwatch stopwatch = Stopwatch.StartNew();
     public static DateTime Now => DateTime.UtcNow;
-    public static IStopwatch Timer() => new Stopwatch(System.Diagnostics.Stopwatch.StartNew());
+    public static Tic Tic()
+    {
+        var origin = stopwatch.Elapsed;
+        return new Tic(() => stopwatch.Elapsed - origin);
+    }
 }
