@@ -27,9 +27,8 @@ public interface IFileDeletion
 }
 public interface IFileManipulation
 {
-    // ToDo: Copy should be async...
-    static abstract IFileInfo Copy(IFileInfo source, IFileInfo destination);
-    static abstract IFileInfo Copy(IFileInfo source, in NewFile destination);
+    static abstract Task<IFileInfo> Copy(IFileInfo source, NewFile destination, CancellationToken token = default);
+    static abstract Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token = default);
 }
 
 public interface IDirectoryCreation

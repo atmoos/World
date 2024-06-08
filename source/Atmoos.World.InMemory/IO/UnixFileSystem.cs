@@ -12,18 +12,19 @@ public sealed class UnixFileSystem<Time> : IFileSystem
         set => Interlocked.Exchange(ref currentDirectory, value);
     }
 
-    public static IFileInfo Copy(IFileInfo source, IFileInfo destination)
+    public static async Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token)
     {
         var sourceFile = fileSystem[source];
         var destinationFile = fileSystem[destination];
-        sourceFile.CopyTo(destinationFile);
+        await Task.Yield();
+        sourceFile.CopyTo(destinationFile, token);
         return destination;
     }
 
-    public static IFileInfo Copy(IFileInfo source, in NewFile destination)
+    public static async Task<IFileInfo> Copy(IFileInfo source, NewFile destination, CancellationToken token)
     {
         var newFile = Create(in destination);
-        return Copy(source, newFile);
+        return await Copy(source, newFile, token);
     }
 
     public static IFileInfo Create(in NewFile file) => fileSystem.Add(in file, Time.Now);

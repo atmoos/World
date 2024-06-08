@@ -22,21 +22,23 @@ public sealed class Current : IFileSystem
         return info;
     }
 
-    public static IFileInfo Copy(IFileInfo source, IFileInfo destination)
+    public static async Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token)
     {
         var sourceFile = FindFile(source);
         var destinationFile = FindFile(destination);
-        sourceFile.CopyTo(destinationFile.FullName, overwrite: true);
+        using var read = sourceFile.OpenRead();
+        using var write = destinationFile.OpenWrite();
+        await read.CopyToAsync(write, token);
         return destination;
     }
 
-    public static IFileInfo Copy(IFileInfo source, in NewFile destination)
+    public static async Task<IFileInfo> Copy(IFileInfo source, NewFile destination, CancellationToken token)
     {
         var sourceFile = FindFile(source);
         var (destinationInfo, file) = Add(destination);
         using var read = sourceFile.OpenRead();
         using var write = file.Create();
-        read.CopyTo(write);
+        await read.CopyToAsync(write, token);
         return destinationInfo;
     }
     public static void Delete(IFileInfo file)
