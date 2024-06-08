@@ -6,6 +6,11 @@ internal sealed class File
     public File(IFileInfo id) => Id = id;
     public void CopyTo(File destination, CancellationToken token)
     {
-        throw new NotImplementedException();
+        // ToDo: copy the content by value.
+    }
+
+    public void CloneInto(File destination)
+    {
+        // ToDo: copy the content by reference.
     }
 }

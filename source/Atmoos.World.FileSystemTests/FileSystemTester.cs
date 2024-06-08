@@ -138,9 +138,11 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         var targetDir = new NewDirectory { Name = new DirectoryName("MovedMeHere"), Parent = targetRoot };
 
         var firstChild = Extensions<FileSystem>.Create(toMove, new DirectoryName("FirstChild"));
-        var secondChild = Extensions<FileSystem>.Create(toMove, new DirectoryName("SecondChild"));
-        var firstFile = Extensions<FileSystem>.Create(firstChild, new FileName("FirstFile", "txt"));
-        var secondFile = Extensions<FileSystem>.Create(toMove, new FileName("SecondFile", "txt"));
+        var firstImmediateFile = Extensions<FileSystem>.Create(toMove, new FileName("Foo", "txt"));
+        var secondImmediateFile = Extensions<FileSystem>.Create(toMove, new FileName("Bar", "txt"));
+        var subDir = Extensions<FileSystem>.Create(toMove, new DirectoryName("SomeSubDir"));
+        var grandChild = Extensions<FileSystem>.Create(firstChild, new FileName("FirstFile", "txt"));
+        IFileInfo[] children = [firstImmediateFile, secondImmediateFile];
 
 
         Assert.True(toMove.Exists, "The directory to move should exist prior to moving");
@@ -149,10 +151,17 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.True(targetRoot.Exists, "Target root should exist");
         Assert.True(originalRoot.Exists, "Original root should still exist");
         Assert.True(moved.Exists, "The move target directory should exist");
-        Assert.False(toMove.Exists, "The moved directory should not exist");
         Assert.Equal(Time.Now, moved.CreationTime, tol);
-        IFileSystemInfo[] movedChildren = [firstChild, secondChild, firstFile, secondFile];
+
+        Assert.False(toMove.Exists, "The moved directory should not exist");
+        Assert.Empty(toMove); // And obviously indicate it's empty
+        IFileSystemInfo[] movedChildren = [firstChild, subDir, grandChild, firstImmediateFile, secondImmediateFile];
         Assert.All(movedChildren, d => Assert.False(d.Exists));
+
+        var childNames = children.Select(c => c.Name).ToHashSet();
+        Assert.Equal(children.Length, moved.Count);
+        Assert.All(moved, f => Assert.True(f.Exists));
+        Assert.All(moved, f => Assert.Contains(f.Name, childNames));
     }
 
     private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectoryInfo nonEmptyDirectory, IFileSystemInfo child)

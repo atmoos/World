@@ -18,11 +18,13 @@ internal sealed class Directory : ICountable<IFileInfo>
         return fileInfo;
     }
 
-    public void CopyTo(Directory other)
+    public void MoveTo(Directory other, DateTime creationTime)
     {
         foreach (var (info, file) in this.files) {
-            other.files[info] = file;
+            var newInfo = new FileInfo(other) { Name = info.Name, CreationTime = creationTime };
+            file.CloneInto(other.files[newInfo] = new File(newInfo));
         }
+        this.files.Clear();
     }
 
     public Boolean Contains(FileInfo file) => this.files.ContainsKey(file);

@@ -3,13 +3,11 @@ namespace Atmoos.World.IO.FileSystem;
 
 public sealed class Current : IFileSystem
 {
-    private static readonly RootDirectoryInfo root = new(new System.IO.DirectoryInfo(Directory.GetCurrentDirectory()).Root);
-    private static readonly Cache<IFileInfo, System.IO.FileInfo> files = new();
-    private static readonly Cache<IDirectoryInfo, System.IO.DirectoryInfo> directories = new();
-    public static IDirectoryInfo CurrentDirectory => Locate(new System.IO.DirectoryInfo(Directory.GetCurrentDirectory()));
+    private static readonly FileSystemCache cache = new();
+    public static IDirectoryInfo CurrentDirectory => cache.Locate(new System.IO.DirectoryInfo(Directory.GetCurrentDirectory()));
     public static IFileInfo Create(in NewFile file)
     {
-        var (info, system) = Add(file);
+        var (info, system) = cache.Add(file);
         using (system.Create()) {
             return info;
         }
@@ -17,15 +15,15 @@ public sealed class Current : IFileSystem
 
     public static IDirectoryInfo Create(in NewDirectory directory)
     {
-        var (info, system) = Add(directory);
+        var (info, system) = cache.Add(directory);
         system.Create();
         return info;
     }
 
     public static async Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token)
     {
-        var sourceFile = FindFile(source);
-        var destinationFile = FindFile(destination);
+        var sourceFile = cache.FindFile(source);
+        var destinationFile = cache.FindFile(destination);
         using var read = sourceFile.OpenRead();
         using var write = destinationFile.OpenWrite();
         await read.CopyToAsync(write, token);
@@ -34,8 +32,8 @@ public sealed class Current : IFileSystem
 
     public static async Task<IFileInfo> Copy(IFileInfo source, NewFile destination, CancellationToken token)
     {
-        var sourceFile = FindFile(source);
-        var (destinationInfo, file) = Add(destination);
+        var sourceFile = cache.FindFile(source);
+        var (destinationInfo, file) = cache.Add(destination);
         using var read = sourceFile.OpenRead();
         using var write = file.Create();
         await read.CopyToAsync(write, token);
@@ -43,79 +41,26 @@ public sealed class Current : IFileSystem
     }
     public static void Delete(IFileInfo file)
     {
-        var fileInfo = FindFile(file);
+        var fileInfo = cache.FindFile(file);
         fileInfo.Delete();
-        files.Purge();
+        cache.Purge();
     }
 
     public static void Delete(IDirectoryInfo directory, Boolean recursive)
     {
-        var directoryInfo = FindDirectory(directory);
+        var directoryInfo = cache.FindDirectory(directory);
         directoryInfo.Delete(recursive);
-        directories.Purge();
-        files.Purge();
+        cache.Purge();
     }
 
     public static IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination)
     {
-        var sourceDir = FindDirectory(source);
-        var (destinationInfo, target) = Add(destination);
+        var sourceDir = cache.FindDirectory(source);
+        var (destinationInfo, target) = cache.Add(destination);
         Directory.Move(sourceDir.FullName, target.FullName);
-        directories.Purge();
-        files.Purge();
+        cache.Purge();
         return destinationInfo;
     }
 
-    internal static IDirectoryInfo Locate(System.IO.DirectoryInfo directory)
-    {
-        if (directory.Parent == null || directory.FullName == root.FullPath) {
-            return root;
-        }
-        // ToDo: Optimize this...
-        foreach (var (info, system) in directories) {
-            if (system.FullName == directory.FullName) {
-                return info;
-            }
-        }
-        var parent = Locate(directory.Parent);
-        var name = new DirectoryName(directory.Name);
-        return Add(new NewDirectory { Name = name, Parent = parent }).info;
-    }
-
-    private static (IFileInfo info, System.IO.FileInfo system) Add(in NewFile file)
-    {
-        var directory = FindDirectory(file.Parent);
-        var fileInfo = new System.IO.FileInfo(Path.Combine(directory.FullName, file.Name));
-        var info = new FileInfo(file.Parent, fileInfo);
-        return (info, files[info] = fileInfo);
-    }
-
-    public static (IDirectoryInfo info, System.IO.DirectoryInfo system) Add(in NewDirectory directory)
-    {
-        var parent = FindDirectory(directory.Parent);
-        var systemInfo = new System.IO.DirectoryInfo(Path.Combine(parent.FullName, directory.Name));
-        var directoryInfo = new DirectoryInfo(directory.Parent, systemInfo);
-        return (directoryInfo, directories[directoryInfo] = systemInfo);
-    }
-
-    private static System.IO.FileInfo FindFile(in IFileInfo file)
-    {
-        if (files.TryGetValue(file, out var fileInfo)) {
-            return fileInfo;
-        }
-        var directory = FindDirectory(file.Directory);
-        return files[file] = new System.IO.FileInfo(Path.Combine(directory.FullName, file.Name));
-    }
-
-    private static System.IO.DirectoryInfo FindDirectory(IDirectoryInfo directory)
-    {
-        if (root.Equals(directory)) {
-            return root.Value;
-        }
-        if (directories.TryGetValue(directory, out var directoryInfo)) {
-            return directoryInfo;
-        }
-        var parent = FindDirectory(directory.Parent);
-        return directories[directory] = new System.IO.DirectoryInfo(Path.Combine(parent.FullName, directory.Name));
-    }
+    internal static IDirectoryInfo Locate(System.IO.DirectoryInfo directory) => cache.Locate(directory);
 }

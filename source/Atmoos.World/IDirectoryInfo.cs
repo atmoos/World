@@ -1,6 +1,6 @@
 namespace Atmoos.World;
 
-public interface IDirectoryInfo : IFileSystemInfo
+public interface IDirectoryInfo : ICountable<IFileInfo>, IFileSystemInfo
 {
     public DirectoryName Name { get; }
     public IDirectoryInfo Parent { get; }

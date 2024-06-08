@@ -1,5 +1,3 @@
-using static Atmoos.World.InMemory.Convenience;
-
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class FileSystem
@@ -12,8 +10,7 @@ internal sealed class FileSystem
     public Directory this[IDirectoryInfo directory] => Trie(directory).Value;
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
-        var root = this.root = new RootDirectory(rootName, creationTime);
-        this.directories = new Trie<IDirectoryInfo, Directory>(new Directory(root));
+        (this.root, this.directories) = RootDirectory.Create(rootName, creationTime);
     }
 
     public IFileInfo Add(in NewFile file, DateTime creationTime)
@@ -60,10 +57,10 @@ internal sealed class FileSystem
     public IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination, DateTime creationTime)
     {
         var sourceParent = Trie(source.Parent);
-        var sourceNode = sourceParent.Node(source);
         var destinationDir = Add(destination, creationTime);
+        var sourceNode = sourceParent.Node(source);
         var destinationNode = Trie(destinationDir);
-        sourceNode.Value.CopyTo(destinationNode.Value);
+        sourceNode.Value.MoveTo(destinationNode.Value, creationTime);
         sourceNode.CopyTo(destinationNode);
         sourceParent.Remove(source);
         return destinationDir;
