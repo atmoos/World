@@ -14,7 +14,7 @@ public sealed class CurrentFileSystemTest : IFileSystemTest, IDisposable
     {
         var rootPath = Path.Combine(Path.GetTempPath(), "Atmoos.World.IO.Test");
         this.root = new DirectoryInfo(rootPath);
-        var rootDir = FileSystem.DirectoryInfo.Of(this.root);
+        var rootDir = Current.Locate(this.root);
         this.tester = new FileSystemTester<Current, Time.Current>(rootDir, TimeSpan.FromMilliseconds(100));
         this.root.Create();
     }
