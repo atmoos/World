@@ -130,6 +130,31 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.False(secondFile.Exists, "Second file should not exist");
     }
 
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget()
+    {
+        var targetRoot = Extensions<FileSystem>.Create(root, new DirectoryName("TargetRoot"));
+        var originalRoot = Extensions<FileSystem>.Create(root, new DirectoryName("OriginalRoot"));
+        var toMove = Extensions<FileSystem>.Create(originalRoot, new DirectoryName("MoveMe"));
+        var targetDir = new NewDirectory { Name = new DirectoryName("MovedMeHere"), Parent = targetRoot };
+
+        var firstChild = Extensions<FileSystem>.Create(toMove, new DirectoryName("FirstChild"));
+        var secondChild = Extensions<FileSystem>.Create(toMove, new DirectoryName("SecondChild"));
+        var firstFile = Extensions<FileSystem>.Create(firstChild, new FileName("FirstFile", "txt"));
+        var secondFile = Extensions<FileSystem>.Create(toMove, new FileName("SecondFile", "txt"));
+
+
+        Assert.True(toMove.Exists, "The directory to move should exist prior to moving");
+        var moved = FileSystem.Move(toMove, in targetDir);
+
+        Assert.True(targetRoot.Exists, "Target root should exist");
+        Assert.True(originalRoot.Exists, "Original root should still exist");
+        Assert.True(moved.Exists, "The move target directory should exist");
+        Assert.False(toMove.Exists, "The moved directory should not exist");
+        Assert.Equal(Time.Now, moved.CreationTime, tol);
+        IFileSystemInfo[] movedChildren = [firstChild, secondChild, firstFile, secondFile];
+        Assert.All(movedChildren, d => Assert.False(d.Exists));
+    }
+
     private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectoryInfo nonEmptyDirectory, IFileSystemInfo child)
         where TException : Exception
     {

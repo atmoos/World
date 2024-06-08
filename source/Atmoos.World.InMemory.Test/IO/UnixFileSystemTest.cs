@@ -41,4 +41,7 @@ public class UnixFileSystemTest : IFileSystemTest
 
     [Fact]
     public void DeleteDirectoryRecursivelyRemovesEverything() => tester.DeleteDirectoryRecursivelyRemovesEverything();
+
+    [Fact]
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => tester.MoveDirectoryRemovesSourceAndRecreatesTarget();
 }

@@ -49,5 +49,8 @@ public sealed class CurrentFileSystemTest : IFileSystemTest, IDisposable
     [Fact]
     public void DeleteDirectoryRecursivelyRemovesEverything() => this.tester.DeleteDirectoryRecursivelyRemovesEverything();
 
+    [Fact]
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => this.tester.MoveDirectoryRemovesSourceAndRecreatesTarget();
+
     public void Dispose() => this.root.Delete(recursive: true);
 }

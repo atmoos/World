@@ -59,8 +59,8 @@ public sealed class Current : IFileSystem
     public static IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination)
     {
         var sourceDir = FindDirectory(source);
-        var (destinationInfo, directory) = Add(destination);
-        sourceDir.MoveTo(directory.FullName);
+        var (destinationInfo, target) = Add(destination);
+        Directory.Move(sourceDir.FullName, target.FullName);
         directories.Purge();
         files.Purge();
         return destinationInfo;
