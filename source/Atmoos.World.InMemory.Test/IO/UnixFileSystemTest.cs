@@ -28,14 +28,17 @@ public class UnixFileSystemTest : IFileSystemTest
     public void AntecedentDirectoriesAreNotOverwritten() => tester.AntecedentDirectoriesAreNotOverwritten();
 
     [Fact]
-    public void RemoveEmptyDirectorySucceeds() => tester.RemoveEmptyDirectorySucceeds();
+    public void DeleteFileSucceeds() => tester.DeleteFileSucceeds();
 
     [Fact]
-    public void RemoveDirectoryContainingFilesThrows() => tester.RemoveDirectoryContainingFilesThrows();
+    public void DeleteEmptyDirectorySucceeds() => tester.DeleteEmptyDirectorySucceeds();
 
     [Fact]
-    public void RemoveDirectoryContainingOtherDirectoriesThrows() => tester.RemoveDirectoryContainingOtherDirectoriesThrows();
+    public void DeleteDirectoryContainingFilesThrows() => tester.DeleteDirectoryContainingFilesThrows();
 
     [Fact]
-    public void RemoveDirectoryRecursivelyRemovesEverything() => tester.RemoveDirectoryRecursivelyRemovesEverything();
+    public void DeleteDirectoryContainingOtherDirectoriesThrows() => tester.DeleteDirectoryContainingOtherDirectoriesThrows();
+
+    [Fact]
+    public void DeleteDirectoryRecursivelyRemovesEverything() => tester.DeleteDirectoryRecursivelyRemovesEverything();
 }

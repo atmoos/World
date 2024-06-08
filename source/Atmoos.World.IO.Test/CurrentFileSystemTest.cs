@@ -35,16 +35,19 @@ public sealed class CurrentFileSystemTest : IFileSystemTest, IDisposable
     public void AntecedentDirectoriesAreNotOverwritten() => this.tester.AntecedentDirectoriesAreNotOverwritten();
 
     [Fact]
-    public void RemoveEmptyDirectorySucceeds() => this.tester.RemoveEmptyDirectorySucceeds();
+    public void DeleteFileSucceeds() => this.tester.DeleteFileSucceeds();
 
     [Fact]
-    public void RemoveDirectoryContainingFilesThrows() => this.tester.RemoveDirectoryContainingFilesThrows();
+    public void DeleteEmptyDirectorySucceeds() => this.tester.DeleteEmptyDirectorySucceeds();
 
     [Fact]
-    public void RemoveDirectoryContainingOtherDirectoriesThrows() => this.tester.RemoveDirectoryContainingOtherDirectoriesThrows();
+    public void DeleteDirectoryContainingFilesThrows() => this.tester.DeleteDirectoryContainingFilesThrows();
 
     [Fact]
-    public void RemoveDirectoryRecursivelyRemovesEverything() => this.tester.RemoveDirectoryRecursivelyRemovesEverything();
+    public void DeleteDirectoryContainingOtherDirectoriesThrows() => this.tester.DeleteDirectoryContainingOtherDirectoriesThrows();
+
+    [Fact]
+    public void DeleteDirectoryRecursivelyRemovesEverything() => this.tester.DeleteDirectoryRecursivelyRemovesEverything();
 
     public void Dispose() => this.root.Delete(recursive: true);
 }

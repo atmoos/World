@@ -72,7 +72,16 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.Equal(firstAntecedents, secondAntecedents);
     }
 
-    public void RemoveEmptyDirectorySucceeds()
+    public void DeleteFileSucceeds()
+    {
+        var fileToDelete = Extensions<FileSystem>.Create(root, new FileName("SomeFile", "md"));
+
+        Assert.True(fileToDelete.Exists);
+        FileSystem.Delete(fileToDelete);
+        Assert.False(fileToDelete.Exists);
+    }
+
+    public void DeleteEmptyDirectorySucceeds()
     {
         var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("Empty"));
 
@@ -81,7 +90,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.False(toDelete.Exists);
     }
 
-    public void RemoveDirectoryContainingFilesThrows()
+    public void DeleteDirectoryContainingFilesThrows()
     {
         var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("FirstNonEmpty"));
         var file = Extensions<FileSystem>.Create(toDelete, new FileName("File", "txt"));
@@ -89,7 +98,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         AssertNonEmptyDirectoryRemovalThrows<IOException>(toDelete, file);
     }
 
-    public void RemoveDirectoryContainingOtherDirectoriesThrows()
+    public void DeleteDirectoryContainingOtherDirectoriesThrows()
     {
         var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("SecondNonEmpty"));
         var subDir = Extensions<FileSystem>.Create(toDelete, new DirectoryName("Child"));
@@ -97,7 +106,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         AssertNonEmptyDirectoryRemovalThrows<IOException>(toDelete, subDir);
     }
 
-    public void RemoveDirectoryRecursivelyRemovesEverything()
+    public void DeleteDirectoryRecursivelyRemovesEverything()
     {
         var parent = Extensions<FileSystem>.Create(root, new DirectoryName("Parent"));
         var toDelete = Extensions<FileSystem>.Create(parent, new DirectoryName("DeleteMe"));

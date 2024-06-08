@@ -7,8 +7,9 @@ public interface IFileSystemTest
     void CreateDirectory();
     void CreateDirectoryInAntecedentDirs();
     void AntecedentDirectoriesAreNotOverwritten();
-    void RemoveEmptyDirectorySucceeds();
-    void RemoveDirectoryContainingFilesThrows();
-    void RemoveDirectoryContainingOtherDirectoriesThrows();
-    void RemoveDirectoryRecursivelyRemovesEverything();
+    void DeleteFileSucceeds();
+    void DeleteEmptyDirectorySucceeds();
+    void DeleteDirectoryContainingFilesThrows();
+    void DeleteDirectoryContainingOtherDirectoriesThrows();
+    void DeleteDirectoryRecursivelyRemovesEverything();
 }
