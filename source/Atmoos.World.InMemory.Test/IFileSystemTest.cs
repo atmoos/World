@@ -2,9 +2,9 @@ namespace Atmoos.World.InMemory.Test;
 
 public interface IFileSystemTest
 {
-    void CreateFileInCurrentDir();
+    void CreateFile();
     void CreateFileInAntecedentDirs();
-    void CreateDirectoryInCurrentDir();
+    void CreateDirectory();
     void CreateDirectoryInAntecedentDirs();
     void AntecedentDirectoriesAreNotOverwritten();
     void RemoveDirectoryRecursivelyRemovesEverything();

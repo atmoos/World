@@ -1,54 +1,55 @@
 namespace Atmoos.World.InMemory.Test;
 
-public class FileSystemTester<FileSystem, Time>() : IFileSystemTest
+public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSystemTest
     where FileSystem : IFileSystem
     where Time : ITime
 {
+    public FileSystemTester() : this(FileSystem.CurrentDirectory) { }
 
-    public void CreateFileInCurrentDir()
+    public void CreateFile()
     {
         var name = new FileName { Name = "file", Extension = "txt" };
-        var fileInfo = Extensions<FileSystem>.Create(in name);
+        var fileInfo = Extensions<FileSystem>.Create(root, in name);
 
         Assert.Equal(name, fileInfo.Name);
         Assert.Equal(Time.Now, fileInfo.CreationTime);
-        Assert.Equal(FileSystem.CurrentDirectory, fileInfo.Directory);
+        Assert.Equal(root, fileInfo.Directory);
     }
 
     public void CreateFileInAntecedentDirs()
     {
         var name = new FileName { Name = "file", Extension = "txt" };
         String[] antecedents = ["some", "antecedent", "directory"];
-        var fileInfo = Extensions<FileSystem>.Create(in name, antecedents);
+        var fileInfo = Extensions<FileSystem>.Create(root, in name, antecedents);
 
         Assert.Equal(name, fileInfo.Name);
         Assert.Equal(Time.Now, fileInfo.CreationTime);
 
-        var expectedAntecedents = FileSystem.CurrentDirectory.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
+        var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
         var actualAntecedents = fileInfo.Directory.Path().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
-    public void CreateDirectoryInCurrentDir()
+    public void CreateDirectory()
     {
         var name = new DirectoryName { Value = "NewDirectory" };
-        var directoryInfo = Extensions<FileSystem>.Create(in name);
+        var directoryInfo = Extensions<FileSystem>.Create(root, in name);
 
         Assert.Equal(name, directoryInfo.Name);
         Assert.Equal(Time.Now, directoryInfo.CreationTime);
-        Assert.Equal(FileSystem.CurrentDirectory, directoryInfo.Parent);
+        Assert.Equal(root, directoryInfo.Parent);
     }
 
     public void CreateDirectoryInAntecedentDirs()
     {
         var name = new DirectoryName { Value = "SomeNewDirectory" };
         String[] antecedents = ["some", "antecedent", "directory"];
-        var directoryInfo = Extensions<FileSystem>.Create(in name, antecedents);
+        var directoryInfo = Extensions<FileSystem>.Create(root, in name, antecedents);
 
         Assert.Equal(name, directoryInfo.Name);
         Assert.Equal(Time.Now, directoryInfo.CreationTime);
 
-        var expectedAntecedents = FileSystem.CurrentDirectory.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
+        var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
         var actualAntecedents = directoryInfo.Antecedents().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
@@ -58,8 +59,8 @@ public class FileSystemTester<FileSystem, Time>() : IFileSystemTest
         var first = new DirectoryName { Value = "FirstDir" };
         var second = new DirectoryName { Value = "SecondDir" };
         String[] antecedents = ["some", "antecedent", "directory"];
-        var firstDir = Extensions<FileSystem>.Create(in first, antecedents);
-        var secondDir = Extensions<FileSystem>.Create(in second, antecedents);
+        var firstDir = Extensions<FileSystem>.Create(root, in first, antecedents);
+        var secondDir = Extensions<FileSystem>.Create(root, in second, antecedents);
 
         Assert.NotEqual(first, second);
 
@@ -71,7 +72,7 @@ public class FileSystemTester<FileSystem, Time>() : IFileSystemTest
 
     public void RemoveDirectoryRecursivelyRemovesEverything()
     {
-        var parent = Extensions<FileSystem>.Create("Parent");
+        var parent = Extensions<FileSystem>.Create(root, new DirectoryName("Parent"));
         var toDelete = Extensions<FileSystem>.Create(parent, new DirectoryName("DeleteMe"));
         var firstChild = Extensions<FileSystem>.Create(toDelete, new DirectoryName("FirstChild"));
         var secondChild = Extensions<FileSystem>.Create(toDelete, new DirectoryName("SecondChild"));
