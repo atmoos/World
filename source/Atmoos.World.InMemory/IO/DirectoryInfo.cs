@@ -7,6 +7,7 @@ internal sealed class RootDirectory(DirectoryName name, DateTime creationTime) :
     public IDirectoryInfo Parent => this;
     public IDirectoryInfo Root => this;
     public DateTime CreationTime => creationTime;
+    public override String ToString() => Name;
 }
 
 internal sealed class DirectoryInfo : IDirectoryInfo
@@ -24,4 +25,5 @@ internal sealed class DirectoryInfo : IDirectoryInfo
         this.parent = parent;
         parent[this] = new Directory(this);
     }
+    public override String ToString() => Name;
 }

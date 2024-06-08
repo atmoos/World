@@ -72,6 +72,31 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.Equal(firstAntecedents, secondAntecedents);
     }
 
+    public void RemoveEmptyDirectorySucceeds()
+    {
+        var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("Empty"));
+
+        Assert.True(toDelete.Exists);
+        FileSystem.Delete(toDelete, recursive: false);
+        Assert.False(toDelete.Exists);
+    }
+
+    public void RemoveDirectoryContainingFilesThrows()
+    {
+        var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("FirstNonEmpty"));
+        var file = Extensions<FileSystem>.Create(toDelete, new FileName("File", "txt"));
+
+        AssertNonEmptyDirectoryRemovalThrows<IOException>(toDelete, file);
+    }
+
+    public void RemoveDirectoryContainingOtherDirectoriesThrows()
+    {
+        var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("SecondNonEmpty"));
+        var subDir = Extensions<FileSystem>.Create(toDelete, new DirectoryName("Child"));
+
+        AssertNonEmptyDirectoryRemovalThrows<IOException>(toDelete, subDir);
+    }
+
     public void RemoveDirectoryRecursivelyRemovesEverything()
     {
         var parent = Extensions<FileSystem>.Create(root, new DirectoryName("Parent"));
@@ -86,7 +111,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.True(secondChild.Exists);
         Assert.All(firstChild.Path(), d => Assert.True(d.Exists));
 
-        FileSystem.Delete(toDelete, true);
+        FileSystem.Delete(toDelete, recursive: true);
 
         Assert.True(parent.Exists, "Parent should still exist");
         Assert.False(toDelete.Exists, "Deleted directory should not exist");
@@ -94,5 +119,16 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.All(secondChild.Path(until: parent), d => Assert.False(d.Exists));
         Assert.False(firstFile.Exists, "First file should not exist");
         Assert.False(secondFile.Exists, "Second file should not exist");
+    }
+
+    private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectoryInfo nonEmptyDirectory, IFileSystemInfo child)
+        where TException : Exception
+    {
+        Assert.True(child.Exists);
+        Assert.True(nonEmptyDirectory.Exists);
+        var e = Assert.ThrowsAny<TException>(() => FileSystem.Delete(nonEmptyDirectory, recursive: false));
+        Assert.True(nonEmptyDirectory.Exists);
+        Assert.True(child.Exists);
+        Assert.Contains(nonEmptyDirectory.Name, e.Message);
     }
 }

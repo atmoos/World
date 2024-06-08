@@ -1,9 +1,11 @@
+
 namespace Atmoos.World.InMemory.IO;
 
-internal sealed class Directory
+internal sealed class Directory : ICountable<IFileInfo>
 {
     private readonly Dictionary<IFileInfo, File> files = [];
     public IDirectoryInfo Id { get; }
+    public Int32 Count => this.files.Count;
 
     public File this[IFileInfo file] => this.files[file];
     public Directory(IDirectoryInfo id) => Id = id;
@@ -24,6 +26,6 @@ internal sealed class Directory
     }
 
     public Boolean Contains(FileInfo file) => this.files.ContainsKey(file);
-
     public Boolean Remove(IFileInfo file) => this.files.Remove(file);
+    public IEnumerator<IFileInfo> GetEnumerator() => this.files.Keys.GetEnumerator();
 }

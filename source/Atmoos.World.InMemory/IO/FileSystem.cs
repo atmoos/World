@@ -1,3 +1,5 @@
+using static Atmoos.World.InMemory.Convenience;
+
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class FileSystem
@@ -38,9 +40,15 @@ internal sealed class FileSystem
 
     public void Remove(IDirectoryInfo directory)
     {
-        // ToDo: Throw an exception if the directory is not empty...
-        var node = Trie(directory.Parent);
-        node.Remove(directory);
+        var node = Trie(directory);
+        var dirCount = node.Count;
+        var fileCount = node.Value.Count;
+        if (dirCount > 0 || fileCount > 0) {
+            var dirs = dirCount.ToString("sub-directory", "sub-directories");
+            var elements = dirs.Combine(fileCount.ToString("file", "files"));
+            throw new InputOutputException($"Directory not empty: '{directory}'. It contains{elements}.");
+        }
+        RemoveRecursively(directory);
     }
 
     public void RemoveRecursively(IDirectoryInfo directory)
