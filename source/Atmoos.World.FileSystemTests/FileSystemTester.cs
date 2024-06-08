@@ -1,4 +1,6 @@
-namespace Atmoos.World.InMemory.Test;
+using Xunit;
+
+namespace Atmoos.World.FileSystemTests;
 
 public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root) : IFileSystemTest
     where FileSystem : IFileSystem

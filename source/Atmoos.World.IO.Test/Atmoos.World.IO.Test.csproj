@@ -3,7 +3,7 @@
   <Import Project="../Atmoos.World.Test.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\Atmoos.World.InMemory\Atmoos.World.InMemory.csproj" />
+    <ProjectReference Include="..\Atmoos.World.IO\Atmoos.World.IO.csproj" />
     <ProjectReference Include="..\Atmoos.World.FileSystemTests\Atmoos.World.FileSystemTests.csproj" />
   </ItemGroup>
 

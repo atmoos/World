@@ -1,4 +1,4 @@
-namespace Atmoos.World.InMemory.Test;
+namespace Atmoos.World.FileSystemTests;
 
 public interface IFileSystemTest
 {
