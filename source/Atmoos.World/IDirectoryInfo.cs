@@ -1,3 +1,5 @@
+using Atmoos.Sphere.Functional;
+
 namespace Atmoos.World;
 
 public interface IDirectoryInfo : ICountable<IFileInfo>, IFileSystemInfo

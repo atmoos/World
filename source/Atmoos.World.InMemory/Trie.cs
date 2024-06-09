@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.InMemory;
 internal sealed class Trie<TKey, TValue> : ICountable<(TKey key, TValue value)>
