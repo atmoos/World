@@ -1,3 +1,5 @@
+using Atmoos.Sphere.Functional;
+
 namespace Atmoos.World;
 
 public static class Extensions
@@ -26,6 +28,12 @@ public static class Extensions
             antecedents.Push(current);
         }
         return antecedents;
+    }
+
+    public static Result<IFileInfo> Search(this IDirectoryInfo directory, FileName name)
+    {
+        var maybeFile = directory.SingleOrDefault(file => file.Name == name);
+        return maybeFile is null ? Result<IFileInfo>.Failure($"File '{name}' not found in '{directory}'.") : (Result<IFileInfo>)maybeFile;
     }
 }
 

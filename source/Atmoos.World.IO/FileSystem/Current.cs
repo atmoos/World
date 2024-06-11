@@ -1,4 +1,6 @@
 ﻿
+using Atmoos.Sphere.Functional;
+
 namespace Atmoos.World.IO.FileSystem;
 
 public sealed class Current : IFileSystem
@@ -62,5 +64,8 @@ public sealed class Current : IFileSystem
         return destinationInfo;
     }
 
+    public static Result<IFileInfo> Search(FileSearch query)
+        => Search(query.Path).SelectMany(d => d.Search(query.Name));
+    public static Result<IDirectoryInfo> Search(DirectorySearch query) => cache.Search(query);
     internal static IDirectoryInfo Locate(System.IO.DirectoryInfo directory) => cache.Locate(directory);
 }

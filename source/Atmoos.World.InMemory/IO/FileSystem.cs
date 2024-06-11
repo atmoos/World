@@ -1,3 +1,5 @@
+using Atmoos.Sphere.Functional;
+
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class FileSystem
@@ -64,6 +66,24 @@ internal sealed class FileSystem
         sourceNode.CopyTo(destinationNode);
         sourceParent.Remove(source);
         return destinationDir;
+    }
+
+    public Result<IDirectoryInfo> Search(DirectorySearch query)
+    {
+        IDirectoryInfo info = query.Root;
+        Trie<IDirectoryInfo, Directory> directory = Trie(query.Root);
+        List<String> traversedPath = [info.Name];
+        foreach (var subDir in query) {
+            if (directory.FindKey(info => info.Name == subDir) is Success<IDirectoryInfo> next) {
+                info = next.Exit();
+                directory = directory.Node(info);
+                traversedPath.Add(subDir);
+                continue;
+            }
+            var path = String.Join(", ", traversedPath);
+            return Result<IDirectoryInfo>.Failure($"No such directory: '{subDir}' in [{path}].");
+        }
+        return Result<IDirectoryInfo>.From(() => info);
     }
 
     private Trie<IDirectoryInfo, Directory> Trie(IDirectoryInfo directory) => directory switch {

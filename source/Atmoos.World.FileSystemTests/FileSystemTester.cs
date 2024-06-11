@@ -1,3 +1,4 @@
+using Atmoos.Sphere.Functional;
 using Xunit;
 
 namespace Atmoos.World.FileSystemTests;
@@ -162,6 +163,39 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.Equal(children.Length, moved.Count);
         Assert.All(moved, f => Assert.True(f.Exists));
         Assert.All(moved, f => Assert.Contains(f.Name, childNames));
+    }
+
+    public void SearchForNonExistentDirectoryFails()
+    {
+        var queryStart = Extensions<FileSystem>.Create(root, new DirectoryName("FreshlyCreated"));
+        var firstSubDir = Extensions<FileSystem>.Create(queryStart, new DirectoryName("SomeSubDir"));
+        var secondSubDir = Extensions<FileSystem>.Create(firstSubDir, new DirectoryName("AnotherSubDir"));
+        var thisDoesNotExist = new DirectoryName("ThisDoesNotExist");
+        var thisDoesNotEither = new DirectoryName("NoNoNo");
+
+        var query = DirectorySearch.Query(queryStart, firstSubDir.Name, secondSubDir.Name, thisDoesNotExist, thisDoesNotEither);
+
+        var result = FileSystem.Search(query);
+
+        String[] expectedErrorContent = [queryStart.Name, firstSubDir.Name, secondSubDir.Name, thisDoesNotExist];
+        IEnumerable<String> actualErrors = Assert.IsType<Failure<IDirectoryInfo>>(result);
+        String actualMessage = Assert.Single(actualErrors);
+        Assert.All(expectedErrorContent, e => Assert.Contains(e, actualMessage));
+        Assert.DoesNotContain(thisDoesNotEither, actualMessage);
+    }
+
+    public void SearchForExistingDirectorySucceeds()
+    {
+        var queryStart = Extensions<FileSystem>.Create(root, new DirectoryName("TheNewestOfDirs"));
+        var firstSubDir = Extensions<FileSystem>.Create(queryStart, new DirectoryName("SomeSubDir"));
+        var expectedFind = Extensions<FileSystem>.Create(firstSubDir, new DirectoryName("TheTailEnd"));
+
+        var query = DirectorySearch.Query(queryStart, firstSubDir.Name, expectedFind.Name);
+
+        var result = FileSystem.Search(query);
+
+        IDirectoryInfo actualDirectory = Assert.IsType<Success<IDirectoryInfo>>(result).Exit();
+        Assert.Equal(expectedFind, actualDirectory);
     }
 
     private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectoryInfo nonEmptyDirectory, IFileSystemInfo child)

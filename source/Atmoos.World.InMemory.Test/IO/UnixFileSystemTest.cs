@@ -44,4 +44,10 @@ public class UnixFileSystemTest : IFileSystemTest
 
     [Fact]
     public void MoveDirectoryRemovesSourceAndRecreatesTarget() => tester.MoveDirectoryRemovesSourceAndRecreatesTarget();
+
+    [Fact]
+    public void SearchForNonExistentDirectoryFails() => tester.SearchForNonExistentDirectoryFails();
+
+    [Fact]
+    public void SearchForExistingDirectorySucceeds() => tester.SearchForExistingDirectorySucceeds();
 }

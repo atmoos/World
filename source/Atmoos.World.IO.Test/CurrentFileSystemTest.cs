@@ -52,5 +52,11 @@ public sealed class CurrentFileSystemTest : IFileSystemTest, IDisposable
     [Fact]
     public void MoveDirectoryRemovesSourceAndRecreatesTarget() => this.tester.MoveDirectoryRemovesSourceAndRecreatesTarget();
 
+    [Fact]
+    public void SearchForNonExistentDirectoryFails() => this.tester.SearchForNonExistentDirectoryFails();
+
+    [Fact]
+    public void SearchForExistingDirectorySucceeds() => this.tester.SearchForExistingDirectorySucceeds();
+
     public void Dispose() => this.root.Delete(recursive: true);
 }

@@ -1,5 +1,6 @@
 using FiInfo = System.IO.FileInfo;
 using DirInfo = System.IO.DirectoryInfo;
+using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.IO.FileSystem;
 
@@ -68,6 +69,22 @@ internal sealed class FileSystemCache
         }
         var parent = FindDirectory(directory.Parent);
         return this.directories[directory] = new DirInfo(Path.Combine(parent.FullName, directory.Name));
+    }
+
+    public Result<IDirectoryInfo> Search(DirectorySearch query)
+    {
+        var info = FindDirectory(query.Root);
+        var dirInfo = query.Root;
+        foreach (var directory in query) {
+            var parentInfo = info;
+            info = new DirInfo(Path.Combine(info.FullName, directory));
+            if (!info.Exists) {
+                return Result<IDirectoryInfo>.Failure($"Directory '{directory}' not found in '{parentInfo}'.");
+            }
+            dirInfo = new DirectoryInfo(this, dirInfo, info);
+            this.directories[dirInfo] = info;
+        }
+        return Result<IDirectoryInfo>.From(() => dirInfo);
     }
 
     public void Purge()

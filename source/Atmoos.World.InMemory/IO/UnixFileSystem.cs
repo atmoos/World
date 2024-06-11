@@ -1,4 +1,6 @@
-﻿namespace Atmoos.World.InMemory.IO;
+﻿using Atmoos.Sphere.Functional;
+
+namespace Atmoos.World.InMemory.IO;
 
 public sealed class UnixFileSystem<Time> : IFileSystem
     where Time : ITime
@@ -44,4 +46,9 @@ public sealed class UnixFileSystem<Time> : IFileSystem
     {
         return fileSystem.Move(source, in destination, Time.Now);
     }
+
+    public static Result<IFileInfo> Search(FileSearch query)
+        => Search(query.Path).SelectMany(d => d.Search(query.Name));
+
+    public static Result<IDirectoryInfo> Search(DirectorySearch query) => fileSystem.Search(query);
 }

@@ -13,4 +13,6 @@ public interface IFileSystemTest
     void DeleteDirectoryContainingOtherDirectoriesThrows();
     void DeleteDirectoryRecursivelyRemovesEverything();
     void MoveDirectoryRemovesSourceAndRecreatesTarget();
+    void SearchForNonExistentDirectoryFails();
+    void SearchForExistingDirectorySucceeds();
 }

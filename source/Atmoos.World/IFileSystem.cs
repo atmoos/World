@@ -1,3 +1,5 @@
+using Atmoos.Sphere.Functional;
+
 namespace Atmoos.World;
 
 public interface IFileSystem :
@@ -8,6 +10,7 @@ public interface IFileSystem :
     IDirectoryCreation,
     IDirectoryDeletion,
     IDirectoryManipulation,
+    IFileSystemQueries,
     IFileSystemState
 { /* The sum of all file system operations. */ }
 
@@ -16,6 +19,11 @@ public interface IFileSystemState
     // ToDo: Should I include the Root on the FileSystem?
     //       Should it be a directory, volume or device?
     static abstract IDirectoryInfo CurrentDirectory { get; }
+}
+public interface IFileSystemQueries
+{
+    static abstract Result<IFileInfo> Search(FileSearch query);
+    static abstract Result<IDirectoryInfo> Search(DirectorySearch query);
 }
 public interface IFileCreation
 {
@@ -27,6 +35,7 @@ public interface IFileDeletion
 }
 public interface IFileManipulation
 {
+    // ToDo: Move to IFileInfo
     static abstract Task<IFileInfo> Copy(IFileInfo source, NewFile destination, CancellationToken token = default);
     static abstract Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token = default);
 }

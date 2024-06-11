@@ -40,6 +40,12 @@ internal sealed class Trie<TKey, TValue> : ICountable<(TKey key, TValue value)>
         throw new KeyNotFoundException($"There is no key '{key}]' in the trie.");
     }
 
+    public Result<TKey> FindKey(Func<TKey, Boolean> predicate)
+    {
+        var key = this.children.Keys.SingleOrDefault(predicate);
+        return key ?? Result<TKey>.Failure("No key satisfies the predicate.");
+    }
+
     public Boolean Remove(TKey key) => this.children.Remove(key);
 
     private Boolean TryGetNode(TKey key, [MaybeNullWhen(false)] out Trie<TKey, TValue> child)
