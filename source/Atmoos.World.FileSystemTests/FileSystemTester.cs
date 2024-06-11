@@ -194,7 +194,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
         var result = FileSystem.Search(query);
 
-        IDirectoryInfo actualDirectory = Assert.IsType<Success<IDirectoryInfo>>(result).Exit();
+        IDirectoryInfo actualDirectory = Assert.IsType<Success<IDirectoryInfo>>(result).Value();
         Assert.Equal(expectedFind, actualDirectory);
     }
 

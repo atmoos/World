@@ -79,12 +79,12 @@ internal sealed class FileSystemCache
             var parentInfo = info;
             info = new DirInfo(Path.Combine(info.FullName, directory));
             if (!info.Exists) {
-                return Result<IDirectoryInfo>.Failure($"Directory '{directory}' not found in '{parentInfo}'.");
+                return Result.Failure<IDirectoryInfo>($"Directory '{directory}' not found in '{parentInfo}'.");
             }
             dirInfo = new DirectoryInfo(this, dirInfo, info);
             this.directories[dirInfo] = info;
         }
-        return Result<IDirectoryInfo>.From(() => dirInfo);
+        return Result.Success(dirInfo);
     }
 
     public void Purge()

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.Sphere.Functional" Version="0.0.1" />
+    <PackageReference Include="Atmoos.Sphere.Functional" Version="0.0.*" />
   </ItemGroup>
 
 </Project>

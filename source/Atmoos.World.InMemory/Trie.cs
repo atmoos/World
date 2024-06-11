@@ -41,10 +41,7 @@ internal sealed class Trie<TKey, TValue> : ICountable<(TKey key, TValue value)>
     }
 
     public Result<TKey> FindKey(Func<TKey, Boolean> predicate)
-    {
-        var key = this.children.Keys.SingleOrDefault(predicate);
-        return key ?? Result<TKey>.Failure("No key satisfies the predicate.");
-    }
+        => this.children.Keys.SingleOrDefault(predicate).ToResult(() => "No key satisfies the predicate.");
 
     public Boolean Remove(TKey key) => this.children.Remove(key);
 

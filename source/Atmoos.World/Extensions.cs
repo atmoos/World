@@ -31,10 +31,7 @@ public static class Extensions
     }
 
     public static Result<IFileInfo> Search(this IDirectoryInfo directory, FileName name)
-    {
-        var maybeFile = directory.SingleOrDefault(file => file.Name == name);
-        return maybeFile is null ? Result<IFileInfo>.Failure($"File '{name}' not found in '{directory}'.") : (Result<IFileInfo>)maybeFile;
-    }
+        => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");
 }
 
 public static class Extensions<TFileSystem>

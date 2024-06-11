@@ -75,15 +75,15 @@ internal sealed class FileSystem
         List<String> traversedPath = [info.Name];
         foreach (var subDir in query) {
             if (directory.FindKey(info => info.Name == subDir) is Success<IDirectoryInfo> next) {
-                info = next.Exit();
+                info = next.Value();
                 directory = directory.Node(info);
                 traversedPath.Add(subDir);
                 continue;
             }
             var path = String.Join(", ", traversedPath);
-            return Result<IDirectoryInfo>.Failure($"No such directory: '{subDir}' in [{path}].");
+            return Result.Failure<IDirectoryInfo>($"No such directory: '{subDir}' in [{path}].");
         }
-        return Result<IDirectoryInfo>.From(() => info);
+        return Result.Success(info);
     }
 
     private Trie<IDirectoryInfo, Directory> Trie(IDirectoryInfo directory) => directory switch {
