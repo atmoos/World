@@ -25,14 +25,16 @@ internal sealed class FileSystemCache
         }
         var parent = Locate(directory.Parent);
         var name = new DirectoryName(directory.Name);
-        return Add(new NewDirectory { Name = name, Parent = parent }).info;
+        return Add(parent, name).info;
     }
 
-    public (IFileInfo info, FiInfo system) Add(in NewFile file)
+    public (IFileInfo info, FiInfo system) Add(in NewFile file) => Add(file.Parent, file.Name);
+    public (IFileInfo info, FiInfo system) Add(IDirectoryInfo parent, FileName name)
     {
-        var directory = FindDirectory(file.Parent);
-        var fileInfo = new FiInfo(Path.Combine(directory.FullName, file.Name));
-        return (Add(file.Parent, fileInfo), fileInfo);
+        var directory = FindDirectory(parent);
+        var fileInfo = new FiInfo(Path.Combine(directory.FullName, name));
+        return (Add(parent, fileInfo), fileInfo);
+
     }
 
     public IFileInfo Add(IDirectoryInfo parent, FiInfo file)
@@ -42,11 +44,12 @@ internal sealed class FileSystemCache
         return info;
     }
 
-    public (IDirectoryInfo info, DirInfo system) Add(in NewDirectory directory)
+    public (IDirectoryInfo info, DirInfo system) Add(in NewDirectory directory) => Add(directory.Parent, directory.Name);
+    public (IDirectoryInfo info, DirInfo system) Add(IDirectoryInfo parent, DirectoryName name)
     {
-        var parent = FindDirectory(directory.Parent);
-        var systemInfo = new DirInfo(Path.Combine(parent.FullName, directory.Name));
-        var directoryInfo = new DirectoryInfo(this, directory.Parent, systemInfo);
+        var dir = FindDirectory(parent);
+        var systemInfo = new DirInfo(Path.Combine(dir.FullName, name));
+        var directoryInfo = new DirectoryInfo(this, parent, systemInfo);
         return (directoryInfo, this.directories[directoryInfo] = systemInfo);
     }
 

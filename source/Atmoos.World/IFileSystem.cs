@@ -27,7 +27,8 @@ public interface IFileSystemQueries
 }
 public interface IFileCreation
 {
-    static abstract IFileInfo Create(in NewFile file);
+    static abstract IFileInfo Create(CreateFile file);
+    static abstract IFileInfo Create(IDirectoryInfo parent, FileName name);
 }
 public interface IFileDeletion
 {
@@ -42,7 +43,8 @@ public interface IFileManipulation
 
 public interface IDirectoryCreation
 {
-    static abstract IDirectoryInfo Create(in NewDirectory directory);
+    static abstract IDirectoryInfo Create(CreateDirectory path);
+    static abstract IDirectoryInfo Create(IDirectoryInfo parent, DirectoryName name);
 }
 public interface IDirectoryDeletion
 {

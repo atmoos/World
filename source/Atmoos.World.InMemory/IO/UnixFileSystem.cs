@@ -28,10 +28,14 @@ public sealed class UnixFileSystem<Time> : IFileSystem
         var newFile = Create(in destination);
         return await Copy(source, newFile, token);
     }
+    public static IFileInfo Create(IDirectoryInfo parent, FileName name) => Create(new NewFile { Parent = parent, Name = name });
+    public static IFileInfo Create(CreateFile file)
+        => Create(new NewFile { Parent = Create(file.Path), Name = file.Name });
 
-    public static IFileInfo Create(in NewFile file) => fileSystem.Add(in file, Time.Now);
+    public static IDirectoryInfo Create(CreateDirectory path) => path.Aggregate(path.Root, Create);
 
-    public static IDirectoryInfo Create(in NewDirectory directory) => fileSystem.Add(in directory, Time.Now);
+    public static IDirectoryInfo Create(IDirectoryInfo parent, DirectoryName name)
+        => fileSystem.Add(new NewDirectory { Parent = parent, Name = name }, Time.Now);
 
     public static void Delete(IFileInfo file) => fileSystem.Remove(file);
 
@@ -51,4 +55,6 @@ public sealed class UnixFileSystem<Time> : IFileSystem
         => Search(query.Path).SelectMany(d => d.Search(query.Name));
 
     public static Result<IDirectoryInfo> Search(DirectorySearch query) => fileSystem.Search(query);
+
+    private static IFileInfo Create(in NewFile file) => fileSystem.Add(in file, Time.Now);
 }

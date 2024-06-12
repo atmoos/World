@@ -18,7 +18,7 @@ internal sealed class FileSystem
     public IFileInfo Add(in NewFile file, DateTime creationTime)
     {
         var directory = this[file.Parent];
-        return directory.Add(in file, creationTime);
+        return directory.Add(file.Name, creationTime);
     }
 
     public IDirectoryInfo Add(in NewDirectory directory, DateTime creationTime)

@@ -11,10 +11,10 @@ internal sealed class Directory : ICountable<IFileInfo>
     public File this[IFileInfo file] => this.files[file];
     public Directory(IDirectoryInfo id) => Id = id;
 
-    public IFileInfo Add(in NewFile file, DateTime creationTime)
+    public IFileInfo Add(FileName name, DateTime creationTime)
     {
         // ToDo: Throw an exception if the file already exists?
-        var fileInfo = new FileInfo(this) { Name = file.Name, CreationTime = creationTime };
+        var fileInfo = new FileInfo(this) { Name = name, CreationTime = creationTime };
         this.files[fileInfo] = new File(fileInfo);
         return fileInfo;
     }

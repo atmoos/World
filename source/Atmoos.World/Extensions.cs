@@ -68,7 +68,7 @@ public static class Extensions<TFileSystem>
         => Create(TFileSystem.CurrentDirectory, in name, antecedents);
 
     public static IFileInfo Create(IDirectoryInfo parent, in FileName name)
-        => TFileSystem.Create(new NewFile { Parent = parent, Name = name });
+        => TFileSystem.Create(parent, name);
     public static IFileInfo Create(IDirectoryInfo root, in FileName name, String antecedent)
     {
         IDirectoryInfo parent = Create(root, new DirectoryName(antecedent));
@@ -114,7 +114,7 @@ public static class Extensions<TFileSystem>
         => Create(TFileSystem.CurrentDirectory, in name, antecedents);
 
     public static IDirectoryInfo Create(IDirectoryInfo parent, in DirectoryName name)
-        => TFileSystem.Create(new NewDirectory { Parent = parent, Name = name });
+        => TFileSystem.Create(parent, name);
     public static IDirectoryInfo Create(IDirectoryInfo root, in DirectoryName name, String antecedent)
     {
         IDirectoryInfo antecedentDir = Create(root, new DirectoryName(antecedent));
