@@ -13,13 +13,13 @@ public class UnixFileSystemTest : IFileSystemTest
     }
 
     [Fact]
-    public void CreateFile() => tester.CreateFile();
+    public void CreateFileSucceeds() => tester.CreateFileSucceeds();
 
     [Fact]
     public void CreateFileInAntecedentDirs() => tester.CreateFileInAntecedentDirs();
 
     [Fact]
-    public void CreateDirectory() => tester.CreateDirectory();
+    public void CreateDirectorySucceeds() => tester.CreateDirectorySucceeds();
 
     [Fact]
     public void CreateDirectoryInAntecedentDirs() => tester.CreateDirectoryInAntecedentDirs();

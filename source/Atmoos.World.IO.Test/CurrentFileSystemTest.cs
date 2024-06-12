@@ -20,13 +20,13 @@ public sealed class CurrentFileSystemTest : IFileSystemTest, IDisposable
     }
 
     [Fact]
-    public void CreateFile() => this.tester.CreateFile();
+    public void CreateFileSucceeds() => this.tester.CreateFileSucceeds();
 
     [Fact]
     public void CreateFileInAntecedentDirs() => this.tester.CreateFileInAntecedentDirs();
 
     [Fact]
-    public void CreateDirectory() => this.tester.CreateDirectory();
+    public void CreateDirectorySucceeds() => this.tester.CreateDirectorySucceeds();
 
     [Fact]
     public void CreateDirectoryInAntecedentDirs() => this.tester.CreateDirectoryInAntecedentDirs();

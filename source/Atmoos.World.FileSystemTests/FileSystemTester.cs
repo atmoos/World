@@ -9,10 +9,10 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 {
     public FileSystemTester() : this(FileSystem.CurrentDirectory, TimeSpan.Zero) { }
 
-    public void CreateFile()
+    public void CreateFileSucceeds()
     {
-        var name = new FileName { Name = "file", Extension = "txt" };
-        var fileInfo = Extensions<FileSystem>.Create(root, in name);
+        var name = new FileName("file", "txt");
+        var fileInfo = FileSystem.Create(root, name);
 
         Assert.Equal(name, fileInfo.Name);
         Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
@@ -23,7 +23,8 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
     {
         var name = new FileName { Name = "file", Extension = "txt" };
         String[] antecedents = ["some", "antecedent", "directory"];
-        var fileInfo = Extensions<FileSystem>.Create(root, in name, antecedents);
+        var command = CreateFile.Command(CreateDirectory.Command(root, antecedents), name);
+        var fileInfo = FileSystem.Create(command);
 
         Assert.Equal(name, fileInfo.Name);
         Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
@@ -33,10 +34,10 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
-    public void CreateDirectory()
+    public void CreateDirectorySucceeds()
     {
         var name = new DirectoryName { Value = "NewDirectory" };
-        var directoryInfo = Extensions<FileSystem>.Create(root, in name);
+        var directoryInfo = FileSystem.Create(root, name);
 
         Assert.Equal(name, directoryInfo.Name);
         Assert.Equal(Time.Now, directoryInfo.CreationTime, tol);
@@ -45,9 +46,10 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void CreateDirectoryInAntecedentDirs()
     {
-        var name = new DirectoryName { Value = "SomeNewDirectory" };
+        var name = "SomeNewDirectory";
         String[] antecedents = ["some", "antecedent", "directory"];
-        var directoryInfo = Extensions<FileSystem>.Create(root, in name, antecedents);
+        var command = CreateDirectory.Command(root, [.. antecedents, name]);
+        var directoryInfo = FileSystem.Create(command);
 
         Assert.Equal(name, directoryInfo.Name);
         Assert.Equal(Time.Now, directoryInfo.CreationTime, tol);
@@ -59,13 +61,11 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void AntecedentDirectoriesAreNotOverwritten()
     {
-        var first = new DirectoryName { Value = "FirstDir" };
-        var second = new DirectoryName { Value = "SecondDir" };
         String[] antecedents = ["some", "antecedent", "directory"];
-        var firstDir = Extensions<FileSystem>.Create(root, in first, antecedents);
-        var secondDir = Extensions<FileSystem>.Create(root, in second, antecedents);
-
-        Assert.NotEqual(first, second);
+        var firstCommand = CreateDirectory.Command(root, [.. antecedents, "FirstDir"]);
+        var secondCommand = CreateDirectory.Command(root, [.. antecedents, "SecondDir"]);
+        var firstDir = FileSystem.Create(firstCommand);
+        var secondDir = FileSystem.Create(secondCommand);
 
         var firstAntecedents = firstDir.Antecedents().ToArray();
         var secondAntecedents = secondDir.Antecedents().ToArray();
@@ -75,7 +75,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void DeleteFileSucceeds()
     {
-        var fileToDelete = Extensions<FileSystem>.Create(root, new FileName("SomeFile", "md"));
+        var fileToDelete = FileSystem.Create(root, new FileName("SomeFile", "md"));
 
         Assert.True(fileToDelete.Exists);
         FileSystem.Delete(fileToDelete);
@@ -84,7 +84,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void DeleteEmptyDirectorySucceeds()
     {
-        var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("Empty"));
+        var toDelete = FileSystem.Create(root, new DirectoryName("Empty"));
 
         Assert.True(toDelete.Exists);
         FileSystem.Delete(toDelete, recursive: false);
@@ -93,28 +93,28 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void DeleteDirectoryContainingFilesThrows()
     {
-        var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("FirstNonEmpty"));
-        var file = Extensions<FileSystem>.Create(toDelete, new FileName("File", "txt"));
+        var command = CreateDirectory.Command(root, "FirstNonEmpty") + new FileName("File", "txt");
+        var spuriousFile = FileSystem.Create(command);
 
-        AssertNonEmptyDirectoryRemovalThrows<IOException>(toDelete, file);
+        AssertNonEmptyDirectoryRemovalThrows<IOException>(spuriousFile.Directory, spuriousFile);
     }
 
     public void DeleteDirectoryContainingOtherDirectoriesThrows()
     {
-        var toDelete = Extensions<FileSystem>.Create(root, new DirectoryName("SecondNonEmpty"));
-        var subDir = Extensions<FileSystem>.Create(toDelete, new DirectoryName("Child"));
+        var command = CreateDirectory.Command(root, "SecondNonEmpty", "Child");
+        var subDir = FileSystem.Create(command);
 
-        AssertNonEmptyDirectoryRemovalThrows<IOException>(toDelete, subDir);
+        AssertNonEmptyDirectoryRemovalThrows<IOException>(subDir.Parent, subDir);
     }
 
     public void DeleteDirectoryRecursivelyRemovesEverything()
     {
-        var parent = Extensions<FileSystem>.Create(root, new DirectoryName("Parent"));
-        var toDelete = Extensions<FileSystem>.Create(parent, new DirectoryName("DeleteMe"));
-        var firstChild = Extensions<FileSystem>.Create(toDelete, new DirectoryName("FirstChild"));
-        var secondChild = Extensions<FileSystem>.Create(toDelete, new DirectoryName("SecondChild"));
-        var firstFile = Extensions<FileSystem>.Create(firstChild, new FileName("FirstFile", "txt"));
-        var secondFile = Extensions<FileSystem>.Create(toDelete, new FileName("SecondFile", "txt"));
+        var parent = FileSystem.Create(root, new DirectoryName("Parent"));
+        var toDelete = FileSystem.Create(parent, new DirectoryName("DeleteMe"));
+        var firstChild = FileSystem.Create(toDelete, new DirectoryName("FirstChild"));
+        var secondChild = FileSystem.Create(toDelete, new DirectoryName("SecondChild"));
+        var firstFile = FileSystem.Create(firstChild, new FileName("FirstFile", "txt"));
+        var secondFile = FileSystem.Create(toDelete, new FileName("SecondFile", "txt"));
 
         Assert.True(firstFile.Exists);
         Assert.True(secondFile.Exists);
@@ -133,16 +133,16 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void MoveDirectoryRemovesSourceAndRecreatesTarget()
     {
-        var targetRoot = Extensions<FileSystem>.Create(root, new DirectoryName("TargetRoot"));
-        var originalRoot = Extensions<FileSystem>.Create(root, new DirectoryName("OriginalRoot"));
-        var toMove = Extensions<FileSystem>.Create(originalRoot, new DirectoryName("MoveMe"));
+        var targetRoot = FileSystem.Create(root, new DirectoryName("TargetRoot"));
+        var originalRoot = FileSystem.Create(root, new DirectoryName("OriginalRoot"));
+        var toMove = FileSystem.Create(originalRoot, new DirectoryName("MoveMe"));
         var targetDir = new NewDirectory { Name = new DirectoryName("MovedMeHere"), Parent = targetRoot };
 
-        var firstChild = Extensions<FileSystem>.Create(toMove, new DirectoryName("FirstChild"));
-        var firstImmediateFile = Extensions<FileSystem>.Create(toMove, new FileName("Foo", "txt"));
-        var secondImmediateFile = Extensions<FileSystem>.Create(toMove, new FileName("Bar", "txt"));
-        var subDir = Extensions<FileSystem>.Create(toMove, new DirectoryName("SomeSubDir"));
-        var grandChild = Extensions<FileSystem>.Create(firstChild, new FileName("FirstFile", "txt"));
+        var firstChild = FileSystem.Create(toMove, new DirectoryName("FirstChild"));
+        var firstImmediateFile = FileSystem.Create(toMove, new FileName("Foo", "txt"));
+        var secondImmediateFile = FileSystem.Create(toMove, new FileName("Bar", "txt"));
+        var subDir = FileSystem.Create(toMove, new DirectoryName("SomeSubDir"));
+        var grandChild = FileSystem.Create(firstChild, new FileName("FirstFile", "txt"));
         IFileInfo[] children = [firstImmediateFile, secondImmediateFile];
 
 
@@ -167,9 +167,9 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void SearchForNonExistentDirectoryFails()
     {
-        var queryStart = Extensions<FileSystem>.Create(root, new DirectoryName("FreshlyCreated"));
-        var firstSubDir = Extensions<FileSystem>.Create(queryStart, new DirectoryName("SomeSubDir"));
-        var secondSubDir = Extensions<FileSystem>.Create(firstSubDir, new DirectoryName("AnotherSubDir"));
+        var queryStart = FileSystem.Create(root, new DirectoryName("FreshlyCreated"));
+        var firstSubDir = FileSystem.Create(queryStart, new DirectoryName("SomeSubDir"));
+        var secondSubDir = FileSystem.Create(firstSubDir, new DirectoryName("AnotherSubDir"));
         var thisDoesNotExist = new DirectoryName("ThisDoesNotExist");
         var thisDoesNotEither = new DirectoryName("NoNoNo");
 
@@ -186,9 +186,9 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void SearchForExistingDirectorySucceeds()
     {
-        var queryStart = Extensions<FileSystem>.Create(root, new DirectoryName("TheNewestOfDirs"));
-        var firstSubDir = Extensions<FileSystem>.Create(queryStart, new DirectoryName("SomeSubDir"));
-        var expectedFind = Extensions<FileSystem>.Create(firstSubDir, new DirectoryName("TheTailEnd"));
+        var queryStart = FileSystem.Create(root, new DirectoryName("TheNewestOfDirs"));
+        var firstSubDir = FileSystem.Create(queryStart, new DirectoryName("SomeSubDir"));
+        var expectedFind = FileSystem.Create(firstSubDir, new DirectoryName("TheTailEnd"));
 
         var query = DirectorySearch.Query(queryStart, firstSubDir.Name, expectedFind.Name);
 

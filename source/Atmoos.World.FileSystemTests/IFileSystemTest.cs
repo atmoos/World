@@ -2,9 +2,9 @@ namespace Atmoos.World.FileSystemTests;
 
 public interface IFileSystemTest
 {
-    void CreateFile();
+    void CreateFileSucceeds();
     void CreateFileInAntecedentDirs();
-    void CreateDirectory();
+    void CreateDirectorySucceeds();
     void CreateDirectoryInAntecedentDirs();
     void AntecedentDirectoriesAreNotOverwritten();
     void DeleteFileSucceeds();
