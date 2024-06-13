@@ -7,12 +7,12 @@ namespace Atmoos.World.IO.FileSystem;
 internal sealed class FileSystemCache
 {
     private readonly RootDirectoryInfo root;
-    private readonly Cache<IFileInfo, FiInfo> files = new();
-    private readonly Cache<IDirectoryInfo, DirInfo> directories = new();
+    private readonly Cache<IFile, FiInfo> files = new();
+    private readonly Cache<IDirectory, DirInfo> directories = new();
 
     public FileSystemCache() => this.root = new RootDirectoryInfo(this, new DirInfo(Directory.GetCurrentDirectory()).Root);
 
-    public IDirectoryInfo Locate(DirInfo directory)
+    public IDirectory Locate(DirInfo directory)
     {
         if (directory.Parent == null || directory.FullName == this.root.FullPath) {
             return this.root;
@@ -28,8 +28,8 @@ internal sealed class FileSystemCache
         return Add(parent, name).info;
     }
 
-    public (IFileInfo info, FiInfo system) Add(in NewFile file) => Add(file.Parent, file.Name);
-    public (IFileInfo info, FiInfo system) Add(IDirectoryInfo parent, FileName name)
+    public (IFile info, FiInfo system) Add(in NewFile file) => Add(file.Parent, file.Name);
+    public (IFile info, FiInfo system) Add(IDirectory parent, FileName name)
     {
         var directory = FindDirectory(parent);
         var fileInfo = new FiInfo(System.IO.Path.Combine(directory.FullName, name));
@@ -37,15 +37,15 @@ internal sealed class FileSystemCache
 
     }
 
-    public IFileInfo Add(IDirectoryInfo parent, FiInfo file)
+    public IFile Add(IDirectory parent, FiInfo file)
     {
         var info = new FileInfo(parent, file);
         this.files[info] = file;
         return info;
     }
 
-    public (IDirectoryInfo info, DirInfo system) Add(in NewDirectory directory) => Add(directory.Parent, directory.Name);
-    public (IDirectoryInfo info, DirInfo system) Add(IDirectoryInfo parent, DirectoryName name)
+    public (IDirectory info, DirInfo system) Add(in NewDirectory directory) => Add(directory.Parent, directory.Name);
+    public (IDirectory info, DirInfo system) Add(IDirectory parent, DirectoryName name)
     {
         var dir = FindDirectory(parent);
         var systemInfo = new DirInfo(System.IO.Path.Combine(dir.FullName, name));
@@ -53,16 +53,16 @@ internal sealed class FileSystemCache
         return (directoryInfo, this.directories[directoryInfo] = systemInfo);
     }
 
-    public FiInfo FindFile(in IFileInfo file)
+    public FiInfo FindFile(in IFile file)
     {
         if (this.files.TryGetValue(file, out var fileInfo)) {
             return fileInfo;
         }
-        var directory = FindDirectory(file.Directory);
+        var directory = FindDirectory(file.Parent);
         return this.files[file] = new FiInfo(System.IO.Path.Combine(directory.FullName, file.Name));
     }
 
-    public DirInfo FindDirectory(IDirectoryInfo directory)
+    public DirInfo FindDirectory(IDirectory directory)
     {
         if (this.root.Equals(directory)) {
             return this.root.Value;
@@ -74,7 +74,7 @@ internal sealed class FileSystemCache
         return this.directories[directory] = new DirInfo(System.IO.Path.Combine(parent.FullName, directory.Name));
     }
 
-    public Result<IDirectoryInfo> Search(Path query)
+    public Result<IDirectory> Search(Path query)
     {
         var info = FindDirectory(query.Root);
         var dirInfo = query.Root;
@@ -82,7 +82,7 @@ internal sealed class FileSystemCache
             var parentInfo = info;
             info = new DirInfo(System.IO.Path.Combine(info.FullName, directory));
             if (!info.Exists) {
-                return Result.Failure<IDirectoryInfo>($"Directory '{directory}' not found in '{parentInfo}'.");
+                return Result.Failure<IDirectory>($"Directory '{directory}' not found in '{parentInfo}'.");
             }
             dirInfo = new DirectoryInfo(this, dirInfo, info);
             this.directories[dirInfo] = info;

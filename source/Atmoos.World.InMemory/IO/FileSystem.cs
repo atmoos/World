@@ -5,24 +5,24 @@ namespace Atmoos.World.InMemory.IO;
 internal sealed class FileSystem
 {
     private const Char separator = ':';
-    private readonly IDirectoryInfo root;
-    private readonly Trie<IDirectoryInfo, Directory> directories;
-    public IDirectoryInfo Root => this.root;
+    private readonly IDirectory root;
+    private readonly Trie<IDirectory, Directory> directories;
+    public IDirectory Root => this.root;
 
-    public File this[IFileInfo file] => this[file.Directory][file];
-    public Directory this[IDirectoryInfo directory] => Trie(directory).Value;
+    public File this[IFile file] => this[file.Parent][file];
+    public Directory this[IDirectory directory] => Trie(directory).Value;
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
         (this.root, this.directories) = RootDirectory.Create(rootName, creationTime);
     }
 
-    public IFileInfo Add(in NewFile file, DateTime creationTime)
+    public IFile Add(in NewFile file, DateTime creationTime)
     {
         var directory = this[file.Parent];
         return directory.Add(file.Name, creationTime);
     }
 
-    public IDirectoryInfo Add(in NewDirectory directory, DateTime creationTime)
+    public IDirectory Add(in NewDirectory directory, DateTime creationTime)
     {
         var name = directory.Name;
         var parent = Trie(directory.Parent);
@@ -32,13 +32,13 @@ internal sealed class FileSystem
         };
     }
 
-    public void Remove(IFileInfo file)
+    public void Remove(IFile file)
     {
-        var directory = this[file.Directory];
+        var directory = this[file.Parent];
         directory.Remove(file);
     }
 
-    public void Remove(IDirectoryInfo directory)
+    public void Remove(IDirectory directory)
     {
         var node = Trie(directory);
         var dirCount = node.Count;
@@ -51,13 +51,13 @@ internal sealed class FileSystem
         RemoveRecursively(directory);
     }
 
-    public void RemoveRecursively(IDirectoryInfo directory)
+    public void RemoveRecursively(IDirectory directory)
     {
         var node = Trie(directory.Parent);
         node.Remove(directory);
     }
 
-    public IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination, DateTime creationTime)
+    public IDirectory Move(IDirectory source, in NewDirectory destination, DateTime creationTime)
     {
         var sourceParent = Trie(source.Parent);
         var destinationDir = Add(destination, creationTime);
@@ -69,25 +69,25 @@ internal sealed class FileSystem
         return destinationDir;
     }
 
-    public Result<IDirectoryInfo> Search(Path query)
+    public Result<IDirectory> Search(Path query)
     {
-        IDirectoryInfo info = query.Root;
-        Trie<IDirectoryInfo, Directory> directory = Trie(query.Root);
+        IDirectory info = query.Root;
+        Trie<IDirectory, Directory> directory = Trie(query.Root);
         List<String> traversedPath = [info.Name];
         foreach (var subDir in query) {
-            if (directory.FindKey(info => info.Name == subDir) is Success<IDirectoryInfo> next) {
+            if (directory.FindKey(info => info.Name == subDir) is Success<IDirectory> next) {
                 info = next.Value();
                 directory = directory.Node(info);
                 traversedPath.Add(subDir);
                 continue;
             }
             var path = String.Join(separator, traversedPath);
-            return Result.Failure<IDirectoryInfo>($"No directory '{subDir}' in [{path}].");
+            return Result.Failure<IDirectory>($"No directory '{subDir}' in [{path}].");
         }
         return Result.Success(info);
     }
 
-    private Trie<IDirectoryInfo, Directory> Trie(IDirectoryInfo directory) => directory switch {
+    private Trie<IDirectory, Directory> Trie(IDirectory directory) => directory switch {
         var dir when dir == this.root => this.directories,
         var dir => Trie(dir.Parent).Node(dir)
     };

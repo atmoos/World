@@ -4,7 +4,7 @@ using Atmoos.Sphere.Functional;
 namespace Atmoos.World.IO;
 
 internal sealed class Cache<TKey, TValue>() : ICountable<(TKey key, TValue value)>
-    where TKey : notnull, IFileSystemInfo
+    where TKey : notnull, INode
     where TValue : notnull, FileSystemInfo
 {
     private readonly Dictionary<TKey, TValue> values = [];

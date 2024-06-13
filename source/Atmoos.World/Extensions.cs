@@ -4,41 +4,41 @@ namespace Atmoos.World;
 
 public static class Extensions
 {
-    public static IEnumerable<IDirectoryInfo> Path(this IDirectoryInfo tail)
+    public static IEnumerable<IDirectory> Path(this IDirectory tail)
     {
-        var antecedents = new Stack<IDirectoryInfo>();
-        for (IDirectoryInfo current = tail; current != tail.Root; current = current.Parent) {
+        var antecedents = new Stack<IDirectory>();
+        for (IDirectory current = tail; current != tail.Root; current = current.Parent) {
             antecedents.Push(current);
         }
         return antecedents;
     }
-    public static IEnumerable<IDirectoryInfo> Path(this IDirectoryInfo tail, IDirectoryInfo until)
+    public static IEnumerable<IDirectory> Path(this IDirectory tail, IDirectory until)
     {
-        var antecedents = new Stack<IDirectoryInfo>();
-        for (IDirectoryInfo current = tail; current != until && current != tail.Root; current = current.Parent) {
-            antecedents.Push(current);
-        }
-        return antecedents;
-    }
-
-    public static IEnumerable<IDirectoryInfo> Antecedents(this IDirectoryInfo tail)
-    {
-        var antecedents = new Stack<IDirectoryInfo>();
-        for (IDirectoryInfo current = tail.Parent; current != tail.Root; current = current.Parent) {
+        var antecedents = new Stack<IDirectory>();
+        for (IDirectory current = tail; current != until && current != tail.Root; current = current.Parent) {
             antecedents.Push(current);
         }
         return antecedents;
     }
 
-    public static IDirectoryInfo Antecedent(this IDirectoryInfo tail, Byte depth)
+    public static IEnumerable<IDirectory> Antecedents(this IDirectory tail)
     {
-        IDirectoryInfo current = tail;
+        var antecedents = new Stack<IDirectory>();
+        for (IDirectory current = tail.Parent; current != tail.Root; current = current.Parent) {
+            antecedents.Push(current);
+        }
+        return antecedents;
+    }
+
+    public static IDirectory Antecedent(this IDirectory tail, Byte depth)
+    {
+        IDirectory current = tail;
         for (Int32 i = 0; i < depth; ++i) {
             current = current.Parent;
         }
         return current;
     }
 
-    public static Result<IFileInfo> Search(this IDirectoryInfo directory, FileName name)
+    public static Result<IFile> Search(this IDirectory directory, FileName name)
         => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");
 }

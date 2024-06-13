@@ -10,18 +10,18 @@ public sealed class FilePath
 
 public sealed class Path : ICountable<DirectoryName>
 {
-    private readonly IDirectoryInfo root;
+    private readonly IDirectory root;
     private readonly IEnumerable<DirectoryName> path;
     public Int32 Count { get; }
-    public IDirectoryInfo Root => this.root;
-    private Path(IDirectoryInfo root, Int32 count, IEnumerable<DirectoryName> path) => (this.root, Count, this.path) = (root, count, path);
+    public IDirectory Root => this.root;
+    private Path(IDirectory root, Int32 count, IEnumerable<DirectoryName> path) => (this.root, Count, this.path) = (root, count, path);
     public IEnumerator<DirectoryName> GetEnumerator() => this.path.GetEnumerator();
 
     // ToDo: Consider moving these to Absolute and Relative static classes. For syntax like:
     // Absolute.Path(root, "MyDirectory", "MySubDirectory")
     // Relative.Path<FileSystem>(2, "MyDirectory", "MySubDirectory")
-    public static Path Abs(IDirectoryInfo root, params DirectoryName[] path) => new(root, path.Length, path);
-    public static Path Abs(IDirectoryInfo root, params String[] path)
+    public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path.Length, path);
+    public static Path Abs(IDirectory root, params String[] path)
         => new(root, path.Length, path.Select(Dir));
     public static Path Rel<TFileSystem>(params DirectoryName[] path)
         where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path.Length, path);

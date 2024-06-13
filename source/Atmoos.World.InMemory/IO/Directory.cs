@@ -2,16 +2,16 @@ using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.InMemory.IO;
 
-internal sealed class Directory : ICountable<IFileInfo>
+internal sealed class Directory : ICountable<IFile>
 {
-    private readonly Dictionary<IFileInfo, File> files = [];
-    public IDirectoryInfo Id { get; }
+    private readonly Dictionary<IFile, File> files = [];
+    public IDirectory Id { get; }
     public Int32 Count => this.files.Count;
 
-    public File this[IFileInfo file] => this.files[file];
-    public Directory(IDirectoryInfo id) => Id = id;
+    public File this[IFile file] => this.files[file];
+    public Directory(IDirectory id) => Id = id;
 
-    public IFileInfo Add(FileName name, DateTime creationTime)
+    public IFile Add(FileName name, DateTime creationTime)
     {
         // ToDo: Throw an exception if the file already exists?
         var fileInfo = new FileInfo(this) { Name = name, CreationTime = creationTime };
@@ -29,6 +29,6 @@ internal sealed class Directory : ICountable<IFileInfo>
     }
 
     public Boolean Contains(FileInfo file) => this.files.ContainsKey(file);
-    public Boolean Remove(IFileInfo file) => this.files.Remove(file);
-    public IEnumerator<IFileInfo> GetEnumerator() => this.files.Keys.GetEnumerator();
+    public Boolean Remove(IFile file) => this.files.Remove(file);
+    public IEnumerator<IFile> GetEnumerator() => this.files.Keys.GetEnumerator();
 }

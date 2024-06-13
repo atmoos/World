@@ -1,9 +1,9 @@
 namespace Atmoos.World.IO.FileSystem;
 
-internal sealed class FileInfo(IDirectoryInfo directoryInfo, System.IO.FileInfo fileInfo) : IEquatable<IFullyQualified>, IFullyQualified, IFileInfo
+internal sealed class FileInfo(IDirectory directoryInfo, System.IO.FileInfo fileInfo) : IEquatable<IFullyQualified>, IFullyQualified, IFile
 {
     public FileName Name { get; } = ExtractName(fileInfo);
-    public IDirectoryInfo Directory => directoryInfo;
+    public IDirectory Parent => directoryInfo;
     public Boolean Exists => File.Exists(FullPath);
     public Boolean IsReadOnly => fileInfo.IsReadOnly;
     public DateTime CreationTime => fileInfo.CreationTimeUtc;

@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Atmoos.World.FileSystemTests;
 
-public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan tol) : IFileSystemTest
+public class FileSystemTester<FileSystem, Time>(IDirectory root, TimeSpan tol) : IFileSystemTest
     where FileSystem : IFileSystem
     where Time : ITime
 {
@@ -16,7 +16,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
         Assert.Equal(name, fileInfo.Name);
         Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
-        Assert.Equal(root, fileInfo.Directory);
+        Assert.Equal(root, fileInfo.Parent);
     }
 
     public void CreateFileInAntecedentDirs()
@@ -30,7 +30,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
 
         var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
-        var actualAntecedents = fileInfo.Directory.Path().Select(a => a.Name.Value).ToArray();
+        var actualAntecedents = fileInfo.Parent.Path().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
@@ -96,7 +96,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         var command = Path.Abs(root, "FirstNonEmpty") + new FileName("File", "txt");
         var spuriousFile = FileSystem.Create(command);
 
-        AssertNonEmptyDirectoryRemovalThrows<IOException>(spuriousFile.Directory, spuriousFile);
+        AssertNonEmptyDirectoryRemovalThrows<IOException>(spuriousFile.Parent, spuriousFile);
     }
 
     public void DeleteDirectoryContainingOtherDirectoriesThrows()
@@ -143,7 +143,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         var secondImmediateFile = FileSystem.Create(toMove, new FileName("Bar", "txt"));
         var subDir = FileSystem.Create(toMove, new DirectoryName("SomeSubDir"));
         var grandChild = FileSystem.Create(firstChild, new FileName("FirstFile", "txt"));
-        IFileInfo[] children = [firstImmediateFile, secondImmediateFile];
+        IFile[] children = [firstImmediateFile, secondImmediateFile];
 
 
         Assert.True(toMove.Exists, "The directory to move should exist prior to moving");
@@ -156,7 +156,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
         Assert.False(toMove.Exists, "The moved directory should not exist");
         Assert.Empty(toMove); // And obviously indicate it's empty
-        IFileSystemInfo[] movedChildren = [firstChild, subDir, grandChild, firstImmediateFile, secondImmediateFile];
+        INode[] movedChildren = [firstChild, subDir, grandChild, firstImmediateFile, secondImmediateFile];
         Assert.All(movedChildren, d => Assert.False(d.Exists));
 
         var childNames = children.Select(c => c.Name).ToHashSet();
@@ -176,7 +176,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         var result = FileSystem.Search(Path.Abs(root, [.. dirs, thisDoesNotExist, thisDoesNotEither]));
 
         String[] expectedErrorContent = [.. dirs, thisDoesNotExist];
-        IEnumerable<String> actualErrors = Assert.IsType<Failure<IDirectoryInfo>>(result);
+        IEnumerable<String> actualErrors = Assert.IsType<Failure<IDirectory>>(result);
         String actualMessage = Assert.Single(actualErrors);
         Assert.All(expectedErrorContent, e => Assert.Contains(e, actualMessage));
         Assert.DoesNotContain(thisDoesNotEither, actualMessage);
@@ -190,11 +190,11 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
         var result = FileSystem.Search(query);
 
-        IDirectoryInfo actualDirectory = Assert.IsType<Success<IDirectoryInfo>>(result).Value();
+        IDirectory actualDirectory = Assert.IsType<Success<IDirectory>>(result).Value();
         Assert.Equal(expectedFind, actualDirectory);
     }
 
-    private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectoryInfo nonEmptyDirectory, IFileSystemInfo child)
+    private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectory nonEmptyDirectory, INode child)
         where TException : Exception
     {
         Assert.True(child.Exists);

@@ -18,40 +18,40 @@ public interface IFileSystemState
 {
     // ToDo: Should I include the Root on the FileSystem?
     //       Should it be a directory, volume or device?
-    static abstract IDirectoryInfo CurrentDirectory { get; }
+    static abstract IDirectory CurrentDirectory { get; }
 }
 public interface IFileSystemQueries
 {
-    static abstract Result<IFileInfo> Search(FilePath query);
-    static abstract Result<IDirectoryInfo> Search(Path query);
+    static abstract Result<IFile> Search(FilePath query);
+    static abstract Result<IDirectory> Search(Path query);
 }
 public interface IFileCreation
 {
-    static abstract IFileInfo Create(FilePath file);
-    static abstract IFileInfo Create(IDirectoryInfo parent, FileName name);
+    static abstract IFile Create(FilePath file);
+    static abstract IFile Create(IDirectory parent, FileName name);
 }
 public interface IFileDeletion
 {
-    static abstract void Delete(IFileInfo file);
+    static abstract void Delete(IFile file);
 }
 public interface IFileManipulation
 {
     // ToDo: Move to IFileInfo
-    static abstract Task<IFileInfo> Copy(IFileInfo source, NewFile destination, CancellationToken token = default);
-    static abstract Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token = default);
+    static abstract Task<IFile> Copy(IFile source, IFile target, CancellationToken token = default);
+    static abstract Task<IFile> Copy(IFile source, NewFile target, CancellationToken token = default);
 }
 
 public interface IDirectoryCreation
 {
-    static abstract IDirectoryInfo Create(Path path);
-    static abstract IDirectoryInfo Create(IDirectoryInfo parent, DirectoryName name);
+    static abstract IDirectory Create(Path path);
+    static abstract IDirectory Create(IDirectory parent, DirectoryName name);
 }
 public interface IDirectoryDeletion
 {
-    static abstract void Delete(IDirectoryInfo directory, Boolean recursive = false);
+    static abstract void Delete(IDirectory directory, Boolean recursive = false);
 }
 public interface IDirectoryManipulation
 {
     // ToDo: Copy directories
-    static abstract IDirectoryInfo Move(IDirectoryInfo source, in NewDirectory destination);
+    static abstract IDirectory Move(IDirectory source, in NewDirectory target);
 }
