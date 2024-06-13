@@ -167,17 +167,15 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void SearchForNonExistentDirectoryFails()
     {
-        var queryStart = FileSystem.Create(root, new DirectoryName("FreshlyCreated"));
-        var firstSubDir = FileSystem.Create(queryStart, new DirectoryName("SomeSubDir"));
-        var secondSubDir = FileSystem.Create(firstSubDir, new DirectoryName("AnotherSubDir"));
+        String[] dirs = ["FreshlyCreated", "SomeSubDir", "AnotherSubDir"];
+        FileSystem.Create(Path.Abs(root, dirs));
         var thisDoesNotExist = new DirectoryName("ThisDoesNotExist");
         var thisDoesNotEither = new DirectoryName("NoNoNo");
 
-        var query = Path.Abs(queryStart, firstSubDir.Name, secondSubDir.Name, thisDoesNotExist, thisDoesNotEither);
 
-        var result = FileSystem.Search(query);
+        var result = FileSystem.Search(Path.Abs(root, [.. dirs, thisDoesNotExist, thisDoesNotEither]));
 
-        String[] expectedErrorContent = [queryStart.Name, firstSubDir.Name, secondSubDir.Name, thisDoesNotExist];
+        String[] expectedErrorContent = [.. dirs, thisDoesNotExist];
         IEnumerable<String> actualErrors = Assert.IsType<Failure<IDirectoryInfo>>(result);
         String actualMessage = Assert.Single(actualErrors);
         Assert.All(expectedErrorContent, e => Assert.Contains(e, actualMessage));
@@ -186,11 +184,9 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void SearchForExistingDirectorySucceeds()
     {
-        var queryStart = FileSystem.Create(root, new DirectoryName("TheNewestOfDirs"));
-        var firstSubDir = FileSystem.Create(queryStart, new DirectoryName("SomeSubDir"));
-        var expectedFind = FileSystem.Create(firstSubDir, new DirectoryName("TheTailEnd"));
+        var query = Path.Abs(root, "TheNewestOfDirs", "SomeSubDir", "TheTailEnd");
 
-        var query = Path.Abs(queryStart, firstSubDir.Name, expectedFind.Name);
+        var expectedFind = FileSystem.Create(query);
 
         var result = FileSystem.Search(query);
 

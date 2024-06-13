@@ -4,6 +4,7 @@ namespace Atmoos.World.InMemory.IO;
 
 internal sealed class FileSystem
 {
+    private const Char separator = ':';
     private readonly IDirectoryInfo root;
     private readonly Trie<IDirectoryInfo, Directory> directories;
     public IDirectoryInfo Root => this.root;
@@ -80,8 +81,8 @@ internal sealed class FileSystem
                 traversedPath.Add(subDir);
                 continue;
             }
-            var path = String.Join(", ", traversedPath);
-            return Result.Failure<IDirectoryInfo>($"No such directory: '{subDir}' in [{path}].");
+            var path = String.Join(separator, traversedPath);
+            return Result.Failure<IDirectoryInfo>($"No directory '{subDir}' in [{path}].");
         }
         return Result.Success(info);
     }
