@@ -68,7 +68,7 @@ internal sealed class FileSystem
         return destinationDir;
     }
 
-    public Result<IDirectoryInfo> Search(DirectorySearch query)
+    public Result<IDirectoryInfo> Search(Path query)
     {
         IDirectoryInfo info = query.Root;
         Trie<IDirectoryInfo, Directory> directory = Trie(query.Root);

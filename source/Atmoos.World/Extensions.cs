@@ -30,6 +30,15 @@ public static class Extensions
         return antecedents;
     }
 
+    public static IDirectoryInfo Antecedent(this IDirectoryInfo tail, Byte depth)
+    {
+        IDirectoryInfo current = tail;
+        for (Int32 i = 0; i < depth; ++i) {
+            current = current.Parent;
+        }
+        return current;
+    }
+
     public static Result<IFileInfo> Search(this IDirectoryInfo directory, FileName name)
         => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");
 }

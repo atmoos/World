@@ -12,7 +12,7 @@ public sealed class CurrentFileSystemTest : IFileSystemTest, IDisposable
 
     public CurrentFileSystemTest()
     {
-        var rootPath = Path.Combine(Path.GetTempPath(), "Atmoos.World.IO.Test");
+        var rootPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Atmoos.World.IO.Test");
         this.root = new DirectoryInfo(rootPath);
         var rootDir = Current.Locate(this.root);
         this.tester = new FileSystemTester<Current, Time.Current>(rootDir, TimeSpan.FromMilliseconds(100));

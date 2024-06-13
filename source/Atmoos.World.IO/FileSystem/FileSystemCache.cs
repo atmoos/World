@@ -32,7 +32,7 @@ internal sealed class FileSystemCache
     public (IFileInfo info, FiInfo system) Add(IDirectoryInfo parent, FileName name)
     {
         var directory = FindDirectory(parent);
-        var fileInfo = new FiInfo(Path.Combine(directory.FullName, name));
+        var fileInfo = new FiInfo(System.IO.Path.Combine(directory.FullName, name));
         return (Add(parent, fileInfo), fileInfo);
 
     }
@@ -48,7 +48,7 @@ internal sealed class FileSystemCache
     public (IDirectoryInfo info, DirInfo system) Add(IDirectoryInfo parent, DirectoryName name)
     {
         var dir = FindDirectory(parent);
-        var systemInfo = new DirInfo(Path.Combine(dir.FullName, name));
+        var systemInfo = new DirInfo(System.IO.Path.Combine(dir.FullName, name));
         var directoryInfo = new DirectoryInfo(this, parent, systemInfo);
         return (directoryInfo, this.directories[directoryInfo] = systemInfo);
     }
@@ -59,7 +59,7 @@ internal sealed class FileSystemCache
             return fileInfo;
         }
         var directory = FindDirectory(file.Directory);
-        return this.files[file] = new FiInfo(Path.Combine(directory.FullName, file.Name));
+        return this.files[file] = new FiInfo(System.IO.Path.Combine(directory.FullName, file.Name));
     }
 
     public DirInfo FindDirectory(IDirectoryInfo directory)
@@ -71,16 +71,16 @@ internal sealed class FileSystemCache
             return directoryInfo;
         }
         var parent = FindDirectory(directory.Parent);
-        return this.directories[directory] = new DirInfo(Path.Combine(parent.FullName, directory.Name));
+        return this.directories[directory] = new DirInfo(System.IO.Path.Combine(parent.FullName, directory.Name));
     }
 
-    public Result<IDirectoryInfo> Search(DirectorySearch query)
+    public Result<IDirectoryInfo> Search(Path query)
     {
         var info = FindDirectory(query.Root);
         var dirInfo = query.Root;
         foreach (var directory in query) {
             var parentInfo = info;
-            info = new DirInfo(Path.Combine(info.FullName, directory));
+            info = new DirInfo(System.IO.Path.Combine(info.FullName, directory));
             if (!info.Exists) {
                 return Result.Failure<IDirectoryInfo>($"Directory '{directory}' not found in '{parentInfo}'.");
             }

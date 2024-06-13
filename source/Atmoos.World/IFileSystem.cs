@@ -22,12 +22,12 @@ public interface IFileSystemState
 }
 public interface IFileSystemQueries
 {
-    static abstract Result<IFileInfo> Search(FileSearch query);
-    static abstract Result<IDirectoryInfo> Search(DirectorySearch query);
+    static abstract Result<IFileInfo> Search(FilePath query);
+    static abstract Result<IDirectoryInfo> Search(Path query);
 }
 public interface IFileCreation
 {
-    static abstract IFileInfo Create(CreateFile file);
+    static abstract IFileInfo Create(FilePath file);
     static abstract IFileInfo Create(IDirectoryInfo parent, FileName name);
 }
 public interface IFileDeletion
@@ -43,7 +43,7 @@ public interface IFileManipulation
 
 public interface IDirectoryCreation
 {
-    static abstract IDirectoryInfo Create(CreateDirectory path);
+    static abstract IDirectoryInfo Create(Path path);
     static abstract IDirectoryInfo Create(IDirectoryInfo parent, DirectoryName name);
 }
 public interface IDirectoryDeletion

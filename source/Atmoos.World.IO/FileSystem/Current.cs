@@ -14,14 +14,14 @@ public sealed class Current : IFileSystem
             return info;
         }
     }
-    public static IFileInfo Create(CreateFile file) => Create(Create(file.Path), file.Name);
+    public static IFileInfo Create(FilePath file) => Create(Create(file.Path), file.Name);
     public static IDirectoryInfo Create(IDirectoryInfo parent, DirectoryName name)
     {
         var (info, dir) = cache.Add(parent, name);
         dir.Create();
         return info;
     }
-    public static IDirectoryInfo Create(CreateDirectory path) => path.Aggregate(path.Root, Create);
+    public static IDirectoryInfo Create(Path path) => path.Aggregate(path.Root, Create);
 
     public static async Task<IFileInfo> Copy(IFileInfo source, IFileInfo destination, CancellationToken token)
     {
@@ -65,8 +65,8 @@ public sealed class Current : IFileSystem
         return destinationInfo;
     }
 
-    public static Result<IFileInfo> Search(FileSearch query)
+    public static Result<IFileInfo> Search(FilePath query)
         => Search(query.Path).SelectMany(d => d.Search(query.Name));
-    public static Result<IDirectoryInfo> Search(DirectorySearch query) => cache.Search(query);
+    public static Result<IDirectoryInfo> Search(Path query) => cache.Search(query);
     internal static IDirectoryInfo Locate(System.IO.DirectoryInfo directory) => cache.Locate(directory);
 }

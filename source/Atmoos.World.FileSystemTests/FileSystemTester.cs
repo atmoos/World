@@ -23,7 +23,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
     {
         var name = new FileName { Name = "file", Extension = "txt" };
         String[] antecedents = ["some", "antecedent", "directory"];
-        var command = CreateFile.Command(CreateDirectory.Command(root, antecedents), name);
+        var command = Path.Abs(root, antecedents) + name;
         var fileInfo = FileSystem.Create(command);
 
         Assert.Equal(name, fileInfo.Name);
@@ -48,7 +48,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
     {
         var name = "SomeNewDirectory";
         String[] antecedents = ["some", "antecedent", "directory"];
-        var command = CreateDirectory.Command(root, [.. antecedents, name]);
+        var command = Path.Abs(root, [.. antecedents, name]);
         var directoryInfo = FileSystem.Create(command);
 
         Assert.Equal(name, directoryInfo.Name);
@@ -62,8 +62,8 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
     public void AntecedentDirectoriesAreNotOverwritten()
     {
         String[] antecedents = ["some", "antecedent", "directory"];
-        var firstCommand = CreateDirectory.Command(root, [.. antecedents, "FirstDir"]);
-        var secondCommand = CreateDirectory.Command(root, [.. antecedents, "SecondDir"]);
+        var firstCommand = Path.Abs(root, [.. antecedents, "FirstDir"]);
+        var secondCommand = Path.Abs(root, [.. antecedents, "SecondDir"]);
         var firstDir = FileSystem.Create(firstCommand);
         var secondDir = FileSystem.Create(secondCommand);
 
@@ -93,7 +93,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void DeleteDirectoryContainingFilesThrows()
     {
-        var command = CreateDirectory.Command(root, "FirstNonEmpty") + new FileName("File", "txt");
+        var command = Path.Abs(root, "FirstNonEmpty") + new FileName("File", "txt");
         var spuriousFile = FileSystem.Create(command);
 
         AssertNonEmptyDirectoryRemovalThrows<IOException>(spuriousFile.Directory, spuriousFile);
@@ -101,7 +101,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
 
     public void DeleteDirectoryContainingOtherDirectoriesThrows()
     {
-        var command = CreateDirectory.Command(root, "SecondNonEmpty", "Child");
+        var command = Path.Abs(root, "SecondNonEmpty", "Child");
         var subDir = FileSystem.Create(command);
 
         AssertNonEmptyDirectoryRemovalThrows<IOException>(subDir.Parent, subDir);
@@ -173,7 +173,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         var thisDoesNotExist = new DirectoryName("ThisDoesNotExist");
         var thisDoesNotEither = new DirectoryName("NoNoNo");
 
-        var query = DirectorySearch.Query(queryStart, firstSubDir.Name, secondSubDir.Name, thisDoesNotExist, thisDoesNotEither);
+        var query = Path.Abs(queryStart, firstSubDir.Name, secondSubDir.Name, thisDoesNotExist, thisDoesNotEither);
 
         var result = FileSystem.Search(query);
 
@@ -190,7 +190,7 @@ public class FileSystemTester<FileSystem, Time>(IDirectoryInfo root, TimeSpan to
         var firstSubDir = FileSystem.Create(queryStart, new DirectoryName("SomeSubDir"));
         var expectedFind = FileSystem.Create(firstSubDir, new DirectoryName("TheTailEnd"));
 
-        var query = DirectorySearch.Query(queryStart, firstSubDir.Name, expectedFind.Name);
+        var query = Path.Abs(queryStart, firstSubDir.Name, expectedFind.Name);
 
         var result = FileSystem.Search(query);
 
