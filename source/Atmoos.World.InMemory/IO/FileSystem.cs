@@ -6,11 +6,11 @@ internal sealed class FileSystem
 {
     private const Char separator = ':';
     private readonly IDirectory root;
-    private readonly Trie<IDirectory, Directory> directories;
+    private readonly Trie<IDirectory, Files> directories;
     public IDirectory Root => this.root;
 
-    public File this[IFile file] => this[file.Parent][file];
-    public Directory this[IDirectory directory] => Trie(directory).Value;
+    public FileContent this[IFile file] => this[file.Parent][file];
+    public Files this[IDirectory directory] => Trie(directory).Value;
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
         (this.root, this.directories) = RootDirectory.Create(rootName, creationTime);
@@ -27,7 +27,7 @@ internal sealed class FileSystem
         var name = directory.Name;
         var parent = Trie(directory.Parent);
         return parent.Select(kv => kv.key).FirstOrDefault(info => info.Name == name) switch {
-            null => new DirectoryInfo(parent, name) { CreationTime = creationTime },
+            null => new Directory(parent, name) { CreationTime = creationTime },
             var existing => existing
         };
     }
@@ -72,7 +72,7 @@ internal sealed class FileSystem
     public Result<IDirectory> Search(Path query)
     {
         IDirectory info = query.Root;
-        Trie<IDirectory, Directory> directory = Trie(query.Root);
+        Trie<IDirectory, Files> directory = Trie(query.Root);
         List<String> traversedPath = [info.Name];
         foreach (var subDir in query) {
             if (directory.FindKey(info => info.Name == subDir) is Success<IDirectory> next) {
@@ -87,7 +87,7 @@ internal sealed class FileSystem
         return Result.Success(info);
     }
 
-    private Trie<IDirectory, Directory> Trie(IDirectory directory) => directory switch {
+    private Trie<IDirectory, Files> Trie(IDirectory directory) => directory switch {
         var dir when dir == this.root => this.directories,
         var dir => Trie(dir.Parent).Node(dir)
     };

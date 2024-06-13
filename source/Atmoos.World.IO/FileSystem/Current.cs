@@ -6,7 +6,7 @@ namespace Atmoos.World.IO.FileSystem;
 public sealed class Current : IFileSystem
 {
     private static readonly FileSystemCache cache = new();
-    public static IDirectory CurrentDirectory => cache.Locate(new System.IO.DirectoryInfo(Directory.GetCurrentDirectory()));
+    public static IDirectory CurrentDirectory => cache.Locate(new DirectoryInfo(System.IO.Directory.GetCurrentDirectory()));
     public static IFile Create(IDirectory parent, FileName name)
     {
         var (info, system) = cache.Add(parent, name);
@@ -60,7 +60,7 @@ public sealed class Current : IFileSystem
     {
         var sourceDir = cache.FindDirectory(source);
         var (destinationInfo, target) = cache.Add(in destination);
-        Directory.Move(sourceDir.FullName, target.FullName);
+        System.IO.Directory.Move(sourceDir.FullName, target.FullName);
         cache.Purge();
         return destinationInfo;
     }
@@ -68,5 +68,5 @@ public sealed class Current : IFileSystem
     public static Result<IFile> Search(FilePath query)
         => Search(query.Path).SelectMany(d => d.Search(query.Name));
     public static Result<IDirectory> Search(Path query) => cache.Search(query);
-    internal static IDirectory Locate(System.IO.DirectoryInfo directory) => cache.Locate(directory);
+    internal static IDirectory Locate(DirectoryInfo directory) => cache.Locate(directory);
 }

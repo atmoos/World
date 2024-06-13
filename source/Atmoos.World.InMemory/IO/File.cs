@@ -1,16 +1,10 @@
+
 namespace Atmoos.World.InMemory.IO;
 
-internal sealed class File
+internal sealed class File(Files directory) : IFile
 {
-    public IFile Id { get; }
-    public File(IFile id) => Id = id;
-    public void CopyTo(File destination, CancellationToken token)
-    {
-        // ToDo: copy the content by value.
-    }
-
-    public void CloneInto(File destination)
-    {
-        // ToDo: copy the content by reference.
-    }
+    public required FileName Name { get; init; }
+    public Boolean Exists => directory.Id.Exists && directory.Contains(this);
+    public IDirectory Parent => directory.Id;
+    public required DateTime CreationTime { get; init; }
 }

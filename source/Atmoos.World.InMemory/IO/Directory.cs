@@ -1,34 +1,52 @@
-using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.InMemory.IO;
 
-internal sealed class Directory : ICountable<IFile>
+internal sealed class RootDirectory : IDirectory
 {
-    private readonly Dictionary<IFile, File> files = [];
-    public IDirectory Id { get; }
-    public Int32 Count => this.files.Count;
+    private readonly Files directory;
+    private readonly Trie<IDirectory, Files> trie;
+    public Int32 Count => this.directory.Count;
+    public Boolean Exists => true;
+    public DirectoryName Name { get; }
+    public IDirectory Parent => this;
+    public IDirectory Root => this;
+    public DateTime CreationTime { get; }
 
-    public File this[IFile file] => this.files[file];
-    public Directory(IDirectory id) => Id = id;
-
-    public IFile Add(FileName name, DateTime creationTime)
+    private RootDirectory(DirectoryName name, DateTime creationTime)
     {
-        // ToDo: Throw an exception if the file already exists?
-        var fileInfo = new FileInfo(this) { Name = name, CreationTime = creationTime };
-        this.files[fileInfo] = new File(fileInfo);
-        return fileInfo;
+        Name = name;
+        CreationTime = creationTime;
+        var directory = this.directory = new Files(this);
+        this.trie = new Trie<IDirectory, Files>(directory);
     }
 
-    public void MoveTo(Directory other, DateTime creationTime)
-    {
-        foreach (var (info, file) in this.files) {
-            var newInfo = new FileInfo(other) { Name = info.Name, CreationTime = creationTime };
-            file.CloneInto(other.files[newInfo] = new File(newInfo));
-        }
-        this.files.Clear();
-    }
+    public IEnumerator<IFile> GetEnumerator() => this.directory.GetEnumerator();
+    public override String ToString() => Name;
 
-    public Boolean Contains(FileInfo file) => this.files.ContainsKey(file);
-    public Boolean Remove(IFile file) => this.files.Remove(file);
-    public IEnumerator<IFile> GetEnumerator() => this.files.Keys.GetEnumerator();
+    public static (RootDirectory root, Trie<IDirectory, Files> trie) Create(DirectoryName name, DateTime creationTime)
+    {
+        var root = new RootDirectory(name, creationTime);
+        return (root, root.trie);
+    }
+}
+
+internal sealed class Directory : IDirectory
+{
+    private readonly Files directory;
+    private readonly Trie<IDirectory, Files> parent;
+    public Int32 Count => this.directory.Count;
+    public DirectoryName Name { get; }
+    public Boolean Exists => Parent.Exists && this.parent.Contains(this);
+    public IDirectory Root => Parent.Root;
+    public IDirectory Parent => this.parent.Value.Id;
+    public required DateTime CreationTime { get; init; }
+
+    public Directory(Trie<IDirectory, Files> parent, DirectoryName name)
+    {
+        Name = name;
+        this.parent = parent;
+        this.directory = parent[this] = new Files(this);
+    }
+    public override String ToString() => Name;
+    public IEnumerator<IFile> GetEnumerator() => this.directory.GetEnumerator();
 }

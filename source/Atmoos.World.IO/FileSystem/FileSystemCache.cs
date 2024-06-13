@@ -10,7 +10,7 @@ internal sealed class FileSystemCache
     private readonly Cache<IFile, FiInfo> files = new();
     private readonly Cache<IDirectory, DirInfo> directories = new();
 
-    public FileSystemCache() => this.root = new RootDirectoryInfo(this, new DirInfo(Directory.GetCurrentDirectory()).Root);
+    public FileSystemCache() => this.root = new RootDirectoryInfo(this, new DirInfo(System.IO.Directory.GetCurrentDirectory()).Root);
 
     public IDirectory Locate(DirInfo directory)
     {
@@ -39,7 +39,7 @@ internal sealed class FileSystemCache
 
     public IFile Add(IDirectory parent, FiInfo file)
     {
-        var info = new FileInfo(parent, file);
+        var info = new File(parent, file);
         this.files[info] = file;
         return info;
     }
@@ -49,7 +49,7 @@ internal sealed class FileSystemCache
     {
         var dir = FindDirectory(parent);
         var systemInfo = new DirInfo(System.IO.Path.Combine(dir.FullName, name));
-        var directoryInfo = new DirectoryInfo(this, parent, systemInfo);
+        var directoryInfo = new Directory(this, parent, systemInfo);
         return (directoryInfo, this.directories[directoryInfo] = systemInfo);
     }
 
@@ -84,7 +84,7 @@ internal sealed class FileSystemCache
             if (!info.Exists) {
                 return Result.Failure<IDirectory>($"Directory '{directory}' not found in '{parentInfo}'.");
             }
-            dirInfo = new DirectoryInfo(this, dirInfo, info);
+            dirInfo = new Directory(this, dirInfo, info);
             this.directories[dirInfo] = info;
         }
         return Result.Success(dirInfo);

@@ -1,11 +1,11 @@
 
 namespace Atmoos.World.IO.FileSystem;
 
-internal sealed class DirectoryInfo(FileSystemCache cache, IDirectory parent, System.IO.DirectoryInfo directory) : IEquatable<IFullyQualified>, IFullyQualified, IDirectory
+internal sealed class Directory(FileSystemCache cache, IDirectory parent, DirectoryInfo directory) : IEquatable<IFullyQualified>, IFullyQualified, IDirectory
 {
     public Int32 Count => Exists ? directory.GetFiles().Length : 0;
     public DirectoryName Name { get; } = new(directory.Name);
-    public Boolean Exists => Directory.Exists(FullPath);
+    public Boolean Exists => System.IO.Directory.Exists(FullPath);
     public IDirectory Parent => parent;
     public IDirectory Root { get; } = parent.Root;
     public DateTime CreationTime => directory.CreationTimeUtc;
@@ -23,16 +23,16 @@ internal sealed class DirectoryInfo(FileSystemCache cache, IDirectory parent, Sy
     }
 }
 
-internal sealed class RootDirectoryInfo(FileSystemCache cache, System.IO.DirectoryInfo directory) : IEquatable<IDirectory>, IEquatable<IFullyQualified>, IFullyQualified, IDirectory
+internal sealed class RootDirectoryInfo(FileSystemCache cache, DirectoryInfo directory) : IEquatable<IDirectory>, IEquatable<IFullyQualified>, IFullyQualified, IDirectory
 {
     public Int32 Count => directory.GetFiles().Length;
     public DirectoryName Name { get; } = new(directory.Name);
     public IDirectory Parent => this;
     public IDirectory Root => this;
     public String FullPath => directory.FullName;
-    public Boolean Exists => Directory.Exists(FullPath);
+    public Boolean Exists => System.IO.Directory.Exists(FullPath);
     public DateTime CreationTime => directory.CreationTimeUtc;
-    public System.IO.DirectoryInfo Value => directory;
+    public DirectoryInfo Value => directory;
 
     public override String ToString() => FullPath;
     public override Boolean Equals(Object? other) => Equals(other as IFullyQualified);
