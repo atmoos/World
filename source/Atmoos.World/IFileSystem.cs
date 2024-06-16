@@ -36,8 +36,6 @@ public interface IFileDeletion
 }
 public interface IFileManipulation
 {
-    // ToDo: Move to IFileInfo
-    static abstract Task<IFile> Copy(IFile source, IFile target, CancellationToken token = default);
     static abstract Task<IFile> Copy(IFile source, NewFile target, CancellationToken token = default);
 }
 

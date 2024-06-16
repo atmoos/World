@@ -14,19 +14,11 @@ public sealed class UnixFileSystem<Time> : IFileSystem
         set => Interlocked.Exchange(ref currentDirectory, value);
     }
 
-    public static async Task<IFile> Copy(IFile source, IFile target, CancellationToken token)
-    {
-        var sourceFile = fileSystem[source];
-        var destinationFile = fileSystem[target];
-        await Task.Yield();
-        sourceFile.CopyTo(destinationFile, token);
-        return target;
-    }
-
     public static async Task<IFile> Copy(IFile source, NewFile target, CancellationToken token)
     {
         var newFile = Create(in target);
-        return await Copy(source, newFile, token);
+        await source.CopyTo(newFile, token).ConfigureAwait(false);
+        return newFile;
     }
     public static IFile Create(IDirectory parent, FileName name) => Create(new NewFile { Parent = parent, Name = name });
     public static IFile Create(FilePath file)
@@ -41,15 +33,13 @@ public sealed class UnixFileSystem<Time> : IFileSystem
 
     public static void Delete(IDirectory directory, Boolean recursive = false)
     {
-        Removal(recursive)(directory);
+        Remove(recursive)(directory);
 
-        static Action<IDirectory> Removal(Boolean recursive) => recursive ? fileSystem.RemoveRecursively : fileSystem.Remove;
+        static Action<IDirectory> Remove(Boolean recursive) => recursive ? fileSystem.RemoveRecursively : fileSystem.Remove;
     }
 
     public static IDirectory Move(IDirectory source, in NewDirectory target)
-    {
-        return fileSystem.Move(source, in target, Time.Now);
-    }
+        => fileSystem.Move(source, in target, Time.Now);
 
     public static Result<IFile> Search(FilePath query)
         => Search(query.Path).SelectMany(d => d.Search(query.Name));

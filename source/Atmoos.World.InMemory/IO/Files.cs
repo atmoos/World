@@ -23,7 +23,7 @@ internal sealed class Files : ICountable<IFile>
     {
         foreach (var (info, file) in this.files) {
             var newInfo = new File(other) { Name = info.Name, CreationTime = creationTime };
-            file.CloneInto(other.files[newInfo] = new FileContent(newInfo));
+            file.CopyTo(other.files[newInfo] = new FileContent(newInfo), CancellationToken.None);
         }
         this.files.Clear();
     }
