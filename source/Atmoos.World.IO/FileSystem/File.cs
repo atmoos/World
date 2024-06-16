@@ -1,12 +1,13 @@
 namespace Atmoos.World.IO.FileSystem;
 
-internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IEquatable<IFullyQualified>, IFullyQualified, IFile
+internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IFile, IEquatable<IFullyQualified>, IFullyQualified
 {
+    public Int64 Size => fileInfo.Length;
     public FileName Name { get; } = ExtractName(fileInfo);
+    public String FullPath => fileInfo.FullName;
     public IDirectory Parent => directoryInfo;
     public Boolean Exists => System.IO.File.Exists(FullPath);
     public DateTime CreationTime => fileInfo.CreationTimeUtc;
-    public String FullPath => fileInfo.FullName;
     public override Boolean Equals(Object? other) => Equals(other as IFullyQualified);
     public Boolean Equals(IFullyQualified? other) => other is not null && FullPath == other.FullPath;
     public override Int32 GetHashCode() => FullPath.GetHashCode();
@@ -17,4 +18,6 @@ internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IEquat
     [.. var names, var extension] => new() { Name = String.Join('.', names), Extension = extension },
         _ => new() { Name = fileInfo.Name }
     };
+    public Stream OpenRead() => fileInfo.OpenRead();
+    public Stream OpenWrite() => fileInfo.OpenWrite();
 }

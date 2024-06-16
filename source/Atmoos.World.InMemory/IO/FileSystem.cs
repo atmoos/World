@@ -9,7 +9,7 @@ internal sealed class FileSystem
     private readonly Trie<IDirectory, Files> directories;
     public IDirectory Root => this.root;
 
-    public FileContent this[IFile file] => this[file.Parent][file];
+    public File this[IFile file] => this[file.Parent][file];
     public Files this[IDirectory directory] => Trie(directory).Value;
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {

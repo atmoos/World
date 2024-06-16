@@ -4,26 +4,25 @@ namespace Atmoos.World.InMemory.IO;
 
 internal sealed class Files : ICountable<IFile>
 {
-    private readonly Dictionary<IFile, FileContent> files = [];
+    private readonly Dictionary<IFile, File> files = [];
     public IDirectory Id { get; }
     public Int32 Count => this.files.Count;
 
-    public FileContent this[IFile file] => this.files[file];
+    public File this[IFile file] => this.files[file];
     public Files(IDirectory id) => Id = id;
 
     public IFile Add(FileName name, DateTime creationTime)
     {
         // ToDo: Throw an exception if the file already exists?
-        var fileInfo = new File(this) { Name = name, CreationTime = creationTime };
-        this.files[fileInfo] = new FileContent(fileInfo);
-        return fileInfo;
+        var file = new File(this) { Name = name, CreationTime = creationTime };
+        return this.files[file] = file;
     }
 
     public void MoveTo(Files other, DateTime creationTime)
     {
-        foreach (var (info, file) in this.files) {
-            var newInfo = new File(other) { Name = info.Name, CreationTime = creationTime };
-            file.CopyTo(other.files[newInfo] = new FileContent(newInfo), CancellationToken.None);
+        foreach (var file in this.files.Values) {
+            var copy = file.CopyInto(other, creationTime);
+            other.files[copy] = copy;
         }
         this.files.Clear();
     }
