@@ -11,7 +11,7 @@ internal sealed class File : IFile
     public required DateTime CreationTime { get; init; }
     public File(Files directory) : this(directory, new MemoryStream()) { }
     private File(Files directory, MemoryStream content) => (this.directory, this.content) = (directory, content);
-    internal File CopyInto(Files directory, DateTime creationTime)
+    internal File MoveTo(Files directory, DateTime creationTime)
         => new(directory, this.content) { Name = this.Name, CreationTime = creationTime };
     public override String ToString() => this.Name.ToString();
 

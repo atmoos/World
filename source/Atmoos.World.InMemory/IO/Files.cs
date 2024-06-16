@@ -21,7 +21,7 @@ internal sealed class Files : ICountable<IFile>
     public void MoveTo(Files other, DateTime creationTime)
     {
         foreach (var file in this.files.Values) {
-            var copy = file.CopyInto(other, creationTime);
+            var copy = file.MoveTo(other, creationTime);
             other.files[copy] = copy;
         }
         this.files.Clear();

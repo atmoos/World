@@ -1,9 +1,12 @@
+using System.Text;
 using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World;
 
 public static class Extensions
 {
+    private const Int32 bufferSize = 65536;
+    private static readonly Encoding encoding = Encoding.UTF8;
     public static IEnumerable<IDirectory> Path(this IDirectory tail)
     {
         var antecedents = new Stack<IDirectory>();
@@ -48,4 +51,13 @@ public static class Extensions
         using var writer = target.OpenWrite();
         await reader.CopyToAsync(writer, token).ConfigureAwait(false);
     }
+
+    public static StreamReader OpenText(this IRead reader)
+        => OpenText(reader, encoding);
+    public static StreamReader OpenText(this IRead reader, Encoding encoding)
+        => new(reader.OpenRead(), encoding, leaveOpen: false, bufferSize: bufferSize);
+    public static StreamWriter AppendText(this IWrite writer)
+        => AppendText(writer, encoding);
+    public static StreamWriter AppendText(this IWrite writer, Encoding encoding)
+        => new(writer.OpenWrite(), encoding, leaveOpen: false, bufferSize: bufferSize);
 }
