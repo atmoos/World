@@ -6,14 +6,14 @@ internal sealed class FileSystem
 {
     private const Char separator = ':';
     private readonly IDirectory root;
-    private readonly Trie<IDirectory, Files> directories;
+    private readonly Trie<IDirectory, Directory> directories;
     public IDirectory Root => this.root;
 
     public File this[IFile file] => this[file.Parent][file];
-    public Files this[IDirectory directory] => Trie(directory).Value;
+    public Directory this[IDirectory directory] => Trie(directory).Value;
     public FileSystem(DirectoryName rootName, DateTime creationTime)
     {
-        (this.root, this.directories) = RootDirectory.Create(rootName, creationTime);
+        (this.root, this.directories) = Directory.CreateRoot(rootName, creationTime);
     }
 
     public IFile Add(in NewFile file, DateTime creationTime)
@@ -27,7 +27,7 @@ internal sealed class FileSystem
         var name = directory.Name;
         var parent = Trie(directory.Parent);
         return parent.Select(kv => kv.key).FirstOrDefault(info => info.Name == name) switch {
-            null => new Directory(parent, name) { CreationTime = creationTime },
+            null => new Directory(parent, name, creationTime),
             var existing => existing
         };
     }
@@ -72,7 +72,7 @@ internal sealed class FileSystem
     public Result<IDirectory> Search(Path query)
     {
         IDirectory info = query.Root;
-        Trie<IDirectory, Files> directory = Trie(query.Root);
+        Trie<IDirectory, Directory> directory = Trie(query.Root);
         List<String> traversedPath = [info.Name];
         foreach (var subDir in query) {
             if (directory.FindKey(info => info.Name == subDir) is Success<IDirectory> next) {
@@ -87,8 +87,8 @@ internal sealed class FileSystem
         return Result.Success(info);
     }
 
-    private Trie<IDirectory, Files> Trie(IDirectory directory) => directory switch {
-        var dir when dir == this.root => this.directories,
+    private Trie<IDirectory, Directory> Trie(IDirectory directory) => directory switch {
+        var dir when ReferenceEquals(this.root, dir) => this.directories,
         var dir => Trie(dir.Parent).Node(dir)
     };
 }
