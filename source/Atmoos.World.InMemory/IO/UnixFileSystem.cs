@@ -14,12 +14,6 @@ public sealed class UnixFileSystem<Time> : IFileSystem
         set => Interlocked.Exchange(ref currentDirectory, value);
     }
 
-    public static async Task<IFile> Copy(IFile source, NewFile target, CancellationToken token)
-    {
-        var newFile = Create(in target);
-        await source.CopyTo(newFile, token).ConfigureAwait(false);
-        return newFile;
-    }
     public static IFile Create(IDirectory parent, FileName name) => Create(new NewFile { Parent = parent, Name = name });
     public static IFile Create(FilePath file)
         => Create(new NewFile { Parent = Create(file.Path), Name = file.Name });

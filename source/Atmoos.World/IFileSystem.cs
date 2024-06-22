@@ -6,7 +6,6 @@ public interface IFileSystem :
     IFileAccess,
     IFileCreation,
     IFileDeletion,
-    IFileManipulation,
     IDirectoryCreation,
     IDirectoryDeletion,
     IDirectoryManipulation,
@@ -34,11 +33,6 @@ public interface IFileDeletion
 {
     static abstract void Delete(IFile file);
 }
-public interface IFileManipulation
-{
-    static abstract Task<IFile> Copy(IFile source, NewFile target, CancellationToken token = default);
-}
-
 public interface IDirectoryCreation
 {
     static abstract IDirectory Create(Path path);

@@ -22,12 +22,6 @@ public sealed class Current : IFileSystem
     }
     public static IDirectory Create(Path path) => path.Aggregate(path.Root, Create);
 
-    public static async Task<IFile> Copy(IFile source, NewFile target, CancellationToken token)
-    {
-        var (destination, _) = cache.Add(in target);
-        await destination.CopyTo(source, token).ConfigureAwait(false);
-        return destination;
-    }
     public static void Delete(IFile file)
     {
         var info = cache.FindFile(file);
