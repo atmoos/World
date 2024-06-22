@@ -8,6 +8,7 @@ public interface IFileSystem :
     IFileDeletion,
     IDirectoryCreation,
     IDirectoryDeletion,
+    IFileManipulation,
     IDirectoryManipulation,
     IFileSystemQueries,
     IFileSystemState
@@ -41,6 +42,11 @@ public interface IDirectoryCreation
 public interface IDirectoryDeletion
 {
     static abstract void Delete(IDirectory directory, Boolean recursive = false);
+}
+public interface IFileManipulation
+{
+    static abstract IFile Move(IFile source, IFile target);
+    static abstract IFile Move(IFile source, in NewFile target);
 }
 public interface IDirectoryManipulation
 {

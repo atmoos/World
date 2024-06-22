@@ -1,4 +1,3 @@
-
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class Directory : IDirectory
@@ -34,27 +33,40 @@ internal sealed class Directory : IDirectory
         parentNode[this] = this;
     }
 
-    public IFile Add(FileName name, DateTime creationTime)
+    public File Add(FileName name, DateTime creationTime)
     {
-        // ToDo: Throw an exception if the file already exists?
+        if (this.files.Values.Any(file => file.Name == name)) {
+            throw FileExists(name);
+        }
         var file = new File(this) { Name = name, CreationTime = creationTime };
         return this.files[file] = file;
     }
 
     public void MoveTo(Directory other, DateTime creationTime)
     {
+        foreach (var item in Intersect(other.files.Values.Select(file => file.Name))) {
+            throw other.FileExists(item);
+        }
         foreach (var file in this.files.Values) {
-            var copy = file.MoveTo(other, creationTime);
-            other.files[copy] = copy;
+            var copy = new File(other) { Name = file.Name, CreationTime = creationTime };
+            other.files[copy] = file.MoveTo(copy);
         }
         this.files.Clear();
     }
 
+    public Boolean Contains(IFile file) => this.files.ContainsKey(file);
     public void Remove(IFile file) => this.files.Remove(file);
     public override String ToString() => Name;
     public IEnumerator<IFile> GetEnumerator() => this.files.Values.GetEnumerator();
+    Boolean ChildExists() => this.node.Value.Exists && this.node.Contains(this);
 
-    private Boolean ChildExists() => this.node.Value.Exists && this.node.Contains(this);
+    private IOException FileExists(FileName name) => new($"File '{name}' already exists in '{this}'.");
+    private HashSet<FileName> Intersect(IEnumerable<FileName> other)
+    {
+        var theseValues = this.files.Values.Select(file => file.Name).ToHashSet();
+        theseValues.IntersectWith(other);
+        return theseValues;
+    }
 
     public static (Directory root, Trie<IDirectory, Directory> trie) CreateRoot(DirectoryName name, DateTime creationTime)
     {

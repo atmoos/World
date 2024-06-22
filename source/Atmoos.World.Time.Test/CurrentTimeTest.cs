@@ -1,8 +1,10 @@
+using System.Diagnostics;
+
 namespace Atmoos.World.Time.Test;
 
 public class CurrentTimeTest
 {
-    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(16);
+    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(8);
 
     [Fact]
     public void NowReturnsUtcNow()
@@ -23,12 +25,14 @@ public class CurrentTimeTest
     [Fact]
     public void TicTocMeasuresActualTime()
     {
-        var delta = TimeSpan.FromMilliseconds(252);
+        var delta = TimeSpan.FromMilliseconds(67);
 
         var tic = Current.Tic();
+        var timer = Stopwatch.StartNew();
         Thread.Sleep(delta);
         var elapsed = Current.Toc(in tic);
+        var expected = timer.Elapsed;
 
-        Assert.InRange(elapsed, delta - tol, delta + tol);
+        Assert.InRange(elapsed, expected - tol, expected + tol);
     }
 }

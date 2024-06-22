@@ -16,17 +16,17 @@ internal sealed class FileSystem
         (this.root, this.directories) = Directory.CreateRoot(rootName, creationTime);
     }
 
-    public IFile Add(in NewFile file, DateTime creationTime)
+    public File Add(in NewFile file, DateTime creationTime)
     {
         var directory = this[file.Parent];
         return directory.Add(file.Name, creationTime);
     }
 
-    public IDirectory Add(in NewDirectory directory, DateTime creationTime)
+    public Directory Add(in NewDirectory directory, DateTime creationTime)
     {
         var name = directory.Name;
         var parent = Trie(directory.Parent);
-        return parent.Select(kv => kv.key).FirstOrDefault(info => info.Name == name) switch {
+        return parent.Select(kv => kv.value).FirstOrDefault(info => info.Name == name) switch {
             null => new Directory(parent, name, creationTime),
             var existing => existing
         };
@@ -46,7 +46,7 @@ internal sealed class FileSystem
         if (dirCount > 0 || fileCount > 0) {
             var dirs = dirCount.ToString("sub-directory", "sub-directories");
             var elements = dirs.Combine(fileCount.ToString("file", "files"));
-            throw new InputOutputException($"Directory not empty: '{directory}'. It contains{elements}.");
+            throw new IOException($"Directory not empty: '{directory}'. It contains{elements}.");
         }
         RemoveRecursively(directory);
     }
@@ -57,7 +57,7 @@ internal sealed class FileSystem
         node.Remove(directory);
     }
 
-    public IDirectory Move(IDirectory source, in NewDirectory destination, DateTime creationTime)
+    public Directory Move(IDirectory source, in NewDirectory destination, DateTime creationTime)
     {
         var sourceParent = Trie(source.Parent);
         var destinationDir = Add(destination, creationTime);

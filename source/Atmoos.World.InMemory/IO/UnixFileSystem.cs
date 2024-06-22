@@ -32,6 +32,24 @@ public sealed class UnixFileSystem<Time> : IFileSystem
         static Action<IDirectory> Remove(Boolean recursive) => recursive ? fileSystem.RemoveRecursively : fileSystem.Remove;
     }
 
+    public static IFile Move(IFile source, IFile target)
+    {
+        var sourceFile = fileSystem[source];
+        var targetFile = fileSystem[target];
+        sourceFile.MoveTo(targetFile);
+        fileSystem.Remove(source);
+        return target;
+    }
+
+    public static IFile Move(IFile source, in NewFile target)
+    {
+        var sourceFile = fileSystem[source];
+        var targetFile = fileSystem.Add(in target, Time.Now);
+        sourceFile.MoveTo(targetFile);
+        fileSystem.Remove(source);
+        return targetFile;
+    }
+
     public static IDirectory Move(IDirectory source, in NewDirectory target)
         => fileSystem.Move(source, in target, Time.Now);
 
@@ -40,5 +58,5 @@ public sealed class UnixFileSystem<Time> : IFileSystem
 
     public static Result<IDirectory> Search(Path query) => fileSystem.Search(query);
 
-    private static IFile Create(in NewFile file) => fileSystem.Add(in file, Time.Now);
+    private static File Create(in NewFile file) => fileSystem.Add(in file, Time.Now);
 }

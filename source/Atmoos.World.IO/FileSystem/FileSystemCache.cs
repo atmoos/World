@@ -52,7 +52,7 @@ internal sealed class FileSystemCache
         return (directoryInfo, this.directories[directoryInfo] = systemInfo);
     }
 
-    public FileInfo FindFile(in IFile file)
+    public FileInfo FindFile(IFile file)
     {
         if (this.files.TryGetValue(file, out var fileInfo)) {
             return fileInfo;

@@ -5,6 +5,7 @@ namespace Atmoos.World;
 
 public static class Extensions
 {
+    private const Char separator = ':';
     private const Int32 bufferSize = 65536;
     private static readonly Encoding encoding = Encoding.UTF8;
     public static IEnumerable<IDirectory> Path(this IDirectory tail)
@@ -35,6 +36,9 @@ public static class Extensions
         }
         return current;
     }
+
+    public static String Trail(this IDirectory directory, Char separator = separator)
+        => String.Join(separator, directory.Path().Select(dir => dir.Name));
 
     public static Result<IFile> Search(this IDirectory directory, FileName name)
         => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");

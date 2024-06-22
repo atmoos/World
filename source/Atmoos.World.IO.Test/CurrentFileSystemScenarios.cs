@@ -50,13 +50,28 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
     public void DeleteDirectoryRecursivelyRemovesEverything() => this.scenarios.DeleteDirectoryRecursivelyRemovesEverything();
 
     [Fact]
-    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => this.scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
+    public void SearchForNonExistentFileFails() => this.scenarios.SearchForNonExistentFileFails();
+
+    [Fact]
+    public void SearchForExistingFileSucceeds() => this.scenarios.SearchForExistingFileSucceeds();
 
     [Fact]
     public void SearchForNonExistentDirectoryFails() => this.scenarios.SearchForNonExistentDirectoryFails();
 
     [Fact]
     public void SearchForExistingDirectorySucceeds() => this.scenarios.SearchForExistingDirectorySucceeds();
+
+    [Fact]
+    public void MoveToNewFileFailsWhenTargetAlreadyExists() => this.scenarios.MoveToNewFileFailsWhenTargetAlreadyExists();
+
+    [Fact]
+    public void MoveToNewFileMovesContentAndRemovesSource() => this.scenarios.MoveToNewFileMovesContentAndRemovesSource();
+
+    [Fact]
+    public void MoveExistingFileOverwritesContentAndRemovesSource() => this.scenarios.MoveExistingFileOverwritesContentAndRemovesSource();
+
+    [Fact]
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => this.scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
 
     public void Dispose() => this.root.Delete(recursive: true);
 }

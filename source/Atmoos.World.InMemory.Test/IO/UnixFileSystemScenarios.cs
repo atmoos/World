@@ -38,11 +38,26 @@ public class UnixFileSystemScenarios : IFileSystemScenarios
     public void DeleteDirectoryRecursivelyRemovesEverything() => scenarios.DeleteDirectoryRecursivelyRemovesEverything();
 
     [Fact]
-    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
+    public void SearchForNonExistentFileFails() => scenarios.SearchForNonExistentFileFails();
+
+    [Fact]
+    public void SearchForExistingFileSucceeds() => scenarios.SearchForExistingFileSucceeds();
 
     [Fact]
     public void SearchForNonExistentDirectoryFails() => scenarios.SearchForNonExistentDirectoryFails();
 
     [Fact]
     public void SearchForExistingDirectorySucceeds() => scenarios.SearchForExistingDirectorySucceeds();
+
+    [Fact]
+    public void MoveToNewFileFailsWhenTargetAlreadyExists() => scenarios.MoveToNewFileFailsWhenTargetAlreadyExists();
+
+    [Fact]
+    public void MoveToNewFileMovesContentAndRemovesSource() => scenarios.MoveToNewFileMovesContentAndRemovesSource();
+
+    [Fact]
+    public void MoveExistingFileOverwritesContentAndRemovesSource() => scenarios.MoveExistingFileOverwritesContentAndRemovesSource();
+
+    [Fact]
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
 }

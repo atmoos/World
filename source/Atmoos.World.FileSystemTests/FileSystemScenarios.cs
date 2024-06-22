@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Atmoos.Sphere.Functional;
 using Xunit;
 
@@ -131,43 +132,9 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
         Assert.False(secondFile.Exists, "Second file should not exist");
     }
 
-    public void MoveDirectoryRemovesSourceAndRecreatesTarget()
-    {
-        var targetRoot = FileSystem.Create(root, new DirectoryName("TargetRoot"));
-        var originalRoot = FileSystem.Create(root, new DirectoryName("OriginalRoot"));
-        var toMove = FileSystem.Create(originalRoot, new DirectoryName("MoveMe"));
-        var targetDir = new NewDirectory { Name = new DirectoryName("MovedMeHere"), Parent = targetRoot };
-
-        var firstChild = FileSystem.Create(toMove, new DirectoryName("FirstChild"));
-        var firstImmediateFile = FileSystem.Create(toMove, new FileName("Foo", "txt"));
-        var secondImmediateFile = FileSystem.Create(toMove, new FileName("Bar", "txt"));
-        var subDir = FileSystem.Create(toMove, new DirectoryName("SomeSubDir"));
-        var grandChild = FileSystem.Create(firstChild, new FileName("FirstFile", "txt"));
-        IFile[] children = [firstImmediateFile, secondImmediateFile];
-
-
-        Assert.True(toMove.Exists, "The directory to move should exist prior to moving");
-        var moved = FileSystem.Move(toMove, in targetDir);
-
-        Assert.True(targetRoot.Exists, "Target root should exist");
-        Assert.True(originalRoot.Exists, "Original root should still exist");
-        Assert.True(moved.Exists, "The move target directory should exist");
-        Assert.Equal(Time.Now, moved.CreationTime, tol);
-
-        Assert.False(toMove.Exists, "The moved directory should not exist");
-        Assert.Empty(toMove); // And obviously indicate it's empty
-        INode[] movedChildren = [firstChild, subDir, grandChild, firstImmediateFile, secondImmediateFile];
-        Assert.All(movedChildren, d => Assert.False(d.Exists));
-
-        var childNames = children.Select(c => c.Name).ToHashSet();
-        Assert.Equal(children.Length, moved.Count);
-        Assert.All(moved, f => Assert.True(f.Exists));
-        Assert.All(moved, f => Assert.Contains(f.Name, childNames));
-    }
-
     public void SearchForNonExistentFileFails()
     {
-        var nonExistentPath = new FilePath { Path = Path.Abs(root), Name = new FileName("ThisDoesNotExist", "nope") };
+        var nonExistentPath = Path.Abs(root) + new FileName("ThisDoesNotExist", "nope");
 
         Result<IFile> result = FileSystem.Search(nonExistentPath);
 
@@ -178,7 +145,7 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
 
     public void SearchForExistingFileSucceeds()
     {
-        var filePath = new FilePath { Path = Path.Abs(root), Name = new FileName("TheNew", "kid") };
+        var filePath = Path.Abs(root) + new FileName("TheNew", "kid");
 
         var expectedFind = FileSystem.Create(filePath);
 
@@ -219,6 +186,80 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
         Assert.Equal(expectedFind, actualDirectory);
     }
 
+    public void MoveToNewFileFailsWhenTargetAlreadyExists()
+    {
+        var testRoot = CreateTestRoot();
+        var source = FileSystem.Create(testRoot, new FileName("Source", "txt"));
+        var target = FileSystem.Create(testRoot, new FileName("Target", "txt"));
+        var alreadyExistingTarget = new NewFile { Name = target.Name, Parent = target.Parent };
+
+        var e = Assert.ThrowsAny<IOException>(() => FileSystem.Move(source, alreadyExistingTarget));
+
+        Assert.Contains(target.Name, e.Message);
+    }
+
+    public void MoveToNewFileMovesContentAndRemovesSource()
+    {
+        var testRoot = CreateTestRoot();
+        var content = "This is the content of the file";
+        var source = NewContent(Path.Abs(testRoot) + new FileName("Source", "txt"), content);
+        var target = new NewFile { Name = new FileName("Target", "txt"), Parent = testRoot };
+
+        var newFile = FileSystem.Move(source, in target);
+
+        Assert.True(newFile.Exists);
+        Assert.False(source.Exists);
+        Assert.Equal(content, ReadText(newFile));
+    }
+
+    public void MoveExistingFileOverwritesContentAndRemovesSource()
+    {
+        var testRoot = CreateTestRoot();
+        var content = "This is the content of the file";
+        var source = NewContent(Path.Abs(testRoot) + new FileName("Source", "txt"), content);
+        var target = NewContent(Path.Abs(testRoot) + new FileName("Target", "txt"), "This should be overwritten!");
+
+        var overwrittenFile = FileSystem.Move(source, target);
+
+        Assert.True(overwrittenFile.Exists);
+        Assert.False(source.Exists);
+        Assert.Equal(content, ReadText(overwrittenFile));
+    }
+
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget()
+    {
+        var targetRoot = FileSystem.Create(root, new DirectoryName("TargetRoot"));
+        var originalRoot = FileSystem.Create(root, new DirectoryName("OriginalRoot"));
+        var toMove = FileSystem.Create(originalRoot, new DirectoryName("MoveMe"));
+        var targetDir = new NewDirectory { Name = new DirectoryName("MovedMeHere"), Parent = targetRoot };
+
+        var firstChild = FileSystem.Create(toMove, new DirectoryName("FirstChild"));
+        var firstImmediateFile = FileSystem.Create(toMove, new FileName("Foo", "txt"));
+        var secondImmediateFile = FileSystem.Create(toMove, new FileName("Bar", "txt"));
+        var subDir = FileSystem.Create(toMove, new DirectoryName("SomeSubDir"));
+        var grandChild = FileSystem.Create(firstChild, new FileName("FirstFile", "txt"));
+        IFile[] children = [firstImmediateFile, secondImmediateFile];
+
+
+        Assert.True(toMove.Exists, "The directory to move should exist prior to moving");
+        var moved = FileSystem.Move(toMove, in targetDir);
+
+        Assert.True(targetRoot.Exists, "Target root should exist");
+        Assert.True(originalRoot.Exists, "Original root should still exist");
+        Assert.True(moved.Exists, "The move target directory should exist");
+        Assert.Equal(Time.Now, moved.CreationTime, tol);
+
+        Assert.False(toMove.Exists, "The moved directory should not exist");
+        Assert.Empty(toMove); // And obviously indicate it's empty
+        INode[] movedChildren = [firstChild, subDir, grandChild, firstImmediateFile, secondImmediateFile];
+        Assert.All(movedChildren, d => Assert.False(d.Exists));
+
+        var childNames = children.Select(c => c.Name).ToHashSet();
+        Assert.Equal(children.Length, moved.Count);
+        Assert.All(moved, f => Assert.True(f.Exists));
+        Assert.All(moved, f => Assert.Contains(f.Name, childNames));
+    }
+
     private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectory nonEmptyDirectory, INode child)
         where TException : Exception
     {
@@ -228,5 +269,26 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
         Assert.True(nonEmptyDirectory.Exists);
         Assert.True(child.Exists);
         Assert.Contains(nonEmptyDirectory.Name, e.Message);
+    }
+
+    private IDirectory CreateTestRoot([CallerMemberName] String name = "") => FileSystem.Create(root, new DirectoryName(name));
+
+    private static String ReadText(IRead read)
+    {
+        using var reader = read.OpenText();
+        return reader.ReadToEnd();
+    }
+
+    private static void WriteText(IWrite write, String content)
+    {
+        using var writer = write.AppendText();
+        writer.Write(content);
+    }
+
+    private static IFile NewContent(FilePath file, String content)
+    {
+        var newFile = FileSystem.Create(file);
+        WriteText(newFile, content);
+        return newFile;
     }
 }

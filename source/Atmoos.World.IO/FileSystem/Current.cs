@@ -36,6 +36,23 @@ public sealed class Current : IFileSystem
         cache.Purge();
     }
 
+    public static IFile Move(IFile source, IFile target)
+    {
+        var sourceFile = cache.FindFile(source);
+        var targetFile = cache.FindFile(target);
+        System.IO.File.Move(sourceFile.FullName, targetFile.FullName, overwrite: true);
+        cache.Purge();
+        return target;
+    }
+    public static IFile Move(IFile source, in NewFile target)
+    {
+        var sourceFile = cache.FindFile(source);
+        var (file, info) = cache.Add(in target);
+        System.IO.File.Move(sourceFile.FullName, info.FullName, overwrite: false);
+        cache.Purge();
+        return file;
+    }
+
     public static IDirectory Move(IDirectory source, in NewDirectory destination)
     {
         var sourceDir = cache.FindDirectory(source);
