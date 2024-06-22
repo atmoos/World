@@ -11,4 +11,5 @@ public sealed class Current : ITime
         var origin = stopwatch.Elapsed;
         return new Tic(() => stopwatch.Elapsed - origin);
     }
+    public static TimeSpan Toc(in Tic tic) => ITime.Elapsed(in tic);
 }

@@ -7,11 +7,6 @@ public class UnixFileSystemTest : IFileSystemTest
 {
     private static readonly IFileSystemTest tester = new FileSystemTester<UnixFileSystem<Time>, Time>();
 
-    public UnixFileSystemTest()
-    {
-        Time.Now = DateTime.UtcNow;
-    }
-
     [Fact]
     public void CreateFileSucceeds() => tester.CreateFileSucceeds();
 

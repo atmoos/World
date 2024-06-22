@@ -3,7 +3,8 @@ public interface ITime
 {
     static abstract DateTime Now { get; }
     static abstract Tic Tic();
-    static TimeSpan Toc(in Tic tic) => tic.Elapsed;
+    static abstract TimeSpan Toc(in Tic tic);
+    protected static TimeSpan Elapsed(in Tic tic) => tic.Elapsed;
 }
 
 public readonly struct Tic(Func<TimeSpan> mark)
