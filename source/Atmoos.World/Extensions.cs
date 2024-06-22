@@ -13,6 +13,7 @@ public static class Extensions
         for (IDirectory current = tail; current != tail.Root; current = current.Parent) {
             antecedents.Push(current);
         }
+        antecedents.Push(tail.Root);
         return antecedents;
     }
     public static IEnumerable<IDirectory> Path(this IDirectory tail, IDirectory until)
@@ -24,14 +25,7 @@ public static class Extensions
         return antecedents;
     }
 
-    public static IEnumerable<IDirectory> Antecedents(this IDirectory tail)
-    {
-        var antecedents = new Stack<IDirectory>();
-        for (IDirectory current = tail.Parent; current != tail.Root; current = current.Parent) {
-            antecedents.Push(current);
-        }
-        return antecedents;
-    }
+    public static IEnumerable<IDirectory> Antecedents(this IDirectory tail) => tail.Parent.Path();
 
     public static IDirectory Antecedent(this IDirectory tail, Byte depth)
     {
