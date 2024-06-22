@@ -13,6 +13,8 @@ public interface IFileSystemScenarios
     void DeleteDirectoryContainingOtherDirectoriesThrows();
     void DeleteDirectoryRecursivelyRemovesEverything();
     void MoveDirectoryRemovesSourceAndRecreatesTarget();
+    void SearchForNonExistentFileFails();
+    void SearchForExistingFileSucceeds();
     void SearchForNonExistentDirectoryFails();
     void SearchForExistingDirectorySucceeds();
 }

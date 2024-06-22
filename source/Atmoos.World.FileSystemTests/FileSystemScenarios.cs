@@ -165,6 +165,30 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
         Assert.All(moved, f => Assert.Contains(f.Name, childNames));
     }
 
+    public void SearchForNonExistentFileFails()
+    {
+        var nonExistentPath = new FilePath { Path = Path.Abs(root), Name = new FileName("ThisDoesNotExist", "nope") };
+
+        Result<IFile> result = FileSystem.Search(nonExistentPath);
+
+        IEnumerable<String> actualErrors = Assert.IsType<Failure<IFile>>(result);
+        String actualMessage = Assert.Single(actualErrors);
+        Assert.Contains(nonExistentPath.Name, actualMessage);
+    }
+
+    public void SearchForExistingFileSucceeds()
+    {
+        var filePath = new FilePath { Path = Path.Abs(root), Name = new FileName("TheNew", "kid") };
+
+        var expectedFind = FileSystem.Create(filePath);
+
+        Result<IFile> result = FileSystem.Search(filePath);
+
+        IFile actualFile = Assert.IsType<Success<IFile>>(result).Value();
+        // ToDo: Change to Assert.Same
+        Assert.Equal(expectedFind, actualFile);
+    }
+
     public void SearchForNonExistentDirectoryFails()
     {
         String[] dirs = ["FreshlyCreated", "SomeSubDir", "AnotherSubDir"];
@@ -173,7 +197,7 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
         var thisDoesNotEither = new DirectoryName("NoNoNo");
 
 
-        var result = FileSystem.Search(Path.Abs(root, [.. dirs, thisDoesNotExist, thisDoesNotEither]));
+        Result<IDirectory> result = FileSystem.Search(Path.Abs(root, [.. dirs, thisDoesNotExist, thisDoesNotEither]));
 
         String[] expectedErrorContent = [.. dirs, thisDoesNotExist];
         IEnumerable<String> actualErrors = Assert.IsType<Failure<IDirectory>>(result);
@@ -188,9 +212,10 @@ public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol
 
         var expectedFind = FileSystem.Create(query);
 
-        var result = FileSystem.Search(query);
+        Result<IDirectory> result = FileSystem.Search(query);
 
         IDirectory actualDirectory = Assert.IsType<Success<IDirectory>>(result).Value();
+        // ToDo: Change to Assert.Same
         Assert.Equal(expectedFind, actualDirectory);
     }
 
