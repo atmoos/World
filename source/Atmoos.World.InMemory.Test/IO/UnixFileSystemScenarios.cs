@@ -3,7 +3,7 @@ using Atmoos.World.FileSystemTests;
 
 namespace Atmoos.World.InMemory.Test.IO;
 
-public class UnixFileSystemScenarios : IFileSystemScenarios
+public sealed class UnixFileSystemScenarios : IFileSystemScenarios
 {
     private static readonly IFileSystemScenarios scenarios = new FileSystemScenarios<UnixFileSystem<Time>, Time>();
 

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Atmoos.World.Build.props" />
+  <Import Project="../Atmoos.World.Test.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
+    <ProjectReference Include="..\Atmoos.World.InMemory\Atmoos.World.InMemory.csproj" />
+  </ItemGroup>
+
+</Project>

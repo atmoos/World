@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Atmoos.World.Time.Test;
 
-public class CurrentTimeTest
+public sealed class CurrentTimeTest
 {
     private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(8);
 

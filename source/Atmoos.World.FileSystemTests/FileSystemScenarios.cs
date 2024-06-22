@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Atmoos.World.FileSystemTests;
 
-public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol) : IFileSystemScenarios
+public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol) : IFileSystemScenarios
     where FileSystem : IFileSystem
     where Time : ITime
 {

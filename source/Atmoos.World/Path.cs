@@ -22,8 +22,7 @@ public sealed class Path : ICountable<DirectoryName>
     // Relative.Path<FileSystem>(2, "MyDirectory", "MySubDirectory")
     public static Path Abs(IDirectory root) => new(root, 0, []);
     public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path.Length, path);
-    public static Path Abs(IDirectory root, params String[] path)
-        => new(root, path.Length, path.Select(Dir));
+    public static Path Abs(IDirectory root, params String[] path) => new(root, path.Length, path.Select(Dir));
     public static Path Rel<TFileSystem>(params DirectoryName[] path)
         where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path.Length, path);
 
