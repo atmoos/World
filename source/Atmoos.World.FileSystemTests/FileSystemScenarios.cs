@@ -3,11 +3,11 @@ using Xunit;
 
 namespace Atmoos.World.FileSystemTests;
 
-public class FileSystemTester<FileSystem, Time>(IDirectory root, TimeSpan tol) : IFileSystemTest
+public class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol) : IFileSystemScenarios
     where FileSystem : IFileSystem
     where Time : ITime
 {
-    public FileSystemTester() : this(FileSystem.CurrentDirectory, TimeSpan.Zero) { }
+    public FileSystemScenarios() : this(FileSystem.CurrentDirectory, TimeSpan.Zero) { }
 
     public void CreateFileSucceeds()
     {

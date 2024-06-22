@@ -1,6 +1,6 @@
 namespace Atmoos.World.FileSystemTests;
 
-public interface IFileSystemTest
+public interface IFileSystemScenarios
 {
     void CreateFileSucceeds();
     void CreateFileInAntecedentDirs();
