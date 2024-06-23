@@ -1,4 +1,3 @@
-
 namespace Atmoos.World.IO.FileSystem;
 
 internal sealed class Directory : IEquatable<IFullyQualified>, IFullyQualified, IDirectory
