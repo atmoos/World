@@ -1,18 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
 using Atmoos.Sphere.Functional;
 
-namespace Atmoos.World.IO;
+namespace Atmoos.World.IO.FileSystem;
 
-internal sealed class Cache<TKey, TValue>() : ICountable<(TKey key, TValue value)>
+internal sealed class Cache<TKey, TValue> : ICountable<(TKey key, TValue value)>
     where TKey : notnull, INode
-    where TValue : notnull, FileSystemInfo
+    where TValue : notnull
 {
     private readonly Dictionary<TKey, TValue> values = [];
     public Int32 Count => this.values.Count;
 
     public TValue this[TKey key]
     {
-        get => this.values[key];
         set => this.values[key] = value;
     }
 

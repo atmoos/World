@@ -2,7 +2,7 @@ namespace Atmoos.World.IO.FileSystem;
 
 internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IFile, IEquatable<IFullyQualified>, IFullyQualified
 {
-    public Int64 Size => fileInfo.Length;
+    public Int64 Size => Exists ? fileInfo.Length : 0;
     public FileName Name { get; } = FileName.Split(fileInfo.Name);
     public String FullPath => fileInfo.FullName;
     public IDirectory Parent => directoryInfo;
