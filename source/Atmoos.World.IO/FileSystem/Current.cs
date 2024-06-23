@@ -5,6 +5,7 @@ namespace Atmoos.World.IO.FileSystem;
 public sealed class Current : IFileSystem
 {
     private static readonly FileSystemCache cache = new();
+    public static IDirectory Root => cache.Root;
     public static IDirectory CurrentDirectory => cache.Locate(new DirectoryInfo(System.IO.Directory.GetCurrentDirectory()));
     public static IFile Create(IDirectory parent, FileName name)
     {

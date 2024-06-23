@@ -7,7 +7,7 @@ public sealed class UnixFileSystem<Time> : IFileSystem
 {
     private static readonly FileSystem fileSystem = new(new DirectoryName { Value = "/" }, Time.Now);
     private static IDirectory currentDirectory = fileSystem.Root;
-
+    public static IDirectory Root => fileSystem.Root;
     public static IDirectory CurrentDirectory
     {
         get => currentDirectory;

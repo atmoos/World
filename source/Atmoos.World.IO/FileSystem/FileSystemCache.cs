@@ -8,9 +8,8 @@ internal sealed class FileSystemCache
     private readonly DirectoryInfo rootValue;
     private readonly Cache<IFile, FileInfo> files = new();
     private readonly Cache<IDirectory, DirectoryInfo> directories = new();
-
+    public IDirectory Root => this.root;
     public FileSystemCache() => (this.root, this.rootValue) = CreateRoot(this, System.IO.Directory.GetCurrentDirectory());
-
     public IDirectory Locate(DirectoryInfo directory)
     {
         if (directory.Parent == null || directory.FullName == this.root.FullPath) {

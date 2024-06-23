@@ -3,7 +3,6 @@ using Atmoos.Sphere.Functional;
 namespace Atmoos.World;
 
 public interface IFileSystem :
-    IFileAccess,
     IFileCreation,
     IFileDeletion,
     IDirectoryCreation,
@@ -16,8 +15,7 @@ public interface IFileSystem :
 
 public interface IFileSystemState
 {
-    // ToDo: Should I include the Root on the FileSystem?
-    //       Should it be a directory, volume or device?
+    static abstract IDirectory Root { get; }
     static abstract IDirectory CurrentDirectory { get; }
 }
 public interface IFileSystemQueries
