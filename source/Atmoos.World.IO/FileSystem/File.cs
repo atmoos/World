@@ -12,6 +12,7 @@ internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IFile,
     public Boolean Equals(IFullyQualified? other) => FullPath.Equals(other?.FullPath);
     public override Int32 GetHashCode() => FullPath.GetHashCode();
     public override String ToString() => FullPath;
-    public Stream OpenRead() => fileInfo.OpenRead();
-    public Stream OpenWrite() => fileInfo.OpenWrite();
+    public Stream OpenRead() => fileInfo.OpenRead(); // this throws when the file does not exist
+    public Stream OpenWrite() // so this should throw too 
+        => Exists ? fileInfo.OpenWrite() : throw new FileNotFoundException($"Cannot write to non-existent file '{Name}' in '{Parent}'.");
 }

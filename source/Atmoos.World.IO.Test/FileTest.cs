@@ -1,18 +1,101 @@
 using Atmoos.World.IO.FileSystem;
 using File = Atmoos.World.IO.FileSystem.File;
 using Directory = Atmoos.World.IO.FileSystem.Directory;
+using Atmoos.World.FileSystemTests;
 
 namespace Atmoos.World.IO.Test;
 
-public sealed class FileTest
+public sealed class FileTest : IFileProperties
 {
-    private static readonly Directory root = CreateRootDirectory(System.IO.Directory.GetCurrentDirectory());
+    private static readonly Directory root = CreateRootDirectory(System.IO.Path.Combine(System.IO.Path.GetTempPath()));
 
     [Fact]
-    public void NonExistentFileHasZeroSize()
+    public void SizeOfNonExistingFileIsZero()
     {
         var file = new File(root, new FileInfo("nonExistent.txt"));
         Assert.Equal(0, file.Size);
+        Assert.False(file.Exists);
+    }
+
+    [Fact]
+    public void SizeOfNonEmptyFileReturnsActualNumberOfBytes()
+    {
+        Byte[] content = [3, 2, 4, 1, 6];
+        using var env = new FileEnv("nonEmpty.txt");
+        using (var writer = env.File.Create()) {
+            writer.Write(content);
+        }
+        var file = new File(root, env.File);
+        Assert.Equal(content.Length, file.Size);
+    }
+
+    [Fact]
+    public void OpenReadOnNonExistentFileThrows()
+    {
+        var name = "NotHere.txt";
+        var file = new File(root, new FileInfo(name));
+
+        var e = Assert.Throws<FileNotFoundException>(() => file.OpenRead());
+        Assert.Contains(name, e.Message);
+    }
+
+
+    [Fact]
+    public void MultipleReadsOnFileAreAllowed()
+    {
+        var name = "lotsOfReads.txt";
+        var content = new Byte[] { 1, 2, 3, 4, 5 };
+        var expected = new Byte[] { 1, 1, 2, 1, 2 };
+        var actualRead = new Byte[content.Length];
+        using var env = FileEnv.Create(name, content);
+        var file = new File(root, env.File);
+        using var read1 = file.OpenRead();
+        using var read2 = file.OpenRead();
+        using var read3 = file.OpenRead();
+        read2.Read(actualRead, 0, 1);
+        read3.Read(actualRead, 1, 2);
+        read1.Read(actualRead, 3, 2);
+
+        Assert.Equal(expected, actualRead);
+    }
+
+    [Fact]
+    public void OpenWriteOnNonExistentFileThrows()
+    {
+        var name = "NotHereEither.txt";
+        using var env = new FileEnv(name);
+        var file = new File(root, env.File);
+
+        var e = Assert.Throws<FileNotFoundException>(() => file.OpenWrite());
+        Assert.Contains(name, e.Message);
+    }
+
+    [Fact]
+    public void OpenWriteOnFileThatIsBeingWrittenToThrows()
+    {
+        var name = "beingRead.txt";
+        using var env = FileEnv.Create(name);
+        var file = new File(root, env.File);
+        using (file.OpenWrite()) {
+
+            var e = Assert.Throws<IOException>(() => file.OpenWrite());
+
+            Assert.Contains(name, e.Message);
+        }
+    }
+
+    [Fact]
+    public void OpenWriteOnFileThatIsBeingReadFromThrows()
+    {
+        var name = "beingReadThenWrite.txt";
+        using var env = FileEnv.Create(name);
+        var file = new File(root, env.File);
+        using (file.OpenRead()) {
+
+            var e = Assert.Throws<IOException>(() => file.OpenWrite());
+
+            Assert.Contains(name, e.Message);
+        }
     }
 
     [Fact]
@@ -52,21 +135,10 @@ public sealed class FileTest
         Assert.False(left.Equals(noValue));
     }
 
-    [Fact]
-    public void NonEmptyFileReturnsCorrectSize()
-    {
-        Byte[] content = [3, 2, 4, 1, 6];
-        using var env = new FileEnv("nonEmpty.txt");
-        using (var writer = env.File.Create()) {
-            writer.Write(content);
-        }
-        var file = new File(root, env.File);
-        Assert.Equal(content.Length, file.Size);
-    }
-
     private static Directory CreateRootDirectory(String path)
     {
         var dirInfo = new DirectoryInfo(path);
+        dirInfo.Create();
         return new Directory(new FileSystemCache(), dirInfo);
     }
 
@@ -75,5 +147,22 @@ public sealed class FileTest
         public FileInfo File { get; } = new FileInfo(System.IO.Path.Combine(root.FullPath, name));
 
         public void Dispose() => File.Delete();
+
+        public static FileEnv Create(String name)
+        {
+            var env = new FileEnv(name);
+            using (env.File.Create()) {
+                return env;
+            }
+        }
+
+        public static FileEnv Create(String name, Byte[] content)
+        {
+            var env = new FileEnv(name);
+            using (var writer = env.File.Create()) {
+                writer.Write(content);
+            }
+            return env;
+        }
     }
 }
