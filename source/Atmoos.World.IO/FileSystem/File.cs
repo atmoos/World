@@ -3,7 +3,7 @@ namespace Atmoos.World.IO.FileSystem;
 internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IFile, IEquatable<IFullyQualified>, IFullyQualified
 {
     public Int64 Size => fileInfo.Length;
-    public FileName Name { get; } = ExtractName(fileInfo);
+    public FileName Name { get; } = FileName.Split(fileInfo.Name);
     public String FullPath => fileInfo.FullName;
     public IDirectory Parent => directoryInfo;
     public Boolean Exists => System.IO.File.Exists(FullPath);
@@ -12,12 +12,6 @@ internal sealed class File(IDirectory directoryInfo, FileInfo fileInfo) : IFile,
     public Boolean Equals(IFullyQualified? other) => FullPath.Equals(other?.FullPath);
     public override Int32 GetHashCode() => FullPath.GetHashCode();
     public override String ToString() => FullPath;
-    private static FileName ExtractName(FileInfo fileInfo) => fileInfo.Name.Split('.') switch {
-    [var name] => new() { Name = name },
-    [var name, var extension] => new() { Name = name, Extension = extension },
-    [.. var names, var extension] => new() { Name = String.Join('.', names), Extension = extension },
-        _ => new() { Name = fileInfo.Name }
-    };
     public Stream OpenRead() => fileInfo.OpenRead();
     public Stream OpenWrite() => fileInfo.OpenWrite();
 }
