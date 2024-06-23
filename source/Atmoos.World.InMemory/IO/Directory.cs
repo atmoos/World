@@ -60,7 +60,7 @@ internal sealed class Directory : IDirectory
     public IEnumerator<IFile> GetEnumerator() => this.files.Values.GetEnumerator();
     Boolean ChildExists() => this.node.Value.Exists && this.node.Contains(this);
 
-    private IOException FileExists(FileName name) => new($"File '{name}' already exists in '{this}'.");
+    private IOException FileExists(FileName name) => new($"Directory '{this}' already contains a file '{name}'.");
     private HashSet<FileName> Intersect(IEnumerable<FileName> other)
     {
         var theseValues = this.files.Values.Select(file => file.Name).ToHashSet();
