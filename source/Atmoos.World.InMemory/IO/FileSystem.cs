@@ -46,7 +46,7 @@ internal sealed class FileSystem
         if (dirCount > 0 || fileCount > 0) {
             var dirs = dirCount.ToString("sub-directory", "sub-directories");
             var elements = dirs.Combine(fileCount.ToString("file", "files"));
-            throw new IOException($"Directory not empty: '{directory}'. It contains{elements}.");
+            throw new IOException($"Directory not empty: '{directory}'. It contains {elements}.");
         }
         RemoveRecursively(directory);
     }
