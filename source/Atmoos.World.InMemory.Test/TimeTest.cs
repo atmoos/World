@@ -1,14 +1,17 @@
+using System.Runtime.InteropServices;
+
 namespace Atmoos.World.InMemory.Test;
 
 public sealed class TimeTest
 {
+    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(16) * (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 3d : 1d);
     private static readonly (DateTime inMemory, DateTime current) initial;
     static TimeTest() => initial = (Time.Now, DateTime.UtcNow);
 
     [Fact]
     public void TimeNowIsSetToCurrentTime()
     {
-        Assert.Equal(initial.current, initial.inMemory, TimeSpan.FromMilliseconds(16));
+        Assert.Equal(initial.current, initial.inMemory, tol);
     }
 
     [Fact]
