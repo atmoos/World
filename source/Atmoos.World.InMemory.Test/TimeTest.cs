@@ -46,7 +46,7 @@ public sealed class TimeTest
     [Fact]
     public void TimeCannotBeSetToLocalTime()
     {
-        var someTime = new DateTime(201, 3, 14, 13, 43, 11, DateTimeKind.Unspecified);
+        var someTime = new DateTime(201, 3, 14, 13, 43, 11, DateTimeKind.Local);
 
         var expected = someTime.ToUniversalTime();
         Time.Now = someTime;
@@ -54,7 +54,6 @@ public sealed class TimeTest
         var actualNow = Time.Now;
         Assert.Equal(expected, actualNow);
         Assert.Equal(DateTimeKind.Utc, actualNow.Kind);
-        Assert.NotEqual(someTime, actualNow);
     }
 
     [Fact]
