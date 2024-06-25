@@ -48,6 +48,5 @@ public interface IFileManipulation
 }
 public interface IDirectoryManipulation
 {
-    // ToDo: Copy directories
     static abstract IDirectory Move(IDirectory source, in NewDirectory target);
 }
