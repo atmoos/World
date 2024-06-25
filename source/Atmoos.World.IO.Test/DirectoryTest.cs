@@ -41,7 +41,7 @@ public sealed class DirectoryTest
 
         var dir = new Directory(root.cache, root.dir, env.Directory);
 
-        Assert.Equal(files, dir.Select(f => f.Name.ToString()));
+        Assert.Equal(files.Order(), dir.Select(f => f.Name.ToString()).Order());
     }
 
     [Fact]

@@ -68,8 +68,8 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeS
         var firstDir = FileSystem.Create(firstCommand);
         var secondDir = FileSystem.Create(secondCommand);
 
-        var firstAntecedents = firstDir.Antecedents().ToArray();
-        var secondAntecedents = secondDir.Antecedents().ToArray();
+        var firstAntecedents = firstDir.Antecedents().OrderBy(d => d.Name.ToString()).ToArray();
+        var secondAntecedents = secondDir.Antecedents().OrderBy(d => d.Name.ToString()).ToArray();
 
         Assert.Equal(firstAntecedents, secondAntecedents);
     }
