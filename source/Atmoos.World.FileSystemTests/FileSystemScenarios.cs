@@ -1,14 +1,15 @@
 using System.Runtime.CompilerServices;
 using Atmoos.Sphere.Functional;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Atmoos.World.FileSystemTests;
 
-public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeSpan tol) : IFileSystemScenarios
+public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITestOutputHelper output, TimeSpan tol) : IFileSystemScenarios
     where FileSystem : IFileSystem
     where Time : ITime
 {
-    public FileSystemScenarios() : this(FileSystem.CurrentDirectory, TimeSpan.Zero) { }
+    public FileSystemScenarios(ITestOutputHelper output) : this(FileSystem.CurrentDirectory, output, TimeSpan.Zero) { }
 
     public void CreateFileSucceeds()
     {
@@ -140,6 +141,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeS
 
         IEnumerable<String> actualErrors = Assert.IsType<Failure<IFile>>(result);
         String actualMessage = Assert.Single(actualErrors);
+        output.WriteLine(actualMessage);
         Assert.Contains(nonExistentPath.Name, actualMessage);
     }
 
@@ -169,6 +171,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeS
         String[] expectedErrorContent = [.. dirs, thisDoesNotExist];
         IEnumerable<String> actualErrors = Assert.IsType<Failure<IDirectory>>(result);
         String actualMessage = Assert.Single(actualErrors);
+        output.WriteLine(actualMessage);
         Assert.All(expectedErrorContent, e => Assert.Contains(e, actualMessage));
         Assert.DoesNotContain(thisDoesNotEither, actualMessage);
     }
@@ -195,6 +198,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeS
 
         var e = Assert.ThrowsAny<IOException>(() => FileSystem.Move(source, alreadyExistingTarget));
 
+        output.WriteLine(e.Message);
         Assert.Contains(target.Name, e.Message);
     }
 
@@ -260,12 +264,13 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, TimeS
         Assert.All(moved, f => Assert.Contains(f.Name, childNames));
     }
 
-    private static void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectory nonEmptyDirectory, INode child)
+    private void AssertNonEmptyDirectoryRemovalThrows<TException>(IDirectory nonEmptyDirectory, INode child)
         where TException : Exception
     {
         Assert.True(child.Exists);
         Assert.True(nonEmptyDirectory.Exists);
         var e = Assert.ThrowsAny<TException>(() => FileSystem.Delete(nonEmptyDirectory, recursive: false));
+        output.WriteLine(e.Message);
         Assert.True(nonEmptyDirectory.Exists);
         Assert.True(child.Exists);
         Assert.Contains(nonEmptyDirectory.Name, e.Message);

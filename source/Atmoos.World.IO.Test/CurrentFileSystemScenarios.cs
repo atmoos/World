@@ -1,5 +1,6 @@
 using Atmoos.World.FileSystemTests;
 using Atmoos.World.IO.FileSystem;
+using Xunit.Abstractions;
 
 using DirectoryInfo = System.IO.DirectoryInfo;
 
@@ -10,12 +11,12 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
     private readonly DirectoryInfo root;
     private readonly IFileSystemScenarios scenarios;
 
-    public CurrentFileSystemScenarios()
+    public CurrentFileSystemScenarios(ITestOutputHelper output)
     {
         var rootPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Atmoos.World.IO.Test");
         this.root = new DirectoryInfo(rootPath);
         var rootDir = Current.Locate(this.root);
-        this.scenarios = new FileSystemScenarios<Current, Time.Current>(rootDir, TimeSpan.FromMilliseconds(100));
+        this.scenarios = new FileSystemScenarios<Current, Time.Current>(rootDir, output, TimeSpan.FromMilliseconds(100));
         this.root.Create();
     }
 

@@ -1,63 +1,64 @@
 using Atmoos.World.InMemory.IO;
 using Atmoos.World.FileSystemTests;
+using Xunit.Abstractions;
 
 namespace Atmoos.World.InMemory.Test.IO;
 
-public sealed class UnixFileSystemScenarios : IFileSystemScenarios
+public sealed class UnixFileSystemScenarios(ITestOutputHelper output) : IFileSystemScenarios
 {
-    private static readonly IFileSystemScenarios scenarios = new FileSystemScenarios<UnixFileSystem<Time>, Time>();
+    private readonly IFileSystemScenarios scenarios = new FileSystemScenarios<UnixFileSystem<Time>, Time>(output);
 
     [Fact]
-    public void CreateFileSucceeds() => scenarios.CreateFileSucceeds();
+    public void CreateFileSucceeds() => this.scenarios.CreateFileSucceeds();
 
     [Fact]
-    public void CreateFileInAntecedentDirs() => scenarios.CreateFileInAntecedentDirs();
+    public void CreateFileInAntecedentDirs() => this.scenarios.CreateFileInAntecedentDirs();
 
     [Fact]
-    public void CreateDirectorySucceeds() => scenarios.CreateDirectorySucceeds();
+    public void CreateDirectorySucceeds() => this.scenarios.CreateDirectorySucceeds();
 
     [Fact]
-    public void CreateDirectoryInAntecedentDirs() => scenarios.CreateDirectoryInAntecedentDirs();
+    public void CreateDirectoryInAntecedentDirs() => this.scenarios.CreateDirectoryInAntecedentDirs();
 
     [Fact]
-    public void AntecedentDirectoriesAreNotOverwritten() => scenarios.AntecedentDirectoriesAreNotOverwritten();
+    public void AntecedentDirectoriesAreNotOverwritten() => this.scenarios.AntecedentDirectoriesAreNotOverwritten();
 
     [Fact]
-    public void DeleteFileSucceeds() => scenarios.DeleteFileSucceeds();
+    public void DeleteFileSucceeds() => this.scenarios.DeleteFileSucceeds();
 
     [Fact]
-    public void DeleteEmptyDirectorySucceeds() => scenarios.DeleteEmptyDirectorySucceeds();
+    public void DeleteEmptyDirectorySucceeds() => this.scenarios.DeleteEmptyDirectorySucceeds();
 
     [Fact]
-    public void DeleteDirectoryContainingFilesThrows() => scenarios.DeleteDirectoryContainingFilesThrows();
+    public void DeleteDirectoryContainingFilesThrows() => this.scenarios.DeleteDirectoryContainingFilesThrows();
 
     [Fact]
-    public void DeleteDirectoryContainingOtherDirectoriesThrows() => scenarios.DeleteDirectoryContainingOtherDirectoriesThrows();
+    public void DeleteDirectoryContainingOtherDirectoriesThrows() => this.scenarios.DeleteDirectoryContainingOtherDirectoriesThrows();
 
     [Fact]
-    public void DeleteDirectoryRecursivelyRemovesEverything() => scenarios.DeleteDirectoryRecursivelyRemovesEverything();
+    public void DeleteDirectoryRecursivelyRemovesEverything() => this.scenarios.DeleteDirectoryRecursivelyRemovesEverything();
 
     [Fact]
-    public void SearchForNonExistentFileFails() => scenarios.SearchForNonExistentFileFails();
+    public void SearchForNonExistentFileFails() => this.scenarios.SearchForNonExistentFileFails();
 
     [Fact]
-    public void SearchForExistingFileSucceeds() => scenarios.SearchForExistingFileSucceeds();
+    public void SearchForExistingFileSucceeds() => this.scenarios.SearchForExistingFileSucceeds();
 
     [Fact]
-    public void SearchForNonExistentDirectoryFails() => scenarios.SearchForNonExistentDirectoryFails();
+    public void SearchForNonExistentDirectoryFails() => this.scenarios.SearchForNonExistentDirectoryFails();
 
     [Fact]
-    public void SearchForExistingDirectorySucceeds() => scenarios.SearchForExistingDirectorySucceeds();
+    public void SearchForExistingDirectorySucceeds() => this.scenarios.SearchForExistingDirectorySucceeds();
 
     [Fact]
-    public void MoveToNewFileFailsWhenTargetAlreadyExists() => scenarios.MoveToNewFileFailsWhenTargetAlreadyExists();
+    public void MoveToNewFileFailsWhenTargetAlreadyExists() => this.scenarios.MoveToNewFileFailsWhenTargetAlreadyExists();
 
     [Fact]
-    public void MoveToNewFileMovesContentAndRemovesSource() => scenarios.MoveToNewFileMovesContentAndRemovesSource();
+    public void MoveToNewFileMovesContentAndRemovesSource() => this.scenarios.MoveToNewFileMovesContentAndRemovesSource();
 
     [Fact]
-    public void MoveExistingFileOverwritesContentAndRemovesSource() => scenarios.MoveExistingFileOverwritesContentAndRemovesSource();
+    public void MoveExistingFileOverwritesContentAndRemovesSource() => this.scenarios.MoveExistingFileOverwritesContentAndRemovesSource();
 
     [Fact]
-    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
+    public void MoveDirectoryRemovesSourceAndRecreatesTarget() => this.scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
 }
