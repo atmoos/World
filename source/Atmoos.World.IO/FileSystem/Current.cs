@@ -48,10 +48,17 @@ public sealed class Current : IFileSystem
     public static IFile Move(IFile source, in NewFile target)
     {
         var sourceFile = cache.FindFile(source);
-        var (file, info) = cache.Add(in target);
-        System.IO.File.Move(sourceFile.FullName, info.FullName, overwrite: false);
-        cache.Purge();
-        return file;
+        var (file, targetFile) = cache.Add(in target);
+        try {
+            System.IO.File.Move(sourceFile.FullName, targetFile.FullName, overwrite: false);
+            return file;
+        }
+        catch (IOException e) when (!e.Message.Contains(target.Name)) {
+            throw new IOException($"Cannot move '{sourceFile.FullName}' to '{targetFile.FullName}'.", e);
+        }
+        finally {
+            cache.Purge();
+        }
     }
 
     public static IDirectory Move(IDirectory source, in NewDirectory destination)
