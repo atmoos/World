@@ -1,10 +1,12 @@
+using System.Collections.Concurrent;
+
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class Directory : IDirectory
 {
     private readonly Func<Boolean> exists;
     private readonly Trie<IDirectory, Directory> node;
-    private readonly Dictionary<IFile, File> files = [];
+    private readonly ConcurrentDictionary<IFile, File> files = [];
     public Int32 Count => this.files.Count;
 
     public File this[IFile file] => this.files[file];
@@ -55,7 +57,7 @@ internal sealed class Directory : IDirectory
     }
 
     public Boolean Contains(IFile file) => this.files.ContainsKey(file);
-    public void Remove(IFile file) => this.files.Remove(file);
+    public void Remove(IFile file) => this.files.TryRemove(file, out _);
     public override String ToString() => Name;
     public IEnumerator<IFile> GetEnumerator() => this.files.Values.GetEnumerator();
     Boolean ChildExists() => this.node.Value.Exists && this.node.Contains(this);

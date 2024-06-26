@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Atmoos.Sphere.Functional;
 
@@ -7,7 +8,7 @@ internal sealed class Trie<TKey, TValue>(TValue value) : ICountable<(TKey key, T
     where TValue : notnull
 {
     private readonly TValue value = value;
-    private readonly Dictionary<TKey, Trie<TKey, TValue>> children = [];
+    private readonly ConcurrentDictionary<TKey, Trie<TKey, TValue>> children = [];
     public TValue Value => this.value;
     public Int32 Count => this.children.Count;
 
@@ -40,7 +41,7 @@ internal sealed class Trie<TKey, TValue>(TValue value) : ICountable<(TKey key, T
     public Result<TKey> FindKey(Func<TKey, Boolean> predicate)
         => this.children.Keys.SingleOrDefault(predicate).ToResult(() => "No key satisfies the predicate.");
 
-    public Boolean Remove(TKey key) => this.children.Remove(key);
+    public Boolean Remove(TKey key) => this.children.TryRemove(key, out _);
 
     private Boolean TryGetNode(TKey key, [MaybeNullWhen(false)] out Trie<TKey, TValue> child)
         => this.children.TryGetValue(key, out child);

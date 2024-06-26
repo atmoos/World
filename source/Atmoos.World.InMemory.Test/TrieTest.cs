@@ -33,7 +33,7 @@ public sealed class TrieTest
             trie[index] = child;
         }
 
-        Assert.Equal(expected, trie);
+        Assert.Equal(expected.OrderBy(e => e.key), trie.OrderBy(t => t.key));
     }
 
     [Fact]
