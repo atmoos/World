@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 
 using DirectoryInfo = System.IO.DirectoryInfo;
 
-namespace Atmoos.World.IO.Test;
+namespace Atmoos.World.IO.Test.FileSystem;
 
 public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposable
 {

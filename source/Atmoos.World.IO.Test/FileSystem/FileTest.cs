@@ -3,7 +3,7 @@ using File = Atmoos.World.IO.FileSystem.File;
 using Directory = Atmoos.World.IO.FileSystem.Directory;
 using Atmoos.World.FileSystemTests;
 
-namespace Atmoos.World.IO.Test;
+namespace Atmoos.World.IO.Test.FileSystem;
 
 public sealed class FileTest : IFileProperties
 {

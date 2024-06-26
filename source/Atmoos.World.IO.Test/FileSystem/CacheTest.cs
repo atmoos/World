@@ -1,7 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
 using Atmoos.World.IO.FileSystem;
 
-namespace Atmoos.World.IO.Test;
+namespace Atmoos.World.IO.Test.FileSystem;
 
 public sealed class CacheTest
 {

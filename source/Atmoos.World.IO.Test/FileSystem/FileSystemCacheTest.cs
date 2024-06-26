@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Atmoos.World.IO.FileSystem;
 
-namespace Atmoos.World.IO.Test;
+namespace Atmoos.World.IO.Test.FileSystem;
 
 public sealed class FileSystemCacheTest
 {

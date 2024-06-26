@@ -1,7 +1,7 @@
 using Atmoos.World.IO.FileSystem;
 using Directory = Atmoos.World.IO.FileSystem.Directory;
 
-namespace Atmoos.World.IO.Test;
+namespace Atmoos.World.IO.Test.FileSystem;
 
 public sealed class DirectoryTest
 {
