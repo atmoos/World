@@ -15,15 +15,9 @@ internal sealed class FileSystemCache
         if (directory.Parent == null || directory.FullName == this.root.FullPath) {
             return this.root;
         }
-        // ToDo: Optimize this...
-        foreach (var (info, system) in this.directories) {
-            if (system.FullName == directory.FullName) {
-                return info;
-            }
-        }
         var parent = Locate(directory.Parent);
-        var name = new DirectoryName(directory.Name);
-        return Add(parent, name).info;
+        var dir = parent.Children().FirstOrDefault(d => d.Name == directory.Name);
+        return dir ?? throw new InvalidOperationException($"Directory '{directory.FullName}' not found.");
     }
 
     public (IFile info, FileInfo system) Add(in NewFile file) => Add(file.Parent, file.Name);
@@ -42,13 +36,19 @@ internal sealed class FileSystemCache
         return info;
     }
 
-    public (IDirectory info, DirectoryInfo system) Add(in NewDirectory directory) => Add(directory.Parent, directory.Name);
-    public (IDirectory info, DirectoryInfo system) Add(IDirectory parent, DirectoryName name)
+    public (IDirectory directory, DirectoryInfo system) Add(in NewDirectory directory) => Add(directory.Parent, directory.Name);
+    public (IDirectory directory, DirectoryInfo system) Add(IDirectory parent, DirectoryName name)
     {
         var dir = FindDirectory(parent);
-        var systemInfo = new DirectoryInfo(System.IO.Path.Combine(dir.FullName, name));
-        var directoryInfo = new Directory(this, parent, systemInfo);
-        return (directoryInfo, this.directories[directoryInfo] = systemInfo);
+        var directoryInfo = new DirectoryInfo(System.IO.Path.Combine(dir.FullName, name));
+        var directory = new Directory(this, parent, directoryInfo);
+        return (directory, this.directories[directory] = directoryInfo);
+    }
+    public IDirectory AddChild(IDirectory parent, DirectoryInfo childInfo)
+    {
+        var child = new Directory(this, parent, childInfo);
+        this.directories[child] = childInfo;
+        return child;
     }
 
     public FileInfo FindFile(IFile file)

@@ -34,7 +34,7 @@ internal sealed class Directory : IDirectory
         this.exists = ChildExists;
         parentNode[this] = this;
     }
-
+    public IEnumerable<IDirectory> Children() => this.node.Select(t => t.key);
     public File Add(FileName name, DateTime creationTime)
     {
         if (this.files.Values.Any(file => file.Name == name)) {

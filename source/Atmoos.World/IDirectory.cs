@@ -9,4 +9,5 @@ public interface IDirectory : ICountable<IFile>, INode
 
     // ToDo: Consider deleting this property.
     public IDirectory Root { get; }
+    public IEnumerable<IDirectory> Children();
 }

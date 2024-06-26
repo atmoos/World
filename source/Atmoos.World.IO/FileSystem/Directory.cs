@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace Atmoos.World.IO.FileSystem;
 
 internal sealed class Directory : IEquatable<IFullyQualified>, IFullyQualified, IDirectory
@@ -5,6 +7,7 @@ internal sealed class Directory : IEquatable<IFullyQualified>, IFullyQualified, 
     private readonly IDirectory parent;
     private readonly DirectoryInfo directory;
     private readonly FileSystemCache cache;
+    private readonly ConcurrentDictionary<String, IDirectory> children = [];
     public Int32 Count => Exists ? this.directory.GetFiles().Length : 0;
     public DirectoryName Name { get; }
     public Boolean Exists => System.IO.Directory.Exists(FullPath);
@@ -29,7 +32,15 @@ internal sealed class Directory : IEquatable<IFullyQualified>, IFullyQualified, 
         Root = this.parent = this;
         Name = new DirectoryName(directory.Name);
     }
-
+    public IEnumerable<IDirectory> Children()
+    {
+        if (!Exists) {
+            return [];
+        }
+        this.children.Purge(v => !v.Exists);
+        var newborns = this.directory.GetDirectories().Where(c => !this.children.TryGetValue(c.Name, out _));
+        return this.children.Update(newborns, child => (child.Name, this.cache.AddChild(this, child))).Values;
+    }
     public override String ToString() => this.directory.FullName;
     public override Boolean Equals(Object? other) => Equals(other as IFullyQualified);
     public Boolean Equals(IFullyQualified? other) => FullPath.Equals(other?.FullPath);
@@ -41,4 +52,6 @@ internal sealed class Directory : IEquatable<IFullyQualified>, IFullyQualified, 
             yield return this.cache.Add(this, file);
         }
     }
+
+
 }

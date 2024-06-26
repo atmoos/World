@@ -15,9 +15,9 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
     {
         var rootPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Atmoos.World.IO.Test");
         this.root = new DirectoryInfo(rootPath);
+        this.root.Create();
         var rootDir = Current.Locate(this.root);
         this.scenarios = new FileSystemScenarios<Current, Time.Current>(rootDir, output, TimeSpan.FromMilliseconds(100));
-        this.root.Create();
     }
 
     [Fact]

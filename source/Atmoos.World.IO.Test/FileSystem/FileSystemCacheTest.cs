@@ -53,6 +53,7 @@ file sealed class Dir(DirectoryName name, IDirectory parent) : IDirectory
     public Int32 Count => 0;
     public Boolean Exists => false;
     public DateTime CreationTime => parent.CreationTime;
+    public IEnumerable<IDirectory> Children() => [];
     public IEnumerator<IFile> GetEnumerator() => ((IEnumerable<IFile>)[]).GetEnumerator();
 }
 

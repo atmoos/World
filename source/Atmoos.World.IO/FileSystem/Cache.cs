@@ -24,13 +24,7 @@ internal sealed class Cache<TKey, TValue> : ICountable<(TKey key, TValue value)>
         return false;
     }
 
-    public void Purge()
-    {
-        var deleted = this.values.Keys.Where(value => !value.Exists).ToArray();
-        foreach (var key in deleted) {
-            this.values.Remove(key, out _);
-        }
-    }
+    public void Purge() => this.values.Purge(v => !v.Exists);
 
     public IEnumerator<(TKey key, TValue value)> GetEnumerator() => this.values.Select(pair => (pair.Key, pair.Value)).GetEnumerator();
 }
