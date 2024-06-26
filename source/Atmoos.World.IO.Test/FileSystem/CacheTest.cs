@@ -19,7 +19,7 @@ public sealed class CacheTest
 
         Cache<INode, String> populatedCache = PopulateCache(expected);
 
-        Assert.Equal(expected, populatedCache);
+        Assert.Equal(expected.OrderBy(n => n.text), populatedCache.OrderBy(n => n.value));
     }
 
     [Fact]
