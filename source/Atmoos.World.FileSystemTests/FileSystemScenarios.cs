@@ -14,11 +14,12 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
     public void CreateFileSucceeds()
     {
         var name = new FileName("file", "txt");
-        var fileInfo = FileSystem.Create(root, name);
+        var file = FileSystem.Create(root, name);
 
-        Assert.Equal(name, fileInfo.Name);
-        Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
-        Assert.Equal(root, fileInfo.Parent);
+        Assert.Equal(name, file.Name);
+        Assert.Equal(Time.Now, file.CreationTime, tol);
+        Assert.Equal(root, file.Parent);
+        Assert.True(file.Exists, "The file should exist after creation.");
     }
 
     public void CreateFileInAntecedentDirs()
@@ -26,24 +27,26 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         var name = new FileName { Name = "file", Extension = "txt" };
         String[] antecedents = ["some", "antecedent", "directory"];
         var command = Path.Abs(root, antecedents) + name;
-        var fileInfo = FileSystem.Create(command);
+        var file = FileSystem.Create(command);
 
-        Assert.Equal(name, fileInfo.Name);
-        Assert.Equal(Time.Now, fileInfo.CreationTime, tol);
+        Assert.Equal(name, file.Name);
+        Assert.Equal(Time.Now, file.CreationTime, tol);
+        Assert.True(file.Exists, "The file should exist after creation.");
 
         var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
-        var actualAntecedents = fileInfo.Parent.Path().Select(a => a.Name.Value).ToArray();
+        var actualAntecedents = file.Parent.Path().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
     public void CreateDirectorySucceeds()
     {
         var name = new DirectoryName { Value = "NewDirectory" };
-        var directoryInfo = FileSystem.Create(root, name);
+        var directory = FileSystem.Create(root, name);
 
-        Assert.Equal(name, directoryInfo.Name);
-        Assert.Equal(Time.Now, directoryInfo.CreationTime, tol);
-        Assert.Equal(root, directoryInfo.Parent);
+        Assert.Equal(name, directory.Name);
+        Assert.Equal(Time.Now, directory.CreationTime, tol);
+        Assert.Equal(root, directory.Parent);
+        Assert.True(directory.Exists, "The directory should exist after creation.");
     }
 
     public void CreateDirectoryInAntecedentDirs()
@@ -51,13 +54,14 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         var name = "SomeNewDirectory";
         String[] antecedents = ["some", "antecedent", "directory"];
         var command = Path.Abs(root, [.. antecedents, name]);
-        var directoryInfo = FileSystem.Create(command);
+        var directory = FileSystem.Create(command);
 
-        Assert.Equal(name, directoryInfo.Name);
-        Assert.Equal(Time.Now, directoryInfo.CreationTime, tol);
+        Assert.Equal(name, directory.Name);
+        Assert.Equal(Time.Now, directory.CreationTime, tol);
+        Assert.True(directory.Exists, "The directory should exist after creation.");
 
         var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
-        var actualAntecedents = directoryInfo.Antecedents().Select(a => a.Name.Value).ToArray();
+        var actualAntecedents = directory.Antecedents().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
