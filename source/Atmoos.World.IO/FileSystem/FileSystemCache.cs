@@ -19,14 +19,17 @@ internal sealed class FileSystemCache
     }
     public FileSystemCache() : this(CreateRoot(System.IO.Directory.GetCurrentDirectory())) { }
     internal FileSystemCache(Directory root) => this.root = root;
-    public IDirectory Locate(DirectoryInfo directory)
+    public Directory Locate(DirectoryInfo directory)
     {
         if (directory.Parent == null || directory.FullName == this.root.FullPath) {
             return this.root;
         }
         var parent = Locate(directory.Parent);
-        var dir = parent.Children().FirstOrDefault(d => d.Name == directory.Name);
-        return dir ?? throw new InvalidOperationException($"Directory '{directory.FullName}' not found.");
+        var child = parent.Children().FirstOrDefault(d => d.Name == directory.Name) switch {
+            Directory dir => dir,
+            _ => parent.Add(new DirectoryName(directory.Name))
+        };
+        return this.directories[child] = child;
     }
 
     public File Find(IFile file)
