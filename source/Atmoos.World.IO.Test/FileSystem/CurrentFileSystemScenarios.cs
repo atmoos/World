@@ -18,6 +18,7 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
         this.root = temp.CreateSubdirectory(Guid.NewGuid().ToString());
         var rootDir = Current.Locate(this.root);
         this.scenarios = new FileSystemScenarios<Current, Time.Current>(rootDir, output, tol);
+        Assert.True(SpinWait.SpinUntil(() => System.IO.Directory.Exists(this.root.FullName), TimeSpan.FromSeconds(2)), $"Failed creating root test directory: {rootDir}");
     }
 
     [Fact]
