@@ -1,57 +1,88 @@
 using System.Collections.Concurrent;
+using SysIO = System.IO;
 
 namespace Atmoos.World.IO.FileSystem;
 
-internal sealed class Directory : IEquatable<IFullyQualified>, IFullyQualified, IDirectory
+internal sealed class Directory : IEquatable<Directory>, IDirectory
 {
-    private readonly IDirectory parent;
-    private readonly DirectoryInfo directory;
-    private readonly FileSystemCache cache;
-    private readonly ConcurrentDictionary<String, IDirectory> children = [];
-    public Int32 Count => Exists ? this.directory.GetFiles().Length : 0;
+    private static readonly List<IFile> empty = [];
+    private readonly ConcurrentDictionary<String, File> files = [];
+    private readonly ConcurrentDictionary<String, Directory> children = [];
+    public Int32 Count => Exists ? Info.GetFiles().Length : 0;
     public DirectoryName Name { get; }
-    public Boolean Exists => System.IO.Directory.Exists(FullPath);
-    public IDirectory Parent => this.parent;
+    public Boolean Exists => SysIO.Directory.Exists(FullPath);
+    internal DirectoryInfo Info { get; }
+    public IDirectory Parent { get; }
     public IDirectory Root { get; }
-    public DateTime CreationTime => this.directory.CreationTimeUtc;
-    public String FullPath => this.directory.FullName;
+    public DateTime CreationTime => Info.CreationTimeUtc;
+    internal String FullPath => Info.FullName;
 
-    public Directory(FileSystemCache cache, IDirectory parent, DirectoryInfo directory)
+    public Directory(IDirectory parent, DirectoryInfo info)
     {
-        this.cache = cache;
-        this.parent = parent;
-        this.directory = directory;
+        Info = info;
+        Parent = parent;
         Root = parent.Root;
-        Name = new DirectoryName(directory.Name);
+        Name = new DirectoryName(info.Name);
     }
 
-    public Directory(FileSystemCache cache, DirectoryInfo directory)
+    public Directory(DirectoryInfo info)
     {
-        this.cache = cache;
-        this.directory = directory;
-        Root = this.parent = this;
-        Name = new DirectoryName(directory.Name);
+        Info = info;
+        Root = Parent = this;
+        Name = new DirectoryName(info.Name);
     }
     public IEnumerable<IDirectory> Children()
     {
         if (!Exists) {
             return [];
         }
-        this.children.Purge(v => !v.Exists);
-        var newborns = this.directory.GetDirectories().Where(c => !this.children.TryGetValue(c.Name, out _));
-        return this.children.Update(newborns, child => (child.Name, this.cache.AddChild(this, child))).Values;
+        var newDirs = Info.EnumerateDirectories().Where(c => !this.children.TryGetValue(c.Name, out _));
+        return this.children.Update(newDirs, child => (child.Name, new Directory(this, child))).Values;
     }
-    public override String ToString() => this.directory.FullName;
-    public override Boolean Equals(Object? other) => Equals(other as IFullyQualified);
-    public Boolean Equals(IFullyQualified? other) => FullPath.Equals(other?.FullPath);
+    public override String ToString() => Info.FullName;
+    public override Boolean Equals(Object? other) => Equals(other as Directory);
+    public Boolean Equals(Directory? other) => FullPath.Equals(other?.FullPath);
     public override Int32 GetHashCode() => FullPath.GetHashCode();
     public IEnumerator<IFile> GetEnumerator()
     {
-        var files = Exists ? this.directory.GetFiles() : [];
-        foreach (var file in files) {
-            yield return this.cache.Add(this, file);
+        if (!Exists) {
+            return empty.GetEnumerator();
         }
+        var newFiles = Info.EnumerateFiles().Where(c => !this.files.TryGetValue(c.Name, out _));
+        return this.files.Update(newFiles, child => (child.Name, new File(this, child))).Values.GetEnumerator();
     }
 
-
+    internal Directory Add(DirectoryName name)
+    {
+        if (this.children.TryGetValue(name, out var child)) {
+            return child;
+        }
+        var childInfo = new DirectoryInfo(SysIO.Path.Combine(Info.FullName, name));
+        return this.children[childInfo.Name] = new Directory(this, childInfo);
+    }
+    internal File Add(FileName name)
+    {
+        if (this.files.TryGetValue(name, out var file)) {
+            return file;
+        }
+        var fileInfo = new FileInfo(SysIO.Path.Combine(Info.FullName, name));
+        return this.files[name] = new File(this, fileInfo);
+    }
+    internal void Delete(Boolean recursive)
+    {
+        Info.Delete(recursive);
+        this.children.Clear();
+        this.files.Clear();
+    }
+    internal void Delete(IFile file)
+    {
+        if (this.files.TryRemove(file.Name, out var fileInfo)) {
+            fileInfo.Delete();
+        }
+    }
+    internal void Purge()
+    {
+        this.children.Purge(v => !v.Exists);
+        this.files.Purge(v => !v.Exists);
+    }
 }

@@ -43,6 +43,9 @@ public static class Extensions
     public static Result<IFile> Search(this IDirectory directory, FileName name)
         => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");
 
+    public static Result<IDirectory> Search(this IDirectory directory, DirectoryName name)
+        => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
+
     public static async Task CopyTo(this IRead source, IWrite target, CancellationToken token = default)
     {
         using var reader = source.OpenRead();

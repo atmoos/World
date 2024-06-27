@@ -1,10 +1,15 @@
 using System.Runtime.InteropServices;
 using Atmoos.World.IO.FileSystem;
+using Directory = Atmoos.World.IO.FileSystem.Directory;
 
 namespace Atmoos.World.IO.Test.FileSystem;
 
-public sealed class FileSystemCacheTest
+public sealed class FileSystemCacheTest : IDisposable
 {
+    private readonly (Directory root, Directory directory) env;
+
+    public FileSystemCacheTest() => this.env = CreateRoot(System.IO.Path.GetTempPath());
+
     [Fact]
     public void RootIsTheCurrentFileSystemsRoot()
     {
@@ -24,10 +29,10 @@ public sealed class FileSystemCacheTest
     public void FindFileOnEmptyCacheDoesNotFail()
     {
         var name = "myName";
-        var cache = new FileSystemCache();
-        var floatingFile = new File(new FileName(name), cache.Root);
+        var cache = new FileSystemCache(this.env.root);
+        var floatingFile = new File(new FileName(name), this.env.directory);
 
-        var actual = cache.FindFile(floatingFile);
+        var actual = cache.Find(floatingFile);
 
         Assert.Equal(name, actual.Name);
     }
@@ -36,14 +41,23 @@ public sealed class FileSystemCacheTest
     public void FindDirectoryOnEmptyCacheDoesNotFail()
     {
         var name = "myName";
-        var cache = new FileSystemCache();
-        var floatingDir = new Dir(new DirectoryName(name), cache.Root);
+        var cache = new FileSystemCache(this.env.root);
+        var floatingDir = new Dir(new DirectoryName(name), this.env.directory);
 
-        var actual = cache.FindDirectory(floatingDir);
+        var actual = cache.Find(floatingDir);
 
         Assert.Equal(name, actual.Name);
     }
+
+    public void Dispose() => this.env.directory.Delete(recursive: true);
+    private static (Directory root, Directory parent) CreateRoot(String root)
+    {
+        var rootDir = new Directory(System.IO.Directory.CreateDirectory(root));
+        var parentPath = System.IO.Path.Combine(root, Guid.NewGuid().ToString());
+        return (rootDir, new(rootDir, System.IO.Directory.CreateDirectory(parentPath)));
+    }
 }
+
 
 file sealed class Dir(DirectoryName name, IDirectory parent) : IDirectory
 {

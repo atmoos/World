@@ -139,7 +139,7 @@ public sealed class FileTest : IFileProperties
     {
         var dirInfo = new DirectoryInfo(path);
         dirInfo.Create();
-        return new Directory(new FileSystemCache(), dirInfo);
+        return new Directory(dirInfo);
     }
 
     private sealed class FileEnv(String name) : IDisposable

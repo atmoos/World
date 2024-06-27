@@ -9,52 +9,54 @@ public sealed class Current : IFileSystem
     public static IDirectory CurrentDirectory => cache.Locate(new DirectoryInfo(System.IO.Directory.GetCurrentDirectory()));
     public static IFile Create(IDirectory parent, FileName name)
     {
-        var (file, info) = cache.Add(parent, name);
-        using (info.Create()) {
-            return file;
+        var file = cache.Find(parent).Add(name);
+        using (file.Info.Create()) {
+            return cache[file] = file;
         }
     }
+
     public static IFile Create(FilePath file) => Create(Create(file.Path), file.Name);
     public static IDirectory Create(IDirectory parent, DirectoryName name)
     {
-        var (directory, info) = cache.Add(parent, name);
-        info.Create();
-        return directory;
+        var directory = cache.Find(parent).Add(name);
+        directory.Info.Create();
+        return cache[directory] = directory;
     }
+
     public static IDirectory Create(Path path) => path.Aggregate(path.Root, Create);
 
     public static void Delete(IFile file)
     {
-        var info = cache.FindFile(file);
-        info.Delete();
+        var dir = cache.Find(file.Parent);
+        dir.Delete(file);
         cache.Purge();
     }
 
     public static void Delete(IDirectory directory, Boolean recursive)
     {
-        var info = cache.FindDirectory(directory);
-        info.Delete(recursive);
+        var dir = cache.Find(directory);
+        dir.Delete(recursive);
         cache.Purge();
     }
 
     public static IFile Move(IFile source, IFile target)
     {
-        var sourceFile = cache.FindFile(source);
-        var targetFile = cache.FindFile(target);
-        System.IO.File.Move(sourceFile.FullName, targetFile.FullName, overwrite: true);
+        var sourceFile = cache.Find(source);
+        var targetFile = cache.Find(target);
+        System.IO.File.Move(sourceFile.ToString(), targetFile.ToString(), overwrite: true);
         cache.Purge();
         return target;
     }
     public static IFile Move(IFile source, in NewFile target)
     {
-        var sourceFile = cache.FindFile(source);
-        var (file, targetFile) = cache.Add(in target);
+        var sourceFile = cache.Find(source);
+        var targetFile = cache.Find(target.Parent).Add(target.Name);
         try {
-            System.IO.File.Move(sourceFile.FullName, targetFile.FullName, overwrite: false);
-            return file;
+            System.IO.File.Move(sourceFile.ToString(), targetFile.ToString(), overwrite: false);
+            return targetFile;
         }
         catch (IOException e) when (!e.Message.Contains(target.Name)) {
-            throw new IOException($"Cannot move '{sourceFile.FullName}' to '{targetFile.FullName}'.", e);
+            throw new IOException($"Cannot move '{sourceFile}' to '{targetFile}'.", e);
         }
         finally {
             cache.Purge();
@@ -63,11 +65,12 @@ public sealed class Current : IFileSystem
 
     public static IDirectory Move(IDirectory source, in NewDirectory destination)
     {
-        var sourceDir = cache.FindDirectory(source);
-        var (directory, target) = cache.Add(in destination);
-        System.IO.Directory.Move(sourceDir.FullName, target.FullName);
+        var sourceDir = cache.Find(source);
+        var targetDir = cache.Find(destination.Parent).Add(destination.Name);
+        System.IO.Directory.Move(sourceDir.FullPath, targetDir.FullPath);
+        sourceDir.Purge();
         cache.Purge();
-        return directory;
+        return targetDir;
     }
 
     public static Result<IFile> Search(FilePath query)

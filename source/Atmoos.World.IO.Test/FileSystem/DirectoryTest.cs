@@ -5,12 +5,12 @@ namespace Atmoos.World.IO.Test.FileSystem;
 
 public sealed class DirectoryTest
 {
-    private static readonly (FileSystemCache cache, Directory dir) root = CreateRootDirectory(System.IO.Path.Combine(System.IO.Path.GetTempPath()));
+    private static readonly Directory root = CreateRootDirectory(System.IO.Path.Combine(System.IO.Path.GetTempPath()));
 
     [Fact]
     public void CountOfNonExistingDirectoryIsZero()
     {
-        var dir = new Directory(root.cache, root.dir, new DirectoryInfo("nonExistent"));
+        var dir = new Directory(root, new DirectoryInfo("nonExistent"));
 
         Assert.Equal(0, dir.Count);
         Assert.False(dir.Exists);
@@ -25,7 +25,7 @@ public sealed class DirectoryTest
             CreateSystemFile(env.FullPath, subDir);
         }
 
-        var dir = new Directory(root.cache, root.dir, env.Directory);
+        var dir = new Directory(root, env.Directory);
 
         Assert.Equal(files.Length, dir.Count);
     }
@@ -39,7 +39,7 @@ public sealed class DirectoryTest
             CreateSystemFile(env.FullPath, subDir);
         }
 
-        var dir = new Directory(root.cache, root.dir, env.Directory);
+        var dir = new Directory(root, env.Directory);
 
         Assert.Equal(files.Order(), dir.Select(f => f.Name.ToString()).Order());
     }
@@ -48,8 +48,8 @@ public sealed class DirectoryTest
     public void DirectoriesOfSamePathAreEqual()
     {
         var dir = RootedPath("someDir");
-        var left = new Directory(root.cache, root.dir, dir);
-        var right = new Directory(root.cache, root.dir, dir);
+        var left = new Directory(root, dir);
+        var right = new Directory(root, dir);
 
         Assert.StrictEqual(left, right);
         Assert.NotSame(left, right); // Just to make it obvious that we are not comparing references.
@@ -58,8 +58,8 @@ public sealed class DirectoryTest
     [Fact]
     public void DirectoriesOfDifferingPathsAreNotEqual()
     {
-        var left = new Directory(root.cache, root.dir, RootedPath("a"));
-        var right = new Directory(root.cache, root.dir, RootedPath("b"));
+        var left = new Directory(root, RootedPath("a"));
+        var right = new Directory(root, RootedPath("b"));
 
         Assert.NotStrictEqual(left, right);
     }
@@ -68,7 +68,7 @@ public sealed class DirectoryTest
     public void DirectoryIsNotEqualToNull()
     {
         Directory? noDir = null;
-        var left = new Directory(root.cache, root.dir, RootedPath("ab"));
+        var left = new Directory(root, RootedPath("ab"));
 
         Assert.False(left.Equals(noDir));
     }
@@ -77,7 +77,7 @@ public sealed class DirectoryTest
     public void ToStringReturnsFullPath()
     {
         var rootedPath = RootedPath("ThisIsThePath");
-        var directory = new Directory(root.cache, root.dir, rootedPath);
+        var directory = new Directory(root, rootedPath);
 
         Assert.Equal(rootedPath.FullName, directory.ToString());
     }
@@ -85,19 +85,18 @@ public sealed class DirectoryTest
     private static void CreateSystemFile(String parent, String name)
         => System.IO.File.Create(System.IO.Path.Combine(parent, name)).Dispose();
     private static DirectoryInfo RootedPath(String name)
-        => new(System.IO.Path.Combine(root.dir.FullPath, name));
-    private static (FileSystemCache cache, Directory root) CreateRootDirectory(String path)
+        => new(System.IO.Path.Combine(root.FullPath, name));
+    private static Directory CreateRootDirectory(String path)
     {
         var dirInfo = new DirectoryInfo(path);
         dirInfo.Create();
-        var cache = new FileSystemCache();
-        return (cache, new Directory(cache, dirInfo));
+        return new Directory(dirInfo);
     }
 
     private sealed class DirEnv(String name) : IDisposable
     {
         public String FullPath => Directory.FullName;
-        public DirectoryInfo Directory { get; } = new DirectoryInfo(System.IO.Path.Combine(root.dir.FullPath, name));
+        public DirectoryInfo Directory { get; } = new DirectoryInfo(System.IO.Path.Combine(root.FullPath, name));
         public void Dispose() => Directory.Delete(recursive: true);
         public static DirEnv Create(String name)
         {
