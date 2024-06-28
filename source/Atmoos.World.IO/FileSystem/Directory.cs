@@ -8,9 +8,9 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
     private static readonly List<IFile> empty = [];
     private readonly ConcurrentDictionary<String, File> files = [];
     private readonly ConcurrentDictionary<String, Directory> children = [];
-    public Int32 Count => Exists ? Info.GetFiles().Length : 0;
+    public Int32 Count => Info.Refresh(i => i.Exists ? i.GetFiles().Length : 0);
     public DirectoryName Name { get; }
-    public Boolean Exists => SysIO.Directory.Exists(FullPath);
+    public Boolean Exists => Info.Refresh(i => i.Exists);
     internal DirectoryInfo Info { get; }
     public IDirectory Parent { get; }
     public IDirectory Root { get; }
@@ -57,7 +57,7 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
         if (this.children.TryGetValue(name, out var child)) {
             return child;
         }
-        var childInfo = new DirectoryInfo(SysIO.Path.Combine(Info.FullName, name));
+        var childInfo = new DirectoryInfo(SysIO.Path.Combine(FullPath, name));
         return this.children[childInfo.Name] = new Directory(this, childInfo);
     }
     internal File Add(FileName name)
@@ -65,7 +65,7 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
         if (this.files.TryGetValue(name, out var file)) {
             return file;
         }
-        var fileInfo = new FileInfo(SysIO.Path.Combine(Info.FullName, name));
+        var fileInfo = new FileInfo(SysIO.Path.Combine(FullPath, name));
         return this.files[name] = new File(this, fileInfo);
     }
     internal void Delete(Boolean recursive)

@@ -45,5 +45,12 @@ internal static class Extensions
         }
         return dictionary;
     }
+
+    public static TValue Refresh<TInfo, TValue>(this TInfo info, Func<TInfo, TValue> refresh)
+        where TInfo : FileSystemInfo
+    {
+        info.Refresh();
+        return refresh(info);
+    }
 }
 
