@@ -30,11 +30,24 @@ public sealed class FileSystemCacheTest : IDisposable
     {
         var name = "myName";
         var cache = new FileSystemCache(this.env.root);
+        var floatingFile = this.env.directory.Add(new FileName(name));
+
+        var actual = cache.Find(floatingFile);
+
+        Assert.Same(floatingFile, actual);
+    }
+
+    [Fact]
+    public void FindFileOnEmptyCacheWithForeignFileTypeDoesNotFail()
+    {
+        var name = "myName";
+        var cache = new FileSystemCache(this.env.root);
         var floatingFile = new File(new FileName(name), this.env.directory);
 
         var actual = cache.Find(floatingFile);
 
         Assert.Equal(name, actual.Name);
+        Assert.NotSame(floatingFile, actual);
     }
 
     [Fact]
@@ -42,9 +55,46 @@ public sealed class FileSystemCacheTest : IDisposable
     {
         var name = "myName";
         var cache = new FileSystemCache(this.env.root);
+        var floatingDir = this.env.directory.Add(new DirectoryName(name));
+
+        var actual = cache.Find(floatingDir);
+
+        Assert.Same(floatingDir, actual);
+    }
+
+    [Fact]
+    public void FindDirectoryOnEmptyCacheWithForeignDirectoryTypeDoesNotFail()
+    {
+        var name = "myName";
+        var cache = new FileSystemCache(this.env.root);
         var floatingDir = new Dir(new DirectoryName(name), this.env.directory);
 
         var actual = cache.Find(floatingDir);
+
+        Assert.Equal(name, actual.Name);
+        Assert.NotSame(floatingDir, actual);
+    }
+
+    [Fact]
+    public void FindRootDirectoryReturnsRoot()
+    {
+        var root = this.env.root;
+        var cache = new FileSystemCache(root);
+
+        var actual = cache.Find(root);
+
+        Assert.Same(root, actual);
+    }
+
+    [Fact]
+    public void LocateDirectoryOnEmptyCacheDoesNotFail()
+    {
+        var name = "child";
+        var root = this.env.root;
+        var cache = new FileSystemCache(root);
+        var childDirInfo = this.env.directory.Info.CreateSubdirectory(name);
+
+        var actual = cache.Locate(childDirInfo);
 
         Assert.Equal(name, actual.Name);
     }

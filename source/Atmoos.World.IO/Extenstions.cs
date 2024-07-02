@@ -14,7 +14,7 @@ internal static class Extensions
     }
 
     public static ConcurrentDictionary<K, V> Purge<K, V>(this ConcurrentDictionary<K, V> dictionary, Func<V, Boolean> predicate)
-    where K : notnull
+        where K : notnull
     {
         var toRemove = dictionary.Where(kv => predicate(kv.Value)).Select(kv => kv.Key);
         return dictionary.Purge(toRemove.ToArray());
@@ -27,17 +27,8 @@ internal static class Extensions
         return dictionary.Purge(toRemove.ToArray());
     }
 
-
-    public static ConcurrentDictionary<K, V> Update<K, V>(this ConcurrentDictionary<K, V> dictionary, IEnumerable<K> keys, Func<K, V> update)
-        where K : notnull
-    {
-        foreach (var key in keys) {
-            dictionary[key] = update(key);
-        }
-        return dictionary;
-    }
     public static ConcurrentDictionary<K, V> Update<K, V, U>(this ConcurrentDictionary<K, V> dictionary, IEnumerable<U> updates, Func<U, (K, V)> selector)
-    where K : notnull
+        where K : notnull
     {
         foreach (var update in updates) {
             var (key, value) = selector(update);
