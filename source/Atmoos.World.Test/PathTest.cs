@@ -33,7 +33,7 @@ public sealed class PathTest
     }
 
     [Fact]
-    public void TheEmptyPathHasLengthZero()
+    public void TheEmptyAbsolutePathHasLengthZero()
     {
         var path = Path.Abs(root);
 
@@ -42,13 +42,35 @@ public sealed class PathTest
     }
 
     [Fact]
-    public void RelativePathIsRootedOnTheCurrentDirectory()
+    public void TheEmptyRelativePathHasLengthZero()
     {
+        var path = Path.Rel<FileSystem>();
+
+        Assert.Equal(0, path.Count);
+        Assert.Empty(path);
+    }
+
+    [Fact]
+    public void RelativePathWithTailArgumentsIsRootedOnTheCurrentDirectoryWithNonZeroTail()
+    {
+        String[] tail = ["Any", "Length", "Of", "Sub", "Directories"];
         FileSystem.CurrentDirectory = FileSystem.Create(root, new DirectoryName("SomeDirectory"));
 
-        var path = Path.Rel<FileSystem>("Any", "Length", "Of", "Sub", "Directories");
+        var path = Path.Rel<FileSystem>(tail);
 
         Assert.Same(FileSystem.CurrentDirectory, path.Root);
+        Assert.Equal(tail, path.Select(s => s.Value));
+    }
+
+    [Fact]
+    public void RelativePathWithoutArgumentIsRootedOnTheCurrentDirectoryWithZeroTail()
+    {
+        FileSystem.CurrentDirectory = FileSystem.Create(root, new DirectoryName("SomeDir"));
+
+        var path = Path.Rel<FileSystem>();
+
+        Assert.Same(FileSystem.CurrentDirectory, path.Root);
+        Assert.Empty(path);
     }
 
     [Fact]
