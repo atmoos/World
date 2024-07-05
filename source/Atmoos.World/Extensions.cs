@@ -72,5 +72,11 @@ public static class Extensions
     public static StreamWriter AppendText(this IWrite writer)
         => AppendText(writer, encoding);
     public static StreamWriter AppendText(this IWrite writer, Encoding encoding)
-        => new(writer.OpenWrite(), encoding, leaveOpen: false, bufferSize: bufferSize);
+    {
+        var stream = writer.OpenWrite();
+        if (stream.CanSeek) {
+            stream.Seek(0, SeekOrigin.End);
+        }
+        return new(stream, encoding, leaveOpen: false, bufferSize: bufferSize);
+    }
 }

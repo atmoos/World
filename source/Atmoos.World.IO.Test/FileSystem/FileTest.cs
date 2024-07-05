@@ -1,4 +1,4 @@
-using Atmoos.World.IO.FileSystem;
+using Atmoos.Sphere.Collections;
 using File = Atmoos.World.IO.FileSystem.File;
 using Directory = Atmoos.World.IO.FileSystem.Directory;
 using Atmoos.World.FileSystemTests;
@@ -15,6 +15,25 @@ public sealed class FileTest : IFileProperties
         var file = new File(root, new FileInfo("nonExistent.txt"));
         Assert.Equal(0, file.Size);
         Assert.False(file.Exists);
+    }
+
+    [Fact]
+    public void SizeIncreasesOnFileThatIsWrittenTo()
+    {
+        var sizes = new List<Int64>();
+        String[] content = ["once", "upon", "a", "time"];
+        using var env = FileEnv.Create("toModify.txt");
+        var file = new File(root, env.File);
+
+        sizes.Add(file.Size);
+        foreach (var line in content) {
+            using (var writer = file.AppendText()) {
+                writer.WriteLine(line);
+            }
+            sizes.Add(file.Size);
+        }
+
+        Assert.All(sizes.Window((prev, size) => prev < size), Assert.True);
     }
 
     [Fact]
@@ -141,6 +160,7 @@ public sealed class FileTest : IFileProperties
         dirInfo.Create();
         return new Directory(dirInfo);
     }
+
 
     private sealed class FileEnv(String name) : IDisposable
     {

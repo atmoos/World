@@ -4,6 +4,7 @@ namespace Atmoos.World.InMemory.IO;
 
 internal sealed class File(Directory directory) : IFile
 {
+    private const Int32 minCapacity = 64;
     private const Int32 notWriting = 0;
     private const Int32 writeInProgress = 1;
     private readonly Directory directory = directory;
@@ -41,14 +42,17 @@ internal sealed class File(Directory directory) : IFile
     private sealed class ThisStream : MemoryStream
     {
         private readonly File file;
-        private ThisStream(File file) : base(file.content, writable: false)
+        private ThisStream(File file)
+            : base(file.content, writable: false)
         {
             Interlocked.Increment(ref file.reads);
             this.file = file;
         }
 
-        private ThisStream(File file, Byte[] head) : base(head.Length)
+        private ThisStream(File file, Byte[] head)
+            : base(Math.Max(2 * head.Length, minCapacity))
         {
+            SetLength(head.Length);
             Interlocked.Exchange(ref file.writing, writeInProgress);
             head.CopyTo(GetBuffer(), 0);
             this.file = file;

@@ -8,4 +8,8 @@
     <ProjectReference Include="..\Atmoos.World.Time\Atmoos.World.Time.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Atmoos.Sphere" Version="0.3.*" />
+  </ItemGroup>
+
 </Project>

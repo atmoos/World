@@ -1,3 +1,4 @@
+using Atmoos.Sphere.Collections;
 using File = Atmoos.World.InMemory.IO.File;
 using Directory = Atmoos.World.InMemory.IO.Directory;
 using Atmoos.World.FileSystemTests;
@@ -16,6 +17,25 @@ public sealed class FileTest : IFileProperties
 
         Assert.Equal(0, file.Size);
         Assert.False(file.Exists);
+    }
+
+    [Fact]
+    public void SizeIncreasesOnFileThatIsWrittenTo()
+    {
+        var sizes = new List<Int64>();
+        String[] content = ["once", "upon", "a", "time"];
+        using var env = new FileEnv("growing.txt");
+        var file = env.File;
+
+        sizes.Add(file.Size);
+        foreach (var line in content) {
+            using (var writer = file.AppendText()) {
+                writer.WriteLine(line);
+            }
+            sizes.Add(file.Size);
+        }
+
+        Assert.All(sizes.Window((prev, size) => prev < size), Assert.True);
     }
 
     [Fact]
@@ -103,6 +123,50 @@ public sealed class FileTest : IFileProperties
         File file = DanglingFile(name);
 
         Assert.Equal(name, file.ToString());
+    }
+
+    [Fact]
+    public void AppendTextAppendsAllTextSegments()
+    {
+        String[] content = ["First", "Second", "Third"];
+        var expected = String.Concat(String.Join(Environment.NewLine, content), Environment.NewLine);
+        using var env = new FileEnv("toAppendTo.md");
+        var file = env.File;
+
+        foreach (var line in content) {
+            using var writer = file.AppendText();
+            writer.WriteLine(line);
+        }
+        using var reader = file.OpenText();
+        var actual = reader.ReadToEnd();
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void OpenWriteToFileThatWasAlreadyWrittenToHasPositionAtZero()
+    {
+        Byte[] initialData = [1, 2, 3, 9, 122];
+        using var env = FileEnv.Create("writeTwice.md", initialData);
+        var file = env.File;
+
+        using var secondWrite = file.OpenWrite();
+
+        Assert.Equal(0, secondWrite.Position);
+        Assert.Equal(initialData.Length, secondWrite.Length);
+    }
+
+    [Fact]
+    public void OpenWriteOnEmptyFileSetsCapacityLargerZero()
+    {
+        using var env = new FileEnv("voidOfAnything.md");
+        var file = env.File;
+
+        using var firstWrite = (MemoryStream)file.OpenWrite();
+
+        Assert.Equal(0, firstWrite.Position);
+        Assert.Equal(0, firstWrite.Length);
+        Assert.True(0 < firstWrite.Capacity);
     }
 
     private static File DanglingFile(String name) => new(root) { Name = FileName.Split(name), CreationTime = DateTime.UtcNow };
