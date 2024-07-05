@@ -10,17 +10,19 @@ public static class Extensions
     private static readonly Encoding encoding = Encoding.UTF8;
     public static IEnumerable<IDirectory> Path(this IDirectory tail)
     {
+        var current = tail;
         var antecedents = new Stack<IDirectory>();
-        for (IDirectory current = tail; current != tail.Root; current = current.Parent) {
+        for (; current != current.Parent; current = current.Parent) {
             antecedents.Push(current);
         }
-        antecedents.Push(tail.Root);
+        antecedents.Push(current);
         return antecedents;
     }
     public static IEnumerable<IDirectory> Path(this IDirectory tail, IDirectory until)
     {
+        var current = tail;
         var antecedents = new Stack<IDirectory>();
-        for (IDirectory current = tail; current != until && current != tail.Root; current = current.Parent) {
+        for (; current != until && current != current.Parent; current = current.Parent) {
             antecedents.Push(current);
         }
         return antecedents;
@@ -32,6 +34,16 @@ public static class Extensions
     {
         IDirectory current = tail;
         for (Int32 i = 0; i < depth; ++i) {
+            current = current.Parent;
+        }
+        return current;
+    }
+
+    public static Boolean IsRoot(this IDirectory directory) => ReferenceEquals(directory.Parent, directory);
+    public static IDirectory Root(this IDirectory directory)
+    {
+        IDirectory current = directory;
+        while (ReferenceEquals(current.Parent, current) == false) {
             current = current.Parent;
         }
         return current;

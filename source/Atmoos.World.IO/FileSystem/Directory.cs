@@ -13,7 +13,6 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
     public Boolean Exists => Info.Refresh(i => i.Exists);
     internal DirectoryInfo Info { get; }
     public IDirectory Parent { get; }
-    public IDirectory Root { get; }
     public DateTime CreationTime => Info.CreationTimeUtc;
     internal String FullPath => Info.FullName;
 
@@ -21,14 +20,13 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
     {
         Info = info;
         Parent = parent;
-        Root = parent.Root;
         Name = new DirectoryName(info.Name);
     }
 
     public Directory(DirectoryInfo info)
     {
         Info = info;
-        Root = Parent = this;
+        Parent = this;
         Name = new DirectoryName(info.Name);
     }
     public IEnumerable<IDirectory> Children()

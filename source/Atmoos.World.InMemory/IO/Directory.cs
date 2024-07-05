@@ -11,14 +11,12 @@ internal sealed class Directory : IDirectory
 
     public File this[IFile file] => this.files[file];
     public DirectoryName Name { get; }
-    public IDirectory Root { get; }
     public Boolean Exists => this.exists();
     public IDirectory Parent => this.node.Value;
     public DateTime CreationTime { get; }
 
     private Directory(DirectoryName name, DateTime creationTime)
     {
-        Root = this;
         Name = name;
         CreationTime = creationTime;
         this.exists = () => true; // root always exists.
@@ -28,7 +26,6 @@ internal sealed class Directory : IDirectory
     public Directory(Trie<IDirectory, Directory> parentNode, DirectoryName name, DateTime creationTime)
     {
         Name = name;
-        Root = parentNode.Value.Root;
         CreationTime = creationTime;
         this.node = parentNode;
         this.exists = ChildExists;

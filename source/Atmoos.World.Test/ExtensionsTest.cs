@@ -5,9 +5,33 @@ public sealed class ExtensionsTest
     private static readonly IDirectory root = FileSystem.CurrentDirectory;
     public ExtensionsTest() => FileSystem.CurrentDirectory = root;
 
+    [Fact]
+    public void IsRootOnFileSystemRootReturnsTrue()
+    {
+        Assert.True(root.IsRoot());
+    }
 
     [Fact]
-    public void TrailCreates()
+    public void IsRootOnNonRootReturnsFalse()
+    {
+        var directory = FileSystem.Create(root, new DirectoryName("notRoot"));
+
+        Assert.False(directory.IsRoot());
+    }
+
+    [Fact]
+    public void RootReturnsFileSystemRoot()
+    {
+        var expectedSegments = new String[] { "one", "two", "three" };
+        var directory = FileSystem.Create(Path.Abs(root, expectedSegments));
+
+        var actual = directory.Root();
+
+        Assert.Same(root, actual);
+    }
+
+    [Fact]
+    public void TrailCreatesFullPathIncludingRoot()
     {
         const Char separator = '*';
         var expectedSegments = new String[] { "parent", "child", "grandchild" };
