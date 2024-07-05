@@ -22,6 +22,9 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
     }
 
     [Fact]
+    public void RootIsTheActualRoot() => this.scenarios.RootIsTheActualRoot();
+
+    [Fact]
     public void CreateFileSucceeds() => this.scenarios.CreateFileSucceeds();
 
     [Fact]

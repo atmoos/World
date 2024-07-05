@@ -9,6 +9,9 @@ public sealed class UnixFileSystemScenarios(ITestOutputHelper output) : IFileSys
     private readonly IFileSystemScenarios scenarios = new FileSystemScenarios<UnixFileSystem<Time>, Time>(output);
 
     [Fact]
+    public void RootIsTheActualRoot() => this.scenarios.RootIsTheActualRoot();
+
+    [Fact]
     public void CreateFileSucceeds() => this.scenarios.CreateFileSucceeds();
 
     [Fact]

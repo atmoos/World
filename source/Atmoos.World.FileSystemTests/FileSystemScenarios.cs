@@ -11,6 +11,13 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 {
     public FileSystemScenarios(ITestOutputHelper output) : this(FileSystem.CurrentDirectory, output, TimeSpan.Zero) { }
 
+    public void RootIsTheActualRoot()
+    {
+        var root = FileSystem.Root;
+
+        Assert.Same(root, root.Parent);
+    }
+
     public void CreateFileSucceeds()
     {
         var name = new FileName("file", "txt");

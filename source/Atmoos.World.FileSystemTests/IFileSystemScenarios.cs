@@ -2,6 +2,7 @@ namespace Atmoos.World.FileSystemTests;
 
 public interface IFileSystemScenarios
 {
+    void RootIsTheActualRoot();
     void CreateFileSucceeds();
     void CreateFileInAntecedentDirs();
     void CreateDirectorySucceeds();
