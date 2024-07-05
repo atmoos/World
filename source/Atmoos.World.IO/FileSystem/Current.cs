@@ -47,6 +47,7 @@ public sealed class Current : IFileSystem
         cache.Purge();
         return target;
     }
+
     public static IFile Move(IFile source, in NewFile target)
     {
         var sourceFile = cache.Find(source);

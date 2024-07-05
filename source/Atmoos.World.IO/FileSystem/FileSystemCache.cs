@@ -13,12 +13,12 @@ internal sealed class FileSystemCache
     {
         set => this.files[file] = value;
     }
-    public Directory this[IDirectory file]
+    public Directory this[IDirectory directory]
     {
-        set => this.directories[file] = value;
+        set => this.directories[directory] = value;
     }
     public FileSystemCache() : this(CreateRoot(System.IO.Directory.GetCurrentDirectory())) { }
-    internal FileSystemCache(Directory root) => this.root = root;
+    internal FileSystemCache(Directory root) => this.root = this[root] = root;
     public Directory Locate(DirectoryInfo directory)
     {
         if (directory.Parent == null || directory.FullName == this.root.FullPath) {
@@ -34,7 +34,7 @@ internal sealed class FileSystemCache
 
     public File Find(IFile file)
     {
-        if (this.files.TryGetValue(file, out var cachedFile)) {
+        if (this.files.TryGetValue(file, out File? cachedFile)) {
             return cachedFile;
         }
         if (file is File typedFile) {
@@ -46,10 +46,7 @@ internal sealed class FileSystemCache
 
     public Directory Find(IDirectory directory)
     {
-        if (this.root.Equals(directory)) {
-            return this.root;
-        }
-        if (this.directories.TryGetValue(directory, out var cachedDir)) {
+        if (this.directories.TryGetValue(directory, out Directory? cachedDir)) {
             return cachedDir;
         }
         if (directory is Directory typedDir) {

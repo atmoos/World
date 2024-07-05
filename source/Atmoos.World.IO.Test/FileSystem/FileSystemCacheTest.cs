@@ -38,16 +38,29 @@ public sealed class FileSystemCacheTest : IDisposable
     }
 
     [Fact]
-    public void FindFileOnEmptyCacheWithForeignFileTypeDoesNotFail()
+    public void FindFileOnEmptyCacheWithNonNativeFileTypeDoesNotFail()
     {
         var name = "myName";
         var cache = new FileSystemCache(this.env.root);
-        var floatingFile = new File(new FileName(name), this.env.directory);
+        var nonNativeFile = new File(new FileName(name), this.env.directory);
 
-        var actual = cache.Find(floatingFile);
+        var actual = cache.Find(nonNativeFile);
 
         Assert.Equal(name, actual.Name);
-        Assert.NotSame(floatingFile, actual);
+        Assert.NotSame(nonNativeFile, actual);
+    }
+
+    [Fact]
+    public void FindFileOnEmptyCacheWithNonNativeFileTypeReturnsSameInstanceAgainWhenUsingNativeFile()
+    {
+        var name = "lookMeUpTwice";
+        var cache = new FileSystemCache(this.env.root);
+        var nonNativeFile = new File(new FileName(name), this.env.directory);
+
+        var nativeFile = cache.Find(nonNativeFile);
+        var nativeFileLookedUpTwice = cache.Find(nativeFile);
+
+        Assert.Same(nativeFile, nativeFileLookedUpTwice);
     }
 
     [Fact]
@@ -63,16 +76,29 @@ public sealed class FileSystemCacheTest : IDisposable
     }
 
     [Fact]
-    public void FindDirectoryOnEmptyCacheWithForeignDirectoryTypeDoesNotFail()
+    public void FindDirectoryOnEmptyCacheWithNonNativeDirectoryTypeDoesNotFail()
     {
         var name = "myName";
         var cache = new FileSystemCache(this.env.root);
-        var floatingDir = new Dir(new DirectoryName(name), this.env.directory);
+        var nonNativeDir = new Dir(new DirectoryName(name), this.env.directory);
 
-        var actual = cache.Find(floatingDir);
+        var actual = cache.Find(nonNativeDir);
 
         Assert.Equal(name, actual.Name);
-        Assert.NotSame(floatingDir, actual);
+        Assert.NotSame(nonNativeDir, actual);
+    }
+
+    [Fact]
+    public void FindDirectoryOnEmptyCacheWithNonNativeDirectoryReturnsSameInstanceAgainWhenUsingNativeDirectory()
+    {
+        var name = "lookMeUpTwice";
+        var cache = new FileSystemCache(this.env.root);
+        var foreignDir = new Dir(new DirectoryName(name), this.env.directory);
+
+        var nativeDir = cache.Find(foreignDir);
+        var nativeDirLookedUpTwice = cache.Find(nativeDir);
+
+        Assert.Same(nativeDir, nativeDirLookedUpTwice);
     }
 
     [Fact]
