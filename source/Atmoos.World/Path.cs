@@ -16,10 +16,6 @@ public sealed class Path : ICountable<DirectoryName>
     public IDirectory Root => this.root;
     private Path(IDirectory root, Int32 count, IEnumerable<DirectoryName> path) => (this.root, Count, this.path) = (root, count, path);
     public IEnumerator<DirectoryName> GetEnumerator() => this.path.GetEnumerator();
-
-    // ToDo: Consider moving these to Absolute and Relative static classes. For syntax like:
-    // Absolute.Path(root, "MyDirectory", "MySubDirectory")
-    // Relative.Path<FileSystem>(2, "MyDirectory", "MySubDirectory")
     public static Path Abs(IDirectory root) => new(root, 0, []);
     public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path.Length, path);
     public static Path Abs(IDirectory root, params String[] path) => new(root, path.Length, path.Select(Dir));

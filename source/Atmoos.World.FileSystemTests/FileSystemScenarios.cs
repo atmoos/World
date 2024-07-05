@@ -158,8 +158,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Result<IFile> result = FileSystem.Search(filePath);
 
         IFile actualFile = Assert.IsType<Success<IFile>>(result).Value();
-        // ToDo: Change to Assert.Same
-        Assert.Equal(expectedFind, actualFile);
+        Assert.Same(expectedFind, actualFile);
     }
 
     public void SearchForNonExistentDirectoryFails()
@@ -189,8 +188,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Result<IDirectory> result = FileSystem.Search(query);
 
         IDirectory actualDirectory = Assert.IsType<Success<IDirectory>>(result).Value();
-        // ToDo: Change to Assert.Same
-        Assert.Equal(expectedFind, actualDirectory);
+        Assert.Same(expectedFind, actualDirectory);
     }
 
     public void MoveToNewFileFailsWhenTargetAlreadyExists()
