@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Version>0.0.1</Version>
-    <Description>Atmoos World: An abstraction over all worldly goodness.</Description>
+    <Description>Atmoos World: An abstraction over all worldly goodness, like IO and time.</Description>
   </PropertyGroup>
 
   <ItemGroup>
