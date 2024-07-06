@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Atmoos.World.Build.props" />
+  <Import Project="../Atmoos.World.Test.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Atmoos.World.InMemory\Atmoos.World.InMemory.csproj" />
+    <ProjectReference Include="..\Atmoos.World.FileSystemTests\Atmoos.World.FileSystemTests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Atmoos.Sphere" Version="0.3.*" />
+  </ItemGroup>
+
+</Project>
