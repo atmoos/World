@@ -1,0 +1,20 @@
+name: Publish Atmoos.World
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [ "main" ]
+    paths: 
+      - '**/Atmoos.World.InMemory.csproj'
+
+jobs:
+  publish-world:
+
+    permissions:
+      contents: write
+
+    uses: ./.github/workflows/publish-new-library.yml
+    with:
+      project-path: 'source/Atmoos.World.InMemory/Atmoos.World.InMemory.csproj'
+      tag-prefix: 'world'
+    secrets: inherit
