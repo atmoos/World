@@ -1,4 +1,4 @@
-name: Publish Atmoos.World
+name: Publish Atmoos.World.Time
 
 on:
   pull_request:
