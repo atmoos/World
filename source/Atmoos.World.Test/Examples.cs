@@ -53,7 +53,7 @@ public static class Examples<FileSystem>
 
     public static IFile CreateFileIn(IDirectory dir)
     {
-        var fileName = new FileName("readme", Extension: "md");
+        var fileName = new FileName("readme", extension: "md");
         return FileSystem.Create(dir, fileName);
     }
 

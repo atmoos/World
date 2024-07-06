@@ -56,12 +56,42 @@ public sealed class FileNameTest
         Assert.Throws<ArgumentOutOfRangeException>(() => FileName.Split(empty));
     }
 
+    [Fact]
+    public void ObjEqualComparesFalseWhenComparedToNull()
+    {
+        var name = new FileName("MyFile");
+        Assert.False(name.Equals(null));
+    }
+
+    [Fact]
+    public void ObjEqualComparesTrueWhenComparedEqualOtherValue()
+    {
+        var commonName = "MyFile";
+        var commonExtension = "txt";
+        var left = new FileName(commonName, commonExtension);
+        Object right = new FileName(commonName, commonExtension);
+        Assert.True(left.Equals(right));
+    }
+
+    [Fact]
+    public void EqualOperatorsAreConsistentWithEqualsMember()
+    {
+        var left = new FileName("MyFile", "txt");
+        var right = new FileName(left.Name, left.Extension);
+        var different = new FileName("OtherFile", "md");
+
+        Assert.Equal(left.Equals(right), left == right);
+        Assert.Equal(!left.Equals(right), left != right);
+        Assert.Equal(left.Equals(different), left == different);
+        Assert.Equal(!left.Equals(different), left != different);
+    }
+
     public static TheoryData<String, FileName> Names() => new() {
-        {"Foo", new FileName{Name = "Foo"}},
-        {".gitconfig", new FileName{Name = ".gitconfig"}},
-        {"Foo.bar", new FileName{Name = "Foo", Extension="bar"}},
-        {"Foo.", new FileName{Name = "Foo", Extension = String.Empty}},
-        {".gitconfig.bak", new FileName{Name = ".gitconfig", Extension="bak"}},
-        {"ToBeBackedUp.txt.bak", new FileName{Name = "ToBeBackedUp.txt", Extension="bak"}}
+        {"Foo", new FileName("Foo")},
+        {".gitconfig", new FileName(".gitconfig")},
+        {"Foo.bar", new FileName("Foo", extension:"bar")},
+        {"Foo.", new FileName("Foo", extension: String.Empty)},
+        {".gitconfig.bak", new FileName(".gitconfig", extension: "bak")},
+        {"ToBeBackedUp.txt.bak", new FileName("ToBeBackedUp.txt", extension: "bak")}
     };
 }

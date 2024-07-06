@@ -31,7 +31,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 
     public void CreateFileInAntecedentDirs()
     {
-        var name = new FileName { Name = "file", Extension = "txt" };
+        var name = new FileName("file", "txt");
         String[] antecedents = ["some", "antecedent", "directory"];
         var command = Path.Abs(root, antecedents) + name;
         var file = FileSystem.Create(command);

@@ -62,7 +62,7 @@ Path relPathC = Path.Rel<Current>(3, "relative", "to", "distant", "antecedent");
 
 // Unix: "/path/to/directory/readme.md"
 // Windows: "C:\path\to\directory\readme.md"
-FilePath filePath = absPath +  new FileName("readme", Extension: "md");
+FilePath filePath = absPath +  new FileName("readme", extension: "md");
 
 // Given a file path or path, create files and directories.
 IFile file = Current.Create(filePath);
