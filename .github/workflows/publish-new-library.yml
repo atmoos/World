@@ -26,9 +26,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DotNetVersion }}
       - name: Publish
-        uses: tedd/publish-nuget-neo@v1
+        uses: atmoos/publish-nuget-neo@v1.1.1
         with:
-          NUGET_KEY: ${{secrets.PUSH_NEW_WORLD_VERSION}}
+          NUGET_KEY: ${{secrets.CREATENEWNUGETPACKAGE}}
           PROJECT_FILE_PATH: ${{inputs.project-path}}
           TAG_COMMIT: true
           TAG_FORMAT: ${{inputs.tag-prefix}}/v*
