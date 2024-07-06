@@ -11,7 +11,7 @@ public sealed class Time : ITime
     public static Tic Tic()
     {
         var origin = now;
-        return new Tic(() => Now - origin);
+        return ITime.Start(() => Now - origin);
     }
 
     public static TimeSpan Toc(in Tic tic) => ITime.Elapsed(in tic);
