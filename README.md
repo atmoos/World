@@ -50,7 +50,7 @@ Path absPath = Path.Abs(Current.Root, "path", "to", "directory");
 IDirectory parent = /* say at /this/path */;
 // Unix: "/this/path/is/somewhere/else"
 // Windows: "C:\this\path\is\somewhere\else"
-Path relPathA = Path.Abs(dir, "is", "somewhere", "else");
+Path relPathA = Path.Abs(parent, "is", "somewhere", "else");
 
 // Unix equivalent : "./relative/to/current"
 // Windows equivalent : ".\relative\to\current"
@@ -64,6 +64,7 @@ Path relPathC = Path.Rel<Current>(3, "relative", "to", "distant", "antecedent");
 // Windows: "C:\path\to\directory\readme.md"
 FilePath filePath = absPath +  new FileName("readme", Extension: "md");
 
+// Given a file path or path, create files and directories.
 IFile file = Current.Create(filePath);
 
 IDirectory directory = Current.Create(relPathA);

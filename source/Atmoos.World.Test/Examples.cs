@@ -11,10 +11,10 @@ public static class Examples<FileSystem>
         return Path.Abs(FileSystem.Root, "path", "to", "directory");
     }
 
-    public static Path CreateAbsolutePathRelativeToSomeOtherDirectory(IDirectory dir /* say at: /this/directory */)
+    public static Path CreateAbsolutePathRelativeToSomeOtherDirectory(IDirectory parent /* say at: /this/directory */)
     {
         // Unix: "/this/directory/is/somewhere/else"
-        return Path.Abs(dir, "is", "somewhere", "else");
+        return Path.Abs(parent, "is", "somewhere", "else");
     }
 
     public static Path CreateAbsolutePathRelativeToCurrentDirectory()
