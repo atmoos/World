@@ -2,8 +2,7 @@ namespace Atmoos.World.Test;
 
 public sealed class ExtensionsTest
 {
-    private static readonly IDirectory root = FileSystem.CurrentDirectory;
-    public ExtensionsTest() => FileSystem.CurrentDirectory = root;
+    private static readonly IDirectory root = new TestDir("root");
 
     [Fact]
     public void IsRootOnFileSystemRootReturnsTrue()
@@ -14,7 +13,7 @@ public sealed class ExtensionsTest
     [Fact]
     public void IsRootOnNonRootReturnsFalse()
     {
-        var directory = FileSystem.Create(root, new DirectoryName("notRoot"));
+        var directory = TestDir.Chain(root, "notRoot");
 
         Assert.False(directory.IsRoot());
     }
@@ -22,10 +21,9 @@ public sealed class ExtensionsTest
     [Fact]
     public void RootReturnsFileSystemRoot()
     {
-        var expectedSegments = new String[] { "one", "two", "three" };
-        var directory = FileSystem.Create(Path.Abs(root, expectedSegments));
+        var child = TestDir.Chain(root, "parent", "child");
 
-        var actual = directory.Root();
+        var actual = child.Root();
 
         Assert.Same(root, actual);
     }
@@ -35,11 +33,11 @@ public sealed class ExtensionsTest
     {
         const Char separator = '*';
         var expectedSegments = new String[] { "parent", "child", "grandchild" };
-        var directory = FileSystem.Create(Path.Abs(root, expectedSegments));
+        var directory = TestDir.Chain(root, expectedSegments);
 
         var actualTrail = directory.Trail(separator);
 
-        var expectedTrail = String.Join(separator, expectedSegments.Prepend("/"));
+        var expectedTrail = String.Join(separator, expectedSegments.Prepend(root.Name));
         Assert.Equal(expectedTrail, actualTrail);
     }
 

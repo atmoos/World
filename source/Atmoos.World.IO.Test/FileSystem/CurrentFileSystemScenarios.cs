@@ -17,7 +17,7 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
         var temp = new DirectoryInfo(System.IO.Directory.GetCurrentDirectory());
         this.root = temp.CreateSubdirectory(Guid.NewGuid().ToString());
         var rootDir = Current.Locate(this.root);
-        this.scenarios = new FileSystemScenarios<Current, Time.Current>(rootDir, output, tol);
+        this.scenarios = new FileSystemScenarios<Current, CurrentTime>(rootDir, output, tol);
         Assert.True(SpinWait.SpinUntil(() => System.IO.Directory.Exists(this.root.FullName), TimeSpan.FromSeconds(2)), $"Failed creating root test directory: {rootDir}");
     }
 
@@ -79,4 +79,11 @@ public sealed class CurrentFileSystemScenarios : IFileSystemScenarios, IDisposab
     public void MoveDirectoryRemovesSourceAndRecreatesTarget() => this.scenarios.MoveDirectoryRemovesSourceAndRecreatesTarget();
 
     public void Dispose() => this.root.Delete(recursive: true);
+}
+
+file sealed class CurrentTime : ITime
+{
+    public static DateTime Now => DateTime.UtcNow;
+    public static Tic Tic() => throw new NotImplementedException();
+    public static TimeSpan Toc(in Tic tic) => throw new NotImplementedException();
 }
