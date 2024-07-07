@@ -25,7 +25,7 @@ public sealed class PathTest
     [Fact]
     public void PathRootIsRoot()
     {
-        var anyRoot = FileSystem.Create(root, new DirectoryName("AnyRoot"));
+        var anyRoot = TestDir.Chain(root, "AnyRoot");
 
         var path = Path.Abs(anyRoot);
 
@@ -54,7 +54,7 @@ public sealed class PathTest
     public void RelativePathWithTailArgumentsIsRootedOnTheCurrentDirectoryWithNonZeroTail()
     {
         String[] tail = ["Any", "Length", "Of", "Sub", "Directories"];
-        FileSystem.CurrentDirectory = FileSystem.Create(root, new DirectoryName("SomeDirectory"));
+        FileSystem.CurrentDirectory = TestDir.Chain(root, "SomeDirectory");
 
         var path = Path.Rel<FileSystem>(tail);
 
@@ -65,7 +65,7 @@ public sealed class PathTest
     [Fact]
     public void RelativePathWithoutArgumentIsRootedOnTheCurrentDirectoryWithZeroTail()
     {
-        FileSystem.CurrentDirectory = FileSystem.Create(root, new DirectoryName("SomeDir"));
+        FileSystem.CurrentDirectory = TestDir.Chain(root, "SomeDir");
 
         var path = Path.Rel<FileSystem>();
 
@@ -78,10 +78,10 @@ public sealed class PathTest
     {
         var leafDirectory = new DirectoryName("LeafDirectory");
         String[] threeLevelsDown = ["Three", "Levels", "Down"];
-        var top = FileSystem.Create(root, new DirectoryName("TopLevel"));
-        var expectedAntecedent = FileSystem.Create(top, new DirectoryName("Antecedent"));
-        var antecedentSibling = FileSystem.Create(top, new DirectoryName("AntecedentSibling"));
-        FileSystem.CurrentDirectory = FileSystem.Create(Path.Abs(expectedAntecedent, threeLevelsDown));
+        var top = TestDir.Chain(root, "TopLevel");
+        var expectedAntecedent = TestDir.Chain(top, "Antecedent");
+        var antecedentSibling = TestDir.Chain(top, "AntecedentSibling");
+        FileSystem.CurrentDirectory = TestDir.Chain(expectedAntecedent, threeLevelsDown);
 
         var path = Path.Rel<FileSystem>((Byte)threeLevelsDown.Length, leafDirectory);
 
@@ -122,7 +122,7 @@ public sealed class PathTest
         const Byte offset = 2;
         String[] stringPath = ["AnySubDir", "ChildSubDir", "GrandChildSubDir"];
         DirectoryName[] namePath = stringPath.Select(n => new DirectoryName(n)).ToArray();
-        FileSystem.CurrentDirectory = FileSystem.Create(Path.Abs(root, Enumerable.Repeat("SomeDir", offset + 1).ToArray()));
+        FileSystem.CurrentDirectory = TestDir.Chain(root, Enumerable.Repeat("SomeDir", offset + 1).ToArray());
 
         var pathFromNames = Path.Rel<FileSystem>(offset, namePath);
         var pathFromStrings = Path.Rel<FileSystem>(offset, stringPath);
