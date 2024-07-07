@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="Atmoos.Sphere" Version="0.3.*" />
-    <PackageReference Include="Atmoos.World.Time" Version="0.0.*" />
   </ItemGroup>
 
 </Project>

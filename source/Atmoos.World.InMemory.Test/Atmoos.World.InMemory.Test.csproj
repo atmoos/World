@@ -7,9 +7,4 @@
     <ProjectReference Include="..\Atmoos.World.FileSystemTests\Atmoos.World.FileSystemTests.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Atmoos.Sphere" Version="0.3.*" />
-    <PackageReference Include="Atmoos.Sphere.Functional" Version="0.0.3" />
-  </ItemGroup>
-
 </Project>

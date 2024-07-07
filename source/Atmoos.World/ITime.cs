@@ -1,5 +1,6 @@
 namespace Atmoos.World;
 
+// ToDo: Split this up into ITimeProvider and ITiming
 public interface ITime
 {
     static abstract DateTime Now { get; }
