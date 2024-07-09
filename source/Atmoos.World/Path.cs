@@ -1,4 +1,5 @@
 using Atmoos.Sphere.Functional;
+using Atmoos.World.Algorithms;
 
 namespace Atmoos.World;
 
@@ -10,6 +11,7 @@ public sealed class FilePath
 
 public sealed class Path : ICountable<DirectoryName>
 {
+    private static readonly Char[] separators = Separators().Distinct().ToArray();
     private readonly IDirectory root;
     private readonly IEnumerable<DirectoryName> path;
     public Int32 Count { get; }
@@ -31,7 +33,12 @@ public sealed class Path : ICountable<DirectoryName>
         where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path.Length, path.Select(Dir));
     public static Path Rel<TFileSystem>(Byte offset, params String[] path)
     where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path.Length, path.Select(Dir));
+    public static Path Parse<TFileSystem>(String path)
+        where TFileSystem : IFileSystemState => Match.Path(TFileSystem.Root, path, separators);
 
     public static FilePath operator +(Path dir, FileName file) => new() { Path = dir, Name = file };
     private static DirectoryName Dir(String name) => new(name);
+
+    private static Char[] Separators()
+        => [System.IO.Path.DirectorySeparatorChar, System.IO.Path.PathSeparator, System.IO.Path.AltDirectorySeparatorChar];
 }

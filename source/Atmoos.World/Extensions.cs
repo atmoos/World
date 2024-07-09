@@ -58,6 +58,20 @@ public static class Extensions
     public static Result<IDirectory> Search(this IDirectory directory, DirectoryName name)
         => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
 
+    /// <summary>
+    /// Recursively looks upward toward parent directories for the leaf directory
+    /// <paramref name="leafDirectoryName"/> starting at <paramref name="anchor"/>.
+    /// </summary>
+    internal static Result<IDirectory> FindLeaf(this IDirectory anchor, DirectoryName leafDirectoryName)
+    {
+        Result<IDirectory> result;
+        IDirectory directory = anchor;
+        while ((result = directory.Search(leafDirectoryName)) is Failure<IDirectory> && !directory.IsRoot()) {
+            directory = directory.Parent;
+        }
+        return result;
+    }
+
     public static async Task CopyTo(this IRead source, IWrite target, CancellationToken token = default)
     {
         using var reader = source.OpenRead();

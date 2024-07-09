@@ -1,3 +1,5 @@
+using Atmoos.Sphere.Functional;
+
 namespace Atmoos.World.Test;
 
 public sealed class ExtensionsTest
@@ -39,6 +41,34 @@ public sealed class ExtensionsTest
 
         var expectedTrail = String.Join(separator, expectedSegments.Prepend(root.Name));
         Assert.Equal(expectedTrail, actualTrail);
+    }
+
+    [Fact]
+    public void FindLeafOfInexistentDirectoryFails()
+    {
+        var current = TestDir.Chain(root, "parent", "child");
+        var name = new DirectoryName("inexistent");
+
+        var result = current.FindLeaf(name);
+
+        String message = Assert.IsType<Failure<IDirectory>>(result).Single();
+        Assert.Contains(name, message);
+        Assert.Contains(root.ToString() ?? String.Empty, message);
+    }
+
+
+    [Fact]
+    public void FindLeafSucceedsWhenLeafDirectoryExists()
+    {
+        var name = new DirectoryName("leaflet");
+        var parent = TestDir.Chain(root, "parent");
+        var leaf = parent.AddDirectory(name);
+        var current = TestDir.Chain(parent, "child", "grandchild", "great-grandchild", "great-great-grandchild");
+
+        var result = current.FindLeaf(name);
+
+        IDirectory actual = Assert.IsType<Success<IDirectory>>(result).Value();
+        Assert.Same(leaf, actual);
     }
 
     [Fact]

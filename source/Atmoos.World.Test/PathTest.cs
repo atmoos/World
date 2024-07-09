@@ -130,4 +130,25 @@ public sealed class PathTest
         Assert.Equal(pathFromNames, pathFromStrings);
         Assert.Same(pathFromNames.Root, pathFromStrings.Root);
     }
+
+    [Fact]
+    public void ParsePathOnCurrentOperatingSystemFindsExpectedPath()
+    {
+        var parent = TestDir.Chain(PathParseFs.Root, "parent");
+        parent.AddDirectory("SomeSibling");
+        var anchor = parent.AddDirectory("anchor");
+        String[] unmatchedTail = ["in", "the", "slick"];
+        var queryPath = System.IO.Path.Combine([$"{PathParseFs.Root}", "parent", "anchor", .. unmatchedTail]);
+
+        var path = Path.Parse<PathParseFs>(queryPath);
+
+        Assert.Same(anchor, path.Root);
+        Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
+    }
+
+    private sealed class PathParseFs : IFileSystemState
+    {
+        public static IDirectory Root { get; } = new TestDir(System.IO.Path.GetPathRoot(Directory.GetCurrentDirectory()) ?? throw new InvalidOperationException("failed to get root."));
+        public static IDirectory CurrentDirectory { get; } = new TestDir("CurrentDirectory");
+    }
 }
