@@ -62,7 +62,7 @@ public static class Extensions
     /// Recursively looks upward toward parent directories for the leaf directory
     /// <paramref name="leafDirectoryName"/> starting at <paramref name="anchor"/>.
     /// </summary>
-    internal static Result<IDirectory> FindLeaf(this IDirectory anchor, DirectoryName leafDirectoryName)
+    public static Result<IDirectory> FindLeaf(this IDirectory anchor, DirectoryName leafDirectoryName)
     {
         Result<IDirectory> result;
         IDirectory directory = anchor;
@@ -71,6 +71,13 @@ public static class Extensions
         }
         return result;
     }
+
+    /// <summary>
+    /// Recursively looks upward toward parent directories for the leaf directory
+    /// <paramref name="leafDirectoryName"/> starting at the current directory.
+    /// </summary>
+    public static Result<IDirectory> FindLeaf<TFileSystem>(DirectoryName leafDirectoryName)
+        where TFileSystem : IFileSystemState => TFileSystem.CurrentDirectory.FindLeaf(leafDirectoryName);
 
     public static async Task CopyTo(this IRead source, IWrite target, CancellationToken token = default)
     {

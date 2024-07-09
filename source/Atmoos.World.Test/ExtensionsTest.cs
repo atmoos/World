@@ -71,6 +71,19 @@ public sealed class ExtensionsTest
         Assert.Same(leaf, actual);
     }
 
+
+    [Fact]
+    public void FindLeafFromCurrentDirWhenLeafDirectoryExists()
+    {
+        var name = new DirectoryName("leaflet");
+        var leaf = TestDir.Chain(Fs.Root, name);
+
+        var result = Extensions.FindLeaf<Fs>(name);
+
+        IDirectory actual = Assert.IsType<Success<IDirectory>>(result).Value();
+        Assert.Same(leaf, actual);
+    }
+
     [Fact]
     public async Task CopyToCopiesAllContent()
     {
@@ -93,4 +106,12 @@ file sealed class Read(Byte[] content) : IRead
 file sealed class Write(MemoryStream memory) : IWrite
 {
     public Stream OpenWrite() => memory;
+}
+
+file sealed class Fs : IFileSystemState
+{
+    private static readonly TestDir root = new TestDir("root");
+    public static IDirectory CurrentDirectory { get; } = root.AddDirectory("current");
+    public static IDirectory Root => root;
+
 }
