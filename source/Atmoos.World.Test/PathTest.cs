@@ -146,9 +146,38 @@ public sealed class PathTest
         Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
     }
 
+    [Fact]
+    public void ParsePathCanHandleMixedPathSeparators()
+    {
+        var root = PathParseFs.Root;
+        var queryPath = $"{root}/s\\t/v\\u";
+        var expectedPathRoot = TestDir.Chain(root, "s", "t", "v");
+
+        var path = Path.Parse<PathParseFs>(queryPath);
+
+        Assert.Same(expectedPathRoot, path.Root);
+        Assert.Equal(1, path.Count);
+        Assert.Equal(["u"], path.Select(d => d.ToString()));
+    }
+
+    [Fact]
+    public void ToStringProducesHumanReadableRepresentation()
+    {
+        var sep = System.IO.Path.PathSeparator;
+        var pathRoot = TestDir.Chain(root, "t", "a");
+        var anchor = String.Join(sep, pathRoot.Path().Select(d => d.ToString()));
+        var tail = String.Join(sep, "i", "l");
+        var expected = $"[{anchor}]{sep}{tail}";
+
+        var path = Path.Abs(pathRoot, "i", "l");
+
+        Assert.Equal(expected, path.ToString());
+    }
+
     private sealed class PathParseFs : IFileSystemState
     {
-        public static IDirectory Root { get; } = new TestDir(System.IO.Path.GetPathRoot(Directory.GetCurrentDirectory()) ?? throw new InvalidOperationException("failed to get root."));
-        public static IDirectory CurrentDirectory { get; } = new TestDir("CurrentDirectory");
+        private static readonly TestDir root = new(System.IO.Path.GetPathRoot(Directory.GetCurrentDirectory()) ?? throw new InvalidOperationException("failed to get root."));
+        public static IDirectory Root => root;
+        public static IDirectory CurrentDirectory { get; } = root.AddDirectory("CurrentDirectory");
     }
 }
