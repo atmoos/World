@@ -12,7 +12,7 @@ public sealed class CurrentFileSystemTest
 
         var actual = Current.CurrentDirectory;
 
-        String path = String.Join(separator, actual.Path(until: actual.Root()).Select(segment => segment.Name));
+        String path = String.Join(separator, actual.Trail(until: actual.Root()).Select(segment => segment.Name));
         Assert.Equal(expected.FullName, $"{actual.Root()}{path}");
     }
 }
