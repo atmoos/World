@@ -31,15 +31,29 @@ public sealed class ExtensionsTest
     }
 
     [Fact]
-    public void TrailCreatesFullPathIncludingRoot()
+    public void ToPathCreatesFullPathIncludingRoot()
     {
         const Char separator = '*';
         var expectedSegments = new String[] { "parent", "child", "grandchild" };
         var directory = TestDir.Chain(root, expectedSegments);
 
-        var actualTrail = directory.Trail(separator);
+        var actualTrail = directory.ToPath(separator);
 
         var expectedTrail = String.Join(separator, expectedSegments.Prepend(root.Name));
+        Assert.Equal(expectedTrail, actualTrail);
+    }
+
+    [Fact]
+    public void ToPathDoesNotCreateDuplicateRoot()
+    {
+        var root = new TestDir(RootName);
+        var expectedSegments = new String[] { "parent", "child", };
+        var directory = TestDir.Chain(root, expectedSegments);
+
+        var actualTrail = directory.ToPath();
+
+        var rootName = root.Name == "/" ? String.Empty : root.Name;
+        var expectedTrail = String.Join(Separator, expectedSegments.Prepend(rootName));
         Assert.Equal(expectedTrail, actualTrail);
     }
 
@@ -110,7 +124,7 @@ file sealed class Write(MemoryStream memory) : IWrite
 
 file sealed class Fs : IFileSystemState
 {
-    private static readonly TestDir root = new TestDir("root");
+    private static readonly TestDir root = new("root");
     public static IDirectory CurrentDirectory { get; } = root.AddDirectory("current");
     public static IDirectory Root => root;
 

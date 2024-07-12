@@ -21,7 +21,7 @@ public sealed class Path : ICountable<DirectoryName>
     public IEnumerator<DirectoryName> GetEnumerator() => this.tail.GetEnumerator();
     public override String ToString()
     {
-        var rootPath = this.root.Trail(separator);
+        var rootPath = this.root.ToPath(separator);
         return String.Join(separator, this.tail.Select(t => t.ToString()).Prepend($"[{rootPath}]"));
     }
     public static Path Abs(IDirectory root) => new(root, 0, []);

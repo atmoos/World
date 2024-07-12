@@ -19,21 +19,19 @@ public sealed class MatchTest
     [Fact]
     public void MatchOnRootedPathOfCurrentOperatingSystemMatchesWithPathSeparatorChar()
     {
-        var rootName = CurrentRoot();
-        AssertRootedMatch(new TestDir(rootName), System.IO.Path.PathSeparator);
+        AssertRootedMatch(new TestDir(RootName), System.IO.Path.PathSeparator);
     }
 
     [Fact]
     public void MatchOnRootedPathOfCurrentOperatingSystemMatchesWithDirectorySeparator()
     {
-        var rootName = CurrentRoot();
-        AssertRootedMatch(new TestDir(rootName), System.IO.Path.DirectorySeparatorChar);
+        AssertRootedMatch(new TestDir(RootName), System.IO.Path.DirectorySeparatorChar);
     }
 
     [Fact]
     public void MatchAllElementsReturnsPathWithZeroUnmatchedSegments()
     {
-        var root = new TestDir(CurrentRoot());
+        var root = new TestDir(RootName);
         String[] querySegments = ["s", "t", "v"];
         var expectedPathRoot = TestDir.Chain(root, querySegments);
         var queryPath = System.IO.Path.Combine([root.Name, .. querySegments]);
@@ -59,8 +57,5 @@ public sealed class MatchTest
         Assert.Same(anchor, path.Root);
         Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
     }
-
-    private static String CurrentRoot()
-        => System.IO.Path.GetPathRoot(System.IO.Path.GetTempPath()) ?? throw new InvalidOperationException("failed to get root.");
 }
 

@@ -5,30 +5,28 @@ namespace Atmoos.World;
 
 public static class Extensions
 {
-    private const Char separator = ':';
     private const Int32 bufferSize = 65536;
     private static readonly Encoding encoding = Encoding.UTF8;
-    public static IEnumerable<IDirectory> Path(this IDirectory tail)
+    private static readonly Char dirSeparator = System.IO.Path.DirectorySeparatorChar;
+    public static IEnumerable<IDirectory> Trail(this IDirectory tail)
     {
-        var current = tail;
-        var antecedents = new Stack<IDirectory>();
-        for (; current != current.Parent; current = current.Parent) {
-            antecedents.Push(current);
+        var trail = new Stack<IDirectory>();
+        for (var current = tail; current != current.Parent; current = current.Parent) {
+            trail.Push(current);
         }
-        antecedents.Push(current);
-        return antecedents;
+        trail.Push(trail.Peek().Parent);
+        return trail;
     }
-    public static IEnumerable<IDirectory> Path(this IDirectory tail, IDirectory until)
+    public static IEnumerable<IDirectory> Trail(this IDirectory tail, IDirectory until)
     {
-        var current = tail;
-        var antecedents = new Stack<IDirectory>();
-        for (; current != until && current != current.Parent; current = current.Parent) {
-            antecedents.Push(current);
+        var trail = new Stack<IDirectory>();
+        for (var current = tail; current != until && current != current.Parent; current = current.Parent) {
+            trail.Push(current);
         }
-        return antecedents;
+        return trail;
     }
 
-    public static IEnumerable<IDirectory> Antecedents(this IDirectory tail) => tail.Parent.Path();
+    public static IEnumerable<IDirectory> Antecedents(this IDirectory tail) => tail.Parent.Trail();
 
     public static IDirectory Antecedent(this IDirectory tail, Byte depth)
     {
@@ -49,8 +47,15 @@ public static class Extensions
         return current;
     }
 
-    public static String Trail(this IDirectory directory, Char separator = separator)
-        => String.Join(separator, directory.Path().Select(dir => dir.Name));
+    public static String ToPath(this IFile file) => file.ToPath(dirSeparator);
+    public static String ToPath(this IFile file, Char separator)
+        => String.Join(separator, file.Parent.ToPath(separator), file.Name);
+    public static String ToPath(this IDirectory directory) => directory.ToPath(dirSeparator);
+    public static String ToPath(this IDirectory directory, Char separator)
+        => String.Join(separator, directory.Trail().Select(dir => dir.Name)) switch {
+        ['/', '/', .. var tail] => $"/{tail}",
+            var path => path,
+        };
 
     public static Result<IFile> Search(this IDirectory directory, FileName name)
         => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");

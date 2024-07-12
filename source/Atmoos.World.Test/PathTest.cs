@@ -165,7 +165,7 @@ public sealed class PathTest
     {
         var sep = System.IO.Path.PathSeparator;
         var pathRoot = TestDir.Chain(root, "t", "a");
-        var anchor = String.Join(sep, pathRoot.Path().Select(d => d.ToString()));
+        var anchor = String.Join(sep, pathRoot.Trail().Select(d => d.ToString()));
         var tail = String.Join(sep, "i", "l");
         var expected = $"[{anchor}]{sep}{tail}";
 
@@ -176,7 +176,7 @@ public sealed class PathTest
 
     private sealed class PathParseFs : IFileSystemState
     {
-        private static readonly TestDir root = new(System.IO.Path.GetPathRoot(Directory.GetCurrentDirectory()) ?? throw new InvalidOperationException("failed to get root."));
+        private static readonly TestDir root = new(RootName);
         public static IDirectory Root => root;
         public static IDirectory CurrentDirectory { get; } = root.AddDirectory("CurrentDirectory");
     }
