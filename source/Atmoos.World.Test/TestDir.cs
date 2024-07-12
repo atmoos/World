@@ -23,7 +23,13 @@ internal sealed class TestDir : IDirectory
         return names.Length == 1 ? first : names[1..].Aggregate(first, (parent, name) => parent.AddDirectory(name));
     }
 
-    internal void Add(IFile file) => this.files.Add(file);
+    internal IFile Add(FileName fileName)
+    {
+        var file = new TestFile(fileName, this);
+        this.files.Add(file);
+        return file;
+    }
+
     internal TestDir AddDirectory(String name)
     {
         var child = new TestDir(name, this);

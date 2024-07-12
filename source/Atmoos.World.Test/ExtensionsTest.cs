@@ -37,10 +37,10 @@ public sealed class ExtensionsTest
         var expectedSegments = new String[] { "parent", "child", "grandchild" };
         var directory = TestDir.Chain(root, expectedSegments);
 
-        var actualTrail = directory.ToPath(separator);
+        var actualPath = directory.ToPath(separator);
 
-        var expectedTrail = String.Join(separator, expectedSegments.Prepend(root.Name));
-        Assert.Equal(expectedTrail, actualTrail);
+        var expectedPath = String.Join(separator, expectedSegments.Prepend(root.Name));
+        Assert.Equal(expectedPath, actualPath);
     }
 
     [Fact]
@@ -50,11 +50,25 @@ public sealed class ExtensionsTest
         var expectedSegments = new String[] { "parent", "child", };
         var directory = TestDir.Chain(root, expectedSegments);
 
-        var actualTrail = directory.ToPath();
+        var actualPath = directory.ToPath();
 
         var rootName = root.Name == "/" ? String.Empty : root.Name;
-        var expectedTrail = String.Join(Separator, expectedSegments.Prepend(rootName));
-        Assert.Equal(expectedTrail, actualTrail);
+        var expectedPath = String.Join(Separator, expectedSegments.Prepend(rootName));
+        Assert.Equal(expectedPath, actualPath);
+    }
+
+    [Fact]
+    public void ToPathOnFileUsesSystemPathSeparator()
+    {
+        var root = new TestDir(RootName);
+        var lastDirName = "to";
+        var fileName = new FileName("file", "txt");
+        var file = TestDir.Chain(root, "path", lastDirName).Add(fileName);
+
+        var actualFilePath = file.ToPath();
+
+        var expectedPathTail = $"{lastDirName}{System.IO.Path.DirectorySeparatorChar}{file.Name}";
+        Assert.EndsWith(expectedPathTail, actualFilePath);
     }
 
     [Fact]
