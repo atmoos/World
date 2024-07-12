@@ -10,11 +10,12 @@ public static class Extensions
     private static readonly Char dirSeparator = System.IO.Path.DirectorySeparatorChar;
     public static IEnumerable<IDirectory> Trail(this IDirectory tail)
     {
+        var current = tail;
         var trail = new Stack<IDirectory>();
-        for (var current = tail; current != current.Parent; current = current.Parent) {
+        for (; current != current.Parent; current = current.Parent) {
             trail.Push(current);
         }
-        trail.Push(trail.Peek().Parent);
+        trail.Push(current);
         return trail;
     }
     public static IEnumerable<IDirectory> Trail(this IDirectory tail, IDirectory until)
