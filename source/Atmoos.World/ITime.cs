@@ -14,6 +14,8 @@ public interface ITiming
 {
     static abstract Tic Tic();
     static abstract TimeSpan Toc(in Tic tic);
+    protected static Tic Start(Func<TimeSpan> mark) => new(mark);
+    protected static TimeSpan Elapsed(in Tic tic) => tic.Elapsed;
 }
 
 public readonly struct Tic
