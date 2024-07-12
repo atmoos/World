@@ -3,7 +3,7 @@
   <Import Project="../Atmoos.World.Pack.targets" />
 
   <PropertyGroup>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Description>Atmoos World: An abstraction over all worldly goodness.</Description>
   </PropertyGroup>
 
