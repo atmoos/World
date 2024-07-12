@@ -1,4 +1,3 @@
-
 namespace Atmoos.World.Test;
 
 internal sealed class TestDir : IDirectory

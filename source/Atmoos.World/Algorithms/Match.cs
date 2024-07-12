@@ -33,4 +33,3 @@ internal static class Match
         return World.Path.Abs(current);
     }
 }
-

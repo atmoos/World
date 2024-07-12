@@ -58,4 +58,3 @@ public sealed class MatchTest
         Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
     }
 }
-
