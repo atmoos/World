@@ -130,4 +130,54 @@ public sealed class PathTest
         Assert.Equal(pathFromNames, pathFromStrings);
         Assert.Same(pathFromNames.Root, pathFromStrings.Root);
     }
+
+    [Fact]
+    public void ParsePathOnCurrentOperatingSystemFindsExpectedPath()
+    {
+        var parent = TestDir.Chain(PathParseFs.Root, "parent");
+        parent.AddDirectory("SomeSibling");
+        var anchor = parent.AddDirectory("anchor");
+        String[] unmatchedTail = ["in", "the", "slick"];
+        var queryPath = System.IO.Path.Combine([$"{PathParseFs.Root}", "parent", "anchor", .. unmatchedTail]);
+
+        var path = Path.Parse<PathParseFs>(queryPath);
+
+        Assert.Same(anchor, path.Root);
+        Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
+    }
+
+    [Fact]
+    public void ParsePathCanHandleMixedPathSeparators()
+    {
+        var root = PathParseFs.Root;
+        var queryPath = $"{root}/s\\t/v\\u";
+        var expectedPathRoot = TestDir.Chain(root, "s", "t", "v");
+
+        var path = Path.Parse<PathParseFs>(queryPath);
+
+        Assert.Same(expectedPathRoot, path.Root);
+        Assert.Equal(1, path.Count);
+        Assert.Equal(["u"], path.Select(d => d.ToString()));
+    }
+
+    [Fact]
+    public void ToStringProducesHumanReadableRepresentation()
+    {
+        var sep = System.IO.Path.PathSeparator;
+        var pathRoot = TestDir.Chain(root, "t", "a");
+        var anchor = String.Join(sep, pathRoot.Trail().Select(d => d.ToString()));
+        var tail = String.Join(sep, "i", "l");
+        var expected = $"[{anchor}]{sep}{tail}";
+
+        var path = Path.Abs(pathRoot, "i", "l");
+
+        Assert.Equal(expected, path.ToString());
+    }
+
+    private sealed class PathParseFs : IFileSystemState
+    {
+        private static readonly TestDir root = new(RootName);
+        public static IDirectory Root => root;
+        public static IDirectory CurrentDirectory { get; } = root.AddDirectory("CurrentDirectory");
+    }
 }

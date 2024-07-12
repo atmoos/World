@@ -1,4 +1,5 @@
 using Atmoos.Sphere.Functional;
+using Atmoos.World.Algorithms;
 
 namespace Atmoos.World;
 
@@ -10,12 +11,19 @@ public sealed class FilePath
 
 public sealed class Path : ICountable<DirectoryName>
 {
+    private static readonly Char separator = System.IO.Path.PathSeparator;
+    private static readonly Char[] separators = Separators().Distinct().ToArray();
     private readonly IDirectory root;
-    private readonly IEnumerable<DirectoryName> path;
+    private readonly IEnumerable<DirectoryName> tail;
     public Int32 Count { get; }
     public IDirectory Root => this.root;
-    private Path(IDirectory root, Int32 count, IEnumerable<DirectoryName> path) => (this.root, Count, this.path) = (root, count, path);
-    public IEnumerator<DirectoryName> GetEnumerator() => this.path.GetEnumerator();
+    private Path(IDirectory root, Int32 count, IEnumerable<DirectoryName> tail) => (this.root, Count, this.tail) = (root, count, tail);
+    public IEnumerator<DirectoryName> GetEnumerator() => this.tail.GetEnumerator();
+    public override String ToString()
+    {
+        var rootPath = this.root.ToPath(separator);
+        return String.Join(separator, this.tail.Select(t => t.ToString()).Prepend($"[{rootPath}]"));
+    }
     public static Path Abs(IDirectory root) => new(root, 0, []);
     public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path.Length, path);
     public static Path Abs(IDirectory root, params String[] path) => new(root, path.Length, path.Select(Dir));
@@ -31,7 +39,15 @@ public sealed class Path : ICountable<DirectoryName>
         where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path.Length, path.Select(Dir));
     public static Path Rel<TFileSystem>(Byte offset, params String[] path)
     where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path.Length, path.Select(Dir));
+    public static Path Parse<TFileSystem>(String path)
+        where TFileSystem : IFileSystemState => Match.Path(TFileSystem.Root, path, separators);
 
     public static FilePath operator +(Path dir, FileName file) => new() { Path = dir, Name = file };
     private static DirectoryName Dir(String name) => new(name);
+
+    private static Char[] Separators()
+        => [System.IO.Path.DirectorySeparatorChar,
+            System.IO.Path.PathSeparator,
+            System.IO.Path.AltDirectorySeparatorChar,
+            '/', '\\'];
 }
