@@ -40,8 +40,8 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Assert.Equal(Time.Now, file.CreationTime, tol);
         Assert.True(file.Exists, "The file should exist after creation.");
 
-        var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
-        var actualAntecedents = file.Parent.Path().Select(a => a.Name.Value).ToArray();
+        var expectedAntecedents = root.Trail().Select(a => a.Name.Value).Concat(antecedents).ToArray();
+        var actualAntecedents = file.Parent.Trail().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
@@ -67,7 +67,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Assert.Equal(Time.Now, directory.CreationTime, tol);
         Assert.True(directory.Exists, "The directory should exist after creation.");
 
-        var expectedAntecedents = root.Path().Select(a => a.Name.Value).Concat(antecedents).ToArray();
+        var expectedAntecedents = root.Trail().Select(a => a.Name.Value).Concat(antecedents).ToArray();
         var actualAntecedents = directory.Antecedents().Select(a => a.Name.Value).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
@@ -132,14 +132,14 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Assert.True(firstFile.Exists);
         Assert.True(secondFile.Exists);
         Assert.True(secondChild.Exists);
-        Assert.All(firstChild.Path(), d => Assert.True(d.Exists));
+        Assert.All(firstChild.Trail(), d => Assert.True(d.Exists));
 
         FileSystem.Delete(toDelete, recursive: true);
 
         Assert.True(parent.Exists, "Parent should still exist");
         Assert.False(toDelete.Exists, "Deleted directory should not exist");
-        Assert.All(firstChild.Path(until: parent), d => Assert.False(d.Exists));
-        Assert.All(secondChild.Path(until: parent), d => Assert.False(d.Exists));
+        Assert.All(firstChild.Trail(until: parent), d => Assert.False(d.Exists));
+        Assert.All(secondChild.Trail(until: parent), d => Assert.False(d.Exists));
         Assert.False(firstFile.Exists, "First file should not exist");
         Assert.False(secondFile.Exists, "Second file should not exist");
     }
