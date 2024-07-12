@@ -31,6 +31,17 @@ public sealed class ExtensionsTest
     }
 
     [Fact]
+    public void TrailOnRootReturnsListOfOneElement()
+    {
+        var child = TestDir.Chain(root);
+
+        var actual = child.Trail();
+
+        var expected = new IDirectory[] { root };
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
     public void ToPathCreatesFullPathIncludingRoot()
     {
         const Char separator = '*';
