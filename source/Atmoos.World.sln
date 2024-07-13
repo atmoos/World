@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atmoos.World.Time.Test", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atmoos.World.Test", "Atmoos.World.Test\Atmoos.World.Test.csproj", "{0052A5E4-0F43-47CE-B66E-24773DB18236}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atmoos.World.Benchmark", "Atmoos.World.Benchmark\Atmoos.World.Benchmark.csproj", "{409D002A-397A-490F-A989-91C8311BE029}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{0052A5E4-0F43-47CE-B66E-24773DB18236}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0052A5E4-0F43-47CE-B66E-24773DB18236}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0052A5E4-0F43-47CE-B66E-24773DB18236}.Release|Any CPU.Build.0 = Release|Any CPU
+		{409D002A-397A-490F-A989-91C8311BE029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{409D002A-397A-490F-A989-91C8311BE029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{409D002A-397A-490F-A989-91C8311BE029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{409D002A-397A-490F-A989-91C8311BE029}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
