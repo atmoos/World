@@ -17,7 +17,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Atmoos.Sphere.BenchmarkDotNet" Version="0.1.3" />
+    <PackageReference Include="Atmoos.Sphere.BenchmarkDotNet" Version="0.1.4" />
     <PackageReference Include="Atmoos.World.IO" Version="0.0.2" />
     <PackageReference Include="Atmoos.World.InMemory" Version="0.0.2" />
   </ItemGroup>
