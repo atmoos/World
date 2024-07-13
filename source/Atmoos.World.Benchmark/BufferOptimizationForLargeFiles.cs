@@ -14,7 +14,7 @@ public class BufferOptimizationForLargeFiles
     [Params(16384, 65536, 262144)]
     public Int32 FileSizeKb { get; set; }
 
-    [Params(4, 32, 64, 128, 512, 2048)]
+    [Params(32, 64, 128, 512, 2048)]
     public Int32 BufferSizeKb { get; set; }
 
     [GlobalSetup]
@@ -46,19 +46,16 @@ LaunchCount=1  WarmupCount=7
 
 | Method | FileSizeKb | BufferSizeKb | Mean       | Error      | Allocated |
 |------- |----------- |------------- |-----------:|-----------:|----------:|
-| Copy   | 16384      | 4            |  18.907 ms |  0.8069 ms |   1.69 KB |
 | Copy   | 16384      | 32           |   6.990 ms |  0.2685 ms |   1.53 KB |
 | Copy   | 16384      | 64           |   6.211 ms |  0.2594 ms |   1.52 KB |
 | Copy   | 16384      | 128          |   5.698 ms |  0.0922 ms |   1.52 KB |
 | Copy   | 16384      | 512          |   6.099 ms |  0.3853 ms |   1.52 KB |
 | Copy   | 16384      | 2048         |   7.059 ms |  0.4620 ms |   1.53 KB |
-| Copy   | 65536      | 4            |  87.890 ms | 10.6338 ms |   1.79 KB |
 | Copy   | 65536      | 32           |  29.305 ms |  1.7385 ms |   1.66 KB |
 | Copy   | 65536      | 64           |  24.118 ms |  0.7515 ms |   1.64 KB |
 | Copy   | 65536      | 128          |  23.238 ms |  1.1848 ms |   1.63 KB |
 | Copy   | 65536      | 512          |  23.721 ms |  1.4869 ms |   1.63 KB |
 | Copy   | 65536      | 2048         |  26.638 ms |  1.4443 ms |   1.64 KB |
-| Copy   | 262144     | 4            | 381.213 ms |  4.2593 ms |    2.7 KB |
 | Copy   | 262144     | 32           | 113.436 ms |  2.6626 ms |   2.09 KB |
 | Copy   | 262144     | 64           |  94.467 ms |  2.0952 ms |   2.09 KB |
 | Copy   | 262144     | 128          |  84.132 ms |  3.7121 ms |   1.79 KB |

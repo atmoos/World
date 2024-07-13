@@ -14,7 +14,7 @@ public class BufferOptimizationForSmallFiles
     [Params(1, 4, 16, 64)]
     public Int32 FileSizeKb { get; set; }
 
-    [Params(1, 2, 4, 8, 16)]
+    [Params(2, 4, 8, 16, 32, 64)]
     public Int32 BufferSizeKb { get; set; }
 
     [GlobalSetup]
@@ -44,26 +44,30 @@ Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical 
 Job=ShortRun  IterationCount=15  IterationTime=240.0000 ms  
 LaunchCount=1  WarmupCount=7  
 
-| Method | FileSizeKb | BufferSizeKb | Mean      | Error    | Allocated |
-|------- |----------- |------------- |----------:|---------:|----------:|
-| Copy   | 1          | 1            |  47.40 μs | 2.872 μs |   5.36 KB |
-| Copy   | 1          | 2            |  43.09 μs | 6.970 μs |   5.33 KB |
-| Copy   | 1          | 4            |  40.83 μs | 5.271 μs |   1.44 KB |
-| Copy   | 1          | 8            |  39.49 μs | 4.618 μs |   1.44 KB |
-| Copy   | 1          | 16           |  43.20 μs | 2.077 μs |   1.46 KB |
-| Copy   | 4          | 1            |  45.87 μs | 6.265 μs |   5.35 KB |
-| Copy   | 4          | 2            |  41.89 μs | 3.981 μs |   5.33 KB |
-| Copy   | 4          | 4            |  42.36 μs | 3.363 μs |   1.46 KB |
-| Copy   | 4          | 8            |  40.09 μs | 6.565 μs |   1.44 KB |
-| Copy   | 4          | 16           |  37.87 μs | 2.669 μs |   1.44 KB |
-| Copy   | 16         | 1            | 102.85 μs | 7.711 μs |   5.59 KB |
-| Copy   | 16         | 2            |  92.88 μs | 6.539 μs |   5.58 KB |
-| Copy   | 16         | 4            |  70.91 μs | 5.128 μs |   1.49 KB |
-| Copy   | 16         | 8            |  56.70 μs | 2.046 μs |   1.48 KB |
-| Copy   | 16         | 16           |  44.69 μs | 3.951 μs |   1.45 KB |
-| Copy   | 64         | 1            | 247.42 μs | 8.750 μs |   5.61 KB |
-| Copy   | 64         | 2            | 190.28 μs | 8.706 μs |   5.65 KB |
-| Copy   | 64         | 4            | 139.29 μs | 4.501 μs |   1.49 KB |
-| Copy   | 64         | 8            | 104.58 μs | 4.042 μs |   1.49 KB |
-| Copy   | 64         | 16           |  79.34 μs | 5.579 μs |   1.49 KB |
+| Method | FileSizeKb | BufferSizeKb | Mean      | Error     | Allocated |
+|------- |----------- |------------- |----------:|----------:|----------:|
+| Copy   | 1          | 2            |  39.50 μs |  2.172 μs |   5.32 KB |
+| Copy   | 1          | 4            |  42.25 μs |  4.203 μs |   1.46 KB |
+| Copy   | 1          | 8            |  39.56 μs |  3.482 μs |   1.46 KB |
+| Copy   | 1          | 16           |  42.69 μs |  3.702 μs |   1.45 KB |
+| Copy   | 1          | 32           |  39.70 μs |  3.434 μs |   1.44 KB |
+| Copy   | 1          | 64           |  37.80 μs |  2.390 μs |   1.46 KB |
+| Copy   | 4          | 2            |  39.20 μs |  1.963 μs |   5.32 KB |
+| Copy   | 4          | 4            |  42.08 μs |  4.684 μs |   1.45 KB |
+| Copy   | 4          | 8            |  39.86 μs |  3.866 μs |   1.44 KB |
+| Copy   | 4          | 16           |  38.29 μs |  1.906 μs |   1.43 KB |
+| Copy   | 4          | 32           |  39.80 μs |  3.398 μs |   1.44 KB |
+| Copy   | 4          | 64           |  43.72 μs |  3.799 μs |   1.46 KB |
+| Copy   | 16         | 2            |  95.70 μs | 12.925 μs |   5.57 KB |
+| Copy   | 16         | 4            |  74.18 μs |  2.658 μs |   1.49 KB |
+| Copy   | 16         | 8            |  54.97 μs |  4.690 μs |   1.48 KB |
+| Copy   | 16         | 16           |  44.19 μs |  4.856 μs |   1.45 KB |
+| Copy   | 16         | 32           |  42.50 μs |  4.757 μs |   1.44 KB |
+| Copy   | 16         | 64           |  44.39 μs |  3.550 μs |   1.45 KB |
+| Copy   | 64         | 2            | 196.87 μs | 15.518 μs |   5.63 KB |
+| Copy   | 64         | 4            | 143.84 μs |  6.084 μs |   1.49 KB |
+| Copy   | 64         | 8            | 102.82 μs | 10.088 μs |   1.49 KB |
+| Copy   | 64         | 16           |  79.41 μs |  6.083 μs |   1.49 KB |
+| Copy   | 64         | 32           |  69.56 μs |  3.886 μs |   1.49 KB |
+| Copy   | 64         | 64           |  62.10 μs |  6.841 μs |   1.48 KB |
 Summary */

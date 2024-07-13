@@ -14,7 +14,7 @@ public class BufferOptimizationForMediumFiles
     [Params(256, 1024, 4096)]
     public Int32 FileSizeKb { get; set; }
 
-    [Params(4, 8, 32, 128)]
+    [Params(32, 64, 128, 256, 512)]
     public Int32 BufferSizeKb { get; set; }
 
     [GlobalSetup]
@@ -44,18 +44,21 @@ Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical 
 Job=ShortRun  IterationCount=15  IterationTime=240.0000 ms  
 LaunchCount=1  WarmupCount=7  
 
-| Method | FileSizeKb | BufferSizeKb | Mean       | Error     | Allocated |
-|------- |----------- |------------- |-----------:|----------:|----------:|
-| Copy   | 256        | 4            |   430.4 μs |  18.42 μs |   1.49 KB |
-| Copy   | 256        | 8            |   267.6 μs |  10.30 μs |   1.49 KB |
-| Copy   | 256        | 32           |   135.3 μs |   6.48 μs |   1.49 KB |
-| Copy   | 256        | 128          |   107.6 μs |   5.35 μs |   1.49 KB |
-| Copy   | 1024       | 4            | 1,491.0 μs |  37.52 μs |    1.5 KB |
-| Copy   | 1024       | 8            |   867.5 μs |  39.22 μs |    1.5 KB |
-| Copy   | 1024       | 32           |   427.9 μs |  18.37 μs |    1.5 KB |
-| Copy   | 1024       | 128          |   299.9 μs |  11.93 μs |   1.49 KB |
-| Copy   | 4096       | 4            | 5,881.2 μs | 140.16 μs |   1.53 KB |
-| Copy   | 4096       | 8            | 3,564.9 μs |  97.60 μs |   1.51 KB |
-| Copy   | 4096       | 32           | 1,823.1 μs | 184.46 μs |    1.5 KB |
-| Copy   | 4096       | 128          | 1,359.8 μs |  77.91 μs |    1.5 KB |
+| Method | FileSizeKb | BufferSizeKb | Mean       | Error    | Allocated |
+|------- |----------- |------------- |-----------:|---------:|----------:|
+| Copy   | 256        | 32           |   103.5 μs |  5.11 μs |   1.51 KB |
+| Copy   | 256        | 64           |   117.5 μs |  4.15 μs |   1.49 KB |
+| Copy   | 256        | 128          |   106.0 μs |  5.79 μs |   1.49 KB |
+| Copy   | 256        | 256          |   104.8 μs |  6.19 μs |   1.49 KB |
+| Copy   | 256        | 512          |   104.0 μs |  4.94 μs |   1.49 KB |
+| Copy   | 1024       | 32           |   416.4 μs | 12.87 μs |   1.49 KB |
+| Copy   | 1024       | 64           |   341.2 μs | 10.57 μs |   1.49 KB |
+| Copy   | 1024       | 128          |   303.8 μs | 14.34 μs |   1.49 KB |
+| Copy   | 1024       | 256          |   286.0 μs |  5.93 μs |   1.49 KB |
+| Copy   | 1024       | 512          |   310.3 μs | 17.51 μs |   1.49 KB |
+| Copy   | 4096       | 32           | 1,843.6 μs | 85.12 μs |    1.5 KB |
+| Copy   | 4096       | 64           | 1,586.8 μs | 70.64 μs |    1.5 KB |
+| Copy   | 4096       | 128          | 1,430.5 μs | 64.42 μs |    1.5 KB |
+| Copy   | 4096       | 256          | 1,450.5 μs | 64.47 μs |    1.5 KB |
+| Copy   | 4096       | 512          | 1,563.2 μs | 61.24 μs |    1.5 KB |
 Summary */

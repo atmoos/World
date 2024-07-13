@@ -34,18 +34,18 @@ internal static class Convenience
         return file;
     }
 
-    public static IEnumerable<Byte[]> Data(Int32 size)
+    public static IEnumerable<Byte[]> Data(Int64 size)
     {
-        const Int32 chunkSize = 4 * 1024;
-        var current = 0;
+        const Int32 chunkSize = 16 * 1024;
+        Int64 current = 0;
         var random = new Random();
         var chunk = new Byte[chunkSize];
-        for (; current < size; current += chunkSize) {
+        for (; current + chunkSize < size; current += chunkSize) {
             random.NextBytes(chunk);
             yield return chunk;
         }
 
-        Int32 remaining = size - current;
+        Int64 remaining = size - current;
         if (remaining > 0) {
             chunk = new Byte[remaining];
             random.NextBytes(chunk);
