@@ -13,20 +13,20 @@
     <PackageReleaseNotes>Please see: https://github.com/atmoos/World/releases</PackageReleaseNotes>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageId>$(RootNamespace)</PackageId>
-    <!-- <PackageIcon>icon.png</PackageIcon> -->
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="readme.md" Pack="true" PackagePath="\" />
-    <!-- <None Include="$(OutDir)nuget.png" Pack="true" PackagePath="\icon.png" /> -->
+    <None Include="$(OutDir)nuget.png" Pack="true" PackagePath="\icon.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.2.25" PrivateAssets="All" />
   </ItemGroup>
 
-  <!--   <Target Name="CopyNugetIcon" BeforeTargets="Build">
+  <Target Name="CopyNugetIcon" BeforeTargets="Build">
     <Copy SourceFiles="..\..\assets\images\nuget.png" DestinationFolder="$(OutDir)" />
-  </Target> -->
+  </Target>
 
 </Project>
