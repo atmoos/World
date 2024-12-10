@@ -3,12 +3,12 @@
   <Import Project="../Atmoos.World.Pack.targets" />
 
   <PropertyGroup>
-    <Version>0.0.2</Version>
+    <Version>0.1.0</Version>
     <Description>Atmoos World Time: Access to the most fundamental worldly experience of all.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.World" Version="0.0.4" />
+    <PackageReference Include="Atmoos.World" Version="0.1.0" />
   </ItemGroup>
 
 </Project>
