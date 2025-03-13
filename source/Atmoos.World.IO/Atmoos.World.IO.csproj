@@ -3,7 +3,7 @@
   <Import Project="../Atmoos.World.Pack.targets" />
 
   <PropertyGroup>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Description>Atmoos World IO: Interaction with The World through input/output.</Description>
   </PropertyGroup>
 
