@@ -1,7 +1,7 @@
 using Atmoos.Sphere.Collections;
-using File = Atmoos.World.InMemory.IO.File;
-using Directory = Atmoos.World.InMemory.IO.Directory;
 using Atmoos.World.FileSystemTests;
+using Directory = Atmoos.World.InMemory.IO.Directory;
+using File = Atmoos.World.InMemory.IO.File;
 
 namespace Atmoos.World.InMemory.Test.IO;
 
@@ -64,17 +64,16 @@ public sealed class FileTest : IFileProperties
     {
         var name = "multiWrite.txt";
         var content = new Byte[] { 1, 2, 3, 4, 5 };
-        var expected = new Byte[] { 1, 1, 2, 1, 2 };
         var actualRead = new Byte[content.Length];
         using var env = FileEnv.Create(name, content);
         using var read1 = env.File.OpenRead();
         using var read2 = env.File.OpenRead();
         using var read3 = env.File.OpenRead();
-        read2.Read(actualRead, 0, 1);
-        read3.Read(actualRead, 1, 2);
-        read1.Read(actualRead, 3, 2);
 
-        Assert.Equal(expected, actualRead);
+        foreach (var read in new[] { read1, read2, read3 }) {
+            read.ReadExactly(actualRead);
+            Assert.Equal(content, actualRead);
+        }
     }
 
 
