@@ -1,7 +1,7 @@
 using Atmoos.Sphere.Collections;
-using File = Atmoos.World.IO.FileSystem.File;
-using Directory = Atmoos.World.IO.FileSystem.Directory;
 using Atmoos.World.FileSystemTests;
+using Directory = Atmoos.World.IO.FileSystem.Directory;
+using File = Atmoos.World.IO.FileSystem.File;
 
 namespace Atmoos.World.IO.Test.FileSystem;
 
@@ -64,18 +64,17 @@ public sealed class FileTest : IFileProperties
     {
         var name = "lotsOfReads.txt";
         var content = new Byte[] { 1, 2, 3, 4, 5 };
-        var expected = new Byte[] { 1, 1, 2, 1, 2 };
         var actualRead = new Byte[content.Length];
         using var env = FileEnv.Create(name, content);
         var file = new File(root, env.File);
         using var read1 = file.OpenRead();
         using var read2 = file.OpenRead();
         using var read3 = file.OpenRead();
-        read2.Read(actualRead, 0, 1);
-        read3.Read(actualRead, 1, 2);
-        read1.Read(actualRead, 3, 2);
 
-        Assert.Equal(expected, actualRead);
+        foreach (var read in new[] { read1, read2, read3 }) {
+            read.ReadExactly(actualRead);
+            Assert.Equal(content, actualRead);
+        }
     }
 
     [Fact]

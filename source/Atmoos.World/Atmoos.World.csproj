@@ -3,12 +3,12 @@
   <Import Project="../Atmoos.World.Pack.targets" />
 
   <PropertyGroup>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Description>Atmoos World: An abstraction over all worldly goodness.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.Sphere.Functional" Version="0.0.*" />
+    <PackageReference Include="Atmoos.Sphere.Functional" Version="0.1.0" />
   </ItemGroup>
 
 </Project>
