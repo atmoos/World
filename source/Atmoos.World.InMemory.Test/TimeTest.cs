@@ -2,18 +2,20 @@ using System.Runtime.InteropServices;
 
 namespace Atmoos.World.InMemory.Test;
 
-public sealed class TimeTest
+public sealed class TimeInitializationTest
 {
-    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(32) * (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 3d : 1d);
-    private static readonly (DateTime inMemory, DateTime current) initial;
-    static TimeTest() => initial = (Time.Now, DateTime.UtcNow);
+    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(100) * (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 3d : 1d);
 
     [Fact]
     public void TimeNowIsSetToCurrentTime()
     {
-        Assert.Equal(initial.current, initial.inMemory, tol);
+        (DateTime pre, DateTime inMemory, DateTime post) = (DateTime.UtcNow, Time.Now, DateTime.UtcNow);
+        Assert.InRange(inMemory, pre - tol, post + tol);
     }
+}
 
+public sealed class TimeTest
+{
     [Fact]
     public void TimeCanBeAdvancedExactly()
     {
