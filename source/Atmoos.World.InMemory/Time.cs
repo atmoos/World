@@ -11,10 +11,10 @@ public sealed class Time : ITime
     public static Tic Tic()
     {
         var origin = now;
-        return ITime.Start(() => Now - origin);
+        return ITiming.Start(() => Now - origin);
     }
 
-    public static TimeSpan Toc(in Tic tic) => ITime.Elapsed(in tic);
+    public static TimeSpan Toc(in Tic tic) => ITiming.Elapsed(in tic);
 
-    public static DateTime AdvanceBy(in TimeSpan delta) => now = now.Add(delta);
+    public static DateTime AdvanceBy(in TimeSpan delta) => now += delta;
 }
