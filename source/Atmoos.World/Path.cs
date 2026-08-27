@@ -1,4 +1,4 @@
-using Atmoos.Sphere.Functional;
+﻿using Atmoos.Sphere.Functional;
 using Atmoos.World.Algorithms;
 
 namespace Atmoos.World;
@@ -12,7 +12,7 @@ public sealed class FilePath
 public sealed class Path : ICountable<DirectoryName>
 {
     private static readonly Char separator = System.IO.Path.PathSeparator;
-    private static readonly Char[] separators = Separators().Distinct().ToArray();
+    private static readonly Char[] separators = [.. Separators().Distinct()];
     private readonly IDirectory root;
     private readonly IEnumerable<DirectoryName> tail;
     public Int32 Count { get; }
