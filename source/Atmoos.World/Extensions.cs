@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using System.Text;
 using Atmoos.Sphere.Functional;
 
@@ -54,7 +55,7 @@ public static class Extensions
     public static String ToPath(this IDirectory directory) => directory.ToPath(dirSeparator);
     public static String ToPath(this IDirectory directory, Char separator)
         => String.Join(separator, directory.Trail().Select(dir => dir.Name)) switch {
-        ['/', '/', .. var tail] => $"/{tail}",
+            ['/', '/', .. var tail] => $"/{tail}",
             var path => path,
         };
 
@@ -63,6 +64,14 @@ public static class Extensions
 
     public static Result<IDirectory> Search(this IDirectory directory, DirectoryName name)
         => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
+
+    public static IEnumerable<IFile> Find(this IDirectory directory, String extension, Boolean recursive = true)
+        => directory.Find(file => file.Name.Extension == extension, recursive);
+
+    public static IEnumerable<IFile> Find(this IDirectory directory, FileName file, Boolean recursive = true)
+        => directory.Find(f => f.Name == file, recursive);
+    public static IEnumerable<IFile> Find(this IDirectory directory, Func<IFile, Boolean> predicate, Boolean recursive = true)
+        => recursive ? directory.Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Where(predicate);
 
     /// <summary>
     /// Recursively looks upward toward parent directories for the leaf directory
