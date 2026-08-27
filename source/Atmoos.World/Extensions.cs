@@ -69,9 +69,16 @@ public static class Extensions
         => directory.Find(file => file.Name.Extension == extension, recursive);
 
     public static IEnumerable<IFile> Find(this IDirectory directory, FileName file, Boolean recursive = true)
-        => directory.Find(f => f.Name == file, recursive);
+        => directory.Find((IFile f) => f.Name == file, recursive);
+
     public static IEnumerable<IFile> Find(this IDirectory directory, Func<IFile, Boolean> predicate, Boolean recursive = true)
         => recursive ? directory.Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Where(predicate);
+
+    public static IEnumerable<IDirectory> Find(this IDirectory directory, DirectoryName directoryName, Boolean recursive = true)
+            => directory.Find((IDirectory d) => d.Name == directoryName, recursive);
+
+    public static IEnumerable<IDirectory> Find(this IDirectory directory, Func<IDirectory, Boolean> predicate, Boolean recursive = true)
+            => recursive ? directory.Children().Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Children().Where(predicate);
 
     /// <summary>
     /// Recursively looks upward toward parent directories for the leaf directory

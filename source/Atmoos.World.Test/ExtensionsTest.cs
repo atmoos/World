@@ -176,7 +176,34 @@ public sealed class ExtensionsTest
         var child = root.AddDirectory("child");
         child.Add(new FileName("child", "txt"));
 
-        var actual = root.Find(_ => false, recursive: false).ToArray();
+        var actual = root.Find((IFile _) => false, recursive: false).ToArray();
+
+        Assert.Empty(actual);
+    }
+
+    [Fact]
+    public void FindDirectoryByNameRecursesAcrossChildren()
+    {
+        var root = new TestDir("root");
+        var parent = root.AddDirectory("parent");
+        var nested = parent.AddDirectory("nested");
+        var expected = parent.AddDirectory("target");
+        var nestedMatch = nested.AddDirectory("target");
+
+        var actual = root.Find(new DirectoryName("target")).ToArray();
+
+        Assert.Equal([expected, nestedMatch], actual);
+    }
+
+    [Fact]
+    public void FindDirectoryByPredicateDoesNotRecurseWhenRecursiveIsFalse()
+    {
+        var root = new TestDir("root");
+        var child = root.AddDirectory("child");
+        var unexpected = child.AddDirectory("nested");
+
+
+        var actual = root.Find((IDirectory directory) => directory.Name == unexpected.Name, recursive: false).ToArray();
 
         Assert.Empty(actual);
     }
