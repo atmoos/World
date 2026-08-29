@@ -65,9 +65,6 @@ public static class Extensions
     public static Result<IDirectory> Search(this IDirectory directory, DirectoryName name)
         => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
 
-    public static IEnumerable<IFile> Find(this IDirectory directory, String extension, Boolean recursive = true)
-        => directory.Find(file => file.Name.Extension == extension, recursive);
-
     public static IEnumerable<IFile> Find(this IDirectory directory, FileName file, Boolean recursive = true)
         => directory.Find((IFile f) => f.Name == file, recursive);
 

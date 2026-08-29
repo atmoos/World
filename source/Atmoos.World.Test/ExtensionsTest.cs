@@ -134,7 +134,7 @@ public sealed class ExtensionsTest
         var nestedFile = nested.Add(new FileName("nested", "txt"));
         nested.Add(new FileName("ignore", "md"));
 
-        var actual = root.Find("txt").ToArray();
+        var actual = root.Find(f => f.Name.Extension == "txt").ToArray();
 
         Assert.Equal([rootFile, parentFile, nestedFile], actual);
     }
