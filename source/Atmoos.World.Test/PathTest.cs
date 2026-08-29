@@ -1,4 +1,4 @@
-namespace Atmoos.World.Test;
+﻿namespace Atmoos.World.Test;
 
 public sealed class PathTest
 {
@@ -174,6 +174,36 @@ public sealed class PathTest
         Assert.Equal(expected, path.ToString());
     }
 
+    [Fact]
+    public void SubtractionOperatorWithCommonRoot()
+    {
+        var common = TestDir.Chain(root, "parent");
+        var left = Path.Abs(common, "puff", "goes", "the", "weasel");
+        var right = Path.Abs(common, "here", "be", "dragons");
+        var expectedDistance = new[] { "here", "be", "dragons" }.Select(n => new DirectoryName(n)).ToArray();
+
+        var (commonPath, distance) = left - right;
+
+        Assert.Same(common, commonPath.Root);
+        Assert.Empty(commonPath);
+        Assert.Equal(expectedDistance, distance);
+    }
+
+    [Fact]
+    public void SubtractionOperatorWithCommonTail()
+    {
+        var common = TestDir.Chain(root, "parent");
+        var commonTail = new DirectoryName("child");
+        var left = Path.Abs(common, commonTail, "puff", "goes", "the", "weasel");
+        var right = Path.Abs(common, commonTail, "here", "be", "dragons");
+        var expectedDistance = new[] { "here", "be", "dragons" }.Select(n => new DirectoryName(n)).ToArray();
+
+        var (commonPath, distance) = left - right;
+
+        Assert.Same(common, commonPath.Root);
+        Assert.Equal([commonTail], commonPath);
+        Assert.Equal(expectedDistance, distance);
+    }
     private sealed class PathParseFs : IFileSystemState
     {
         private static readonly TestDir root = new(RootName);

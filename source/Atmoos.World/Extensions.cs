@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Text;
+﻿using System.Text;
 using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World;
@@ -9,6 +8,7 @@ public static class Extensions
     private const Int32 bufferSize = 65536;
     private static readonly Encoding encoding = Encoding.UTF8;
     private static readonly Char dirSeparator = System.IO.Path.DirectorySeparatorChar;
+    public static String ToPath(this IEnumerable<DirectoryName> segment) => String.Join(dirSeparator, segment);
     public static IEnumerable<IDirectory> Trail(this IDirectory tail)
     {
         var current = tail;
@@ -64,9 +64,6 @@ public static class Extensions
 
     public static Result<IDirectory> Search(this IDirectory directory, DirectoryName name)
         => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
-
-    public static IEnumerable<IFile> Find(this IDirectory directory, String extension, Boolean recursive = true)
-        => directory.Find(file => file.Name.Extension == extension, recursive);
 
     public static IEnumerable<IFile> Find(this IDirectory directory, FileName file, Boolean recursive = true)
         => directory.Find((IFile f) => f.Name == file, recursive);

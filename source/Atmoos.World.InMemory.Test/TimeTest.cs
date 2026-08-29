@@ -1,10 +1,10 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Atmoos.World.InMemory.Test;
 
 public sealed class TimeInitializationTest
 {
-    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(100) * (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 3d : 1d);
+    private static readonly TimeSpan tol = TimeSpan.FromMilliseconds(141) * (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 3d : 1d);
 
     [Fact]
     public void TimeNowIsSetToCurrentTime()

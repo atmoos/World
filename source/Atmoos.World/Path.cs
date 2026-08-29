@@ -19,11 +19,24 @@ public sealed class Path : ICountable<DirectoryName>
     public IDirectory Root => this.root;
     private Path(IDirectory root, Int32 count, IEnumerable<DirectoryName> tail) => (this.root, Count, this.tail) = (root, count, tail);
     public IEnumerator<DirectoryName> GetEnumerator() => this.tail.GetEnumerator();
+    private IEnumerable<DirectoryName> Trail()
+    {
+        foreach (var dir in this.root.Trail()) {
+            yield return dir.Name;
+        }
+        foreach (var dir in this.tail) {
+            yield return dir;
+        }
+    }
     public override String ToString()
     {
         var rootPath = this.root.ToPath(separator);
         return String.Join(separator, this.tail.Select(t => t.ToString()).Prepend($"[{rootPath}]"));
     }
+
+    public String ToPath() => this.ToPath(separator);
+    public String ToPath(Char separator) => String.Join(separator, this.Trail().Select(d => d.ToString()));
+
     public static Path Abs(IDirectory root) => new(root, 0, []);
     public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path.Length, path);
     public static Path Abs(IDirectory root, params String[] path) => new(root, path.Length, path.Select(Dir));
@@ -43,6 +56,16 @@ public sealed class Path : ICountable<DirectoryName>
         where TFileSystem : IFileSystemState => Match.Path(TFileSystem.Root, path, separators);
 
     public static FilePath operator +(Path dir, FileName file) => new() { Path = dir, Name = file };
+
+    public static (Path common, DirectoryName[] distance) operator -(Path left, Path right)
+    {
+        var leftTrail = left.Trail().ToArray();
+        var rightTrail = right.Trail().ToArray();
+        var commonLength = leftTrail.Zip(rightTrail).TakeWhile(pair => pair.First == pair.Second).Count();
+        var leading = left.root.Trail().TakeWhile((d, i) => d.Name == leftTrail[i]).ToArray();
+        var newTail = leftTrail[leading.Length..commonLength];
+        return (new Path(leading[^1], newTail.Length, newTail), rightTrail[commonLength..]);
+    }
     private static DirectoryName Dir(String name) => new(name);
 
     private static Char[] Separators()

@@ -1,19 +1,20 @@
+﻿using Atmoos.Sphere.Functional;
 using Atmoos.Sphere.Text;
-using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class FileSystem
 {
-    private const Char separator = ':';
     private readonly IDirectory root;
     private readonly Trie<IDirectory, Directory> directories;
+    public Char Separator { get; }
     public IDirectory Root => this.root;
 
     public File this[IFile file] => this[file.Parent][file];
     public Directory this[IDirectory directory] => Trie(directory).Value;
-    public FileSystem(DirectoryName rootName, DateTime creationTime)
+    public FileSystem(DirectoryName rootName, DateTime creationTime, Char separator)
     {
+        this.Separator = separator;
         (this.root, this.directories) = Directory.CreateRoot(rootName, creationTime);
     }
 
@@ -82,7 +83,7 @@ internal sealed class FileSystem
                 traversedPath.Add(subDir);
                 continue;
             }
-            var path = String.Join(separator, traversedPath);
+            var path = String.Join(this.Separator, traversedPath);
             return Result.Failure<IDirectory>($"No directory '{subDir}' in [{path}].");
         }
         return Result.Success(info);

@@ -5,7 +5,7 @@ namespace Atmoos.World.InMemory.IO;
 public sealed class UnixFileSystem<Time> : IFileSystem
     where Time : ITime
 {
-    private static readonly FileSystem fileSystem = new(new DirectoryName { Value = "/" }, Time.Now);
+    private static readonly FileSystem fileSystem = new(new DirectoryName { Value = "/" }, Time.Now, ':');
     private static IDirectory currentDirectory = fileSystem.Root;
     public static IDirectory Root => fileSystem.Root;
     public static IDirectory CurrentDirectory
