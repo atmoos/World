@@ -177,7 +177,6 @@ public sealed class PathTest
     [Fact]
     public void SubtractionOperatorWithCommonRoot()
     {
-        var separator = ':';
         var common = TestDir.Chain(root, "parent");
         var left = Path.Abs(common, "puff", "goes", "the", "weasel");
         var right = Path.Abs(common, "here", "be", "dragons");
@@ -187,13 +186,12 @@ public sealed class PathTest
 
         Assert.Same(common, commonPath.Root);
         Assert.Empty(commonPath);
-        Assert.Equal(Join(separator, expectedDistance), Join(separator, distance));
+        Assert.Equal(expectedDistance, distance);
     }
 
     [Fact]
     public void SubtractionOperatorWithCommonTail()
     {
-        var separator = ':';
         var common = TestDir.Chain(root, "parent");
         var commonTail = new DirectoryName("child");
         var left = Path.Abs(common, commonTail, "puff", "goes", "the", "weasel");
@@ -204,11 +202,8 @@ public sealed class PathTest
 
         Assert.Same(common, commonPath.Root);
         Assert.Equal([commonTail], commonPath);
-        Assert.Equal(Join(separator, expectedDistance), Join(separator, distance));
+        Assert.Equal(expectedDistance, distance);
     }
-
-    private static String Join(Char separator, IEnumerable<DirectoryName> path) => String.Join(separator, path.Select(d => d.ToString()));
-
     private sealed class PathParseFs : IFileSystemState
     {
         private static readonly TestDir root = new(RootName);

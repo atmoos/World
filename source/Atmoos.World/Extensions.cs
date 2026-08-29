@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Text;
+﻿using System.Text;
 using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World;
@@ -9,6 +8,7 @@ public static class Extensions
     private const Int32 bufferSize = 65536;
     private static readonly Encoding encoding = Encoding.UTF8;
     private static readonly Char dirSeparator = System.IO.Path.DirectorySeparatorChar;
+    public static String ToPath(this IEnumerable<DirectoryName> segment) => String.Join(dirSeparator, segment);
     public static IEnumerable<IDirectory> Trail(this IDirectory tail)
     {
         var current = tail;
