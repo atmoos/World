@@ -8,7 +8,17 @@ public static class Extensions
     private const Int32 bufferSize = 65536;
     private static readonly Encoding encoding = Encoding.UTF8;
     private static readonly Char dirSeparator = System.IO.Path.DirectorySeparatorChar;
-    public static String ToPath(this IEnumerable<DirectoryName> segment) => String.Join(dirSeparator, segment);
+
+    extension(IFile file)
+    {
+        public FilePath Path => new() { Path = file.Parent.Path, Name = file.Name };
+    }
+
+    extension(IDirectory directory)
+    {
+        public Path Path => Path.Abs(directory);
+    }
+
     public static IEnumerable<IDirectory> Trail(this IDirectory tail)
     {
         var current = tail;

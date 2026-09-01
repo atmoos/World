@@ -14,11 +14,11 @@ public sealed class Path : ICountable<DirectoryName>
     private static readonly Char separator = System.IO.Path.PathSeparator;
     private static readonly Char[] separators = [.. Separators().Distinct()];
     private readonly IDirectory root;
-    private readonly IEnumerable<DirectoryName> tail;
-    public Int32 Count { get; }
+    private readonly IReadOnlyCollection<DirectoryName> tail;
+    public Int32 Count => this.tail.Count + this.root.Trail().Count();
     public IDirectory Root => this.root;
-    private Path(IDirectory root, Int32 count, IEnumerable<DirectoryName> tail) => (this.root, Count, this.tail) = (root, count, tail);
-    public IEnumerator<DirectoryName> GetEnumerator() => this.tail.GetEnumerator();
+    private Path(IDirectory root, IReadOnlyCollection<DirectoryName> tail) => (this.root, this.tail) = (root, tail);
+    public IEnumerator<DirectoryName> GetEnumerator() => this.Trail().GetEnumerator();
     private IEnumerable<DirectoryName> Trail()
     {
         foreach (var dir in this.root.Trail()) {
@@ -37,21 +37,16 @@ public sealed class Path : ICountable<DirectoryName>
     public String ToPath() => this.ToPath(separator);
     public String ToPath(Char separator) => String.Join(separator, this.Trail().Select(d => d.ToString()));
 
-    public static Path Abs(IDirectory root) => new(root, 0, []);
-    public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path.Length, path);
-    public static Path Abs(IDirectory root, params String[] path) => new(root, path.Length, path.Select(Dir));
+    public static Path Abs(IDirectory root) => new(root, []);
+    public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path);
     public static Path Rel<TFileSystem>()
-        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, 0, []);
+        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, []);
     public static Path Rel<TFileSystem>(params DirectoryName[] path)
-        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path.Length, path);
+        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path);
 
     // "../../MyDirectory" translates to Rel<FileSystem>(2, "MyDirectory")
     public static Path Rel<TFileSystem>(Byte offset, params DirectoryName[] path)
-    where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path.Length, path);
-    public static Path Rel<TFileSystem>(params String[] path)
-        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path.Length, path.Select(Dir));
-    public static Path Rel<TFileSystem>(Byte offset, params String[] path)
-    where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path.Length, path.Select(Dir));
+    where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path);
     public static Path Parse<TFileSystem>(String path)
         where TFileSystem : IFileSystemState => Match.Path(TFileSystem.Root, path, separators);
 
@@ -64,7 +59,7 @@ public sealed class Path : ICountable<DirectoryName>
         var commonLength = leftTrail.Zip(rightTrail).TakeWhile(pair => pair.First == pair.Second).Count();
         var leading = left.root.Trail().TakeWhile((d, i) => d.Name == leftTrail[i]).ToArray();
         var newTail = leftTrail[leading.Length..commonLength];
-        return (new Path(leading[^1], newTail.Length, newTail), rightTrail[commonLength..]);
+        return (new Path(leading[^1], newTail), rightTrail[commonLength..]);
     }
     private static DirectoryName Dir(String name) => new(name);
 
