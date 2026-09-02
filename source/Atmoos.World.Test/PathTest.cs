@@ -167,6 +167,31 @@ public sealed class PathTest
         Assert.Equal(expectedDistance, distance);
     }
 
+
+    [Fact]
+    public void NormalizeRemovesDotAndDotDotSegments()
+    {
+        var segments = new[] { "parent", ".", ".", "irrelevant", "child", "..", "sibling", "..", "..", "current", ".", "dir", "." };
+        var path = Path.Abs(root.dir, segments);
+
+        var normalized = path.Normalize();
+
+        DirectoryName[] expected = [.. new[] { root.dir.Name, "parent", "current", "dir" }.Select(n => new DirectoryName(n))];
+        Assert.Equal(expected, normalized);
+    }
+
+    [Fact]
+    public void NormalizeJumpsToParentOnDotDot()
+    {
+        var parent = TestDir.Chain(root.dir, "parent");
+        var path = Path.Abs(parent, "..", "current", "dir");
+
+        var normalized = path.Normalize();
+
+        DirectoryName[] expected = [.. new[] { root.dir.Name, "current", "dir" }.Select(n => new DirectoryName(n))];
+        Assert.Equal(expected, normalized);
+    }
+
     private static (IDirectory dir, DirectoryName[] segments) SetUp(String rootName)
     {
         var root = new TestDir(rootName);

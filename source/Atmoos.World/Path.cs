@@ -11,6 +11,8 @@ public sealed class FilePath
 
 public sealed class Path : ICountable<DirectoryName>
 {
+    private static DirectoryName dot => new(".");
+    private static DirectoryName dotDot => new("..");
     private static readonly Char separator = System.IO.Path.PathSeparator;
     private static readonly Char[] separators = [.. Separators().Distinct()];
     private readonly IDirectory root;
@@ -18,6 +20,28 @@ public sealed class Path : ICountable<DirectoryName>
     public Int32 Count => this.tail.Count + this.root.Trail().Count();
     public IDirectory Root => this.root;
     private Path(IDirectory root, IReadOnlyCollection<DirectoryName> tail) => (this.root, this.tail) = (root, tail);
+
+    public Path Normalize()
+    {
+        var root = this.root;
+        var normalized = new Stack<DirectoryName>();
+        foreach (var segment in this.tail) {
+            if (segment == dot) {
+                continue;
+            }
+            if (segment == dotDot) {
+                if (normalized.Count > 0) {
+                    normalized.Pop();
+                    continue;
+                }
+                root = root.Parent;
+                continue;
+            }
+            normalized.Push(segment);
+        }
+        return new(root, [.. normalized.Reverse()]);
+    }
+
     public IEnumerator<DirectoryName> GetEnumerator() => this.Trail().GetEnumerator();
     private IEnumerable<DirectoryName> Trail()
     {
