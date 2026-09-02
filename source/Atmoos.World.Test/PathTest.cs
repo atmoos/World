@@ -167,7 +167,6 @@ public sealed class PathTest
         Assert.Equal(expectedDistance, distance);
     }
 
-
     [Fact]
     public void NormalizeRemovesDotAndDotDotSegments()
     {

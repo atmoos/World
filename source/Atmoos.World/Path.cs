@@ -11,8 +11,8 @@ public sealed class FilePath
 
 public sealed class Path : ICountable<DirectoryName>
 {
-    private static DirectoryName dot => new(".");
-    private static DirectoryName dotDot => new("..");
+    private static readonly DirectoryName dot = new(".");
+    private static readonly DirectoryName dotDot = new("..");
     private static readonly Char separator = System.IO.Path.PathSeparator;
     private static readonly Char[] separators = [.. Separators().Distinct()];
     private readonly IDirectory root;
