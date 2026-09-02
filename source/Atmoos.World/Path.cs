@@ -39,14 +39,19 @@ public sealed class Path : ICountable<DirectoryName>
 
     public static Path Abs(IDirectory root) => new(root, []);
     public static Path Abs(IDirectory root, params DirectoryName[] path) => new(root, path);
+    internal static Path Abs(IDirectory root, params String[] path) => new(root, [.. path.Select(Dir)]);
     public static Path Rel<TFileSystem>()
         where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, []);
     public static Path Rel<TFileSystem>(params DirectoryName[] path)
         where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, path);
+    internal static Path Rel<TFileSystem>(params String[] path)
+        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory, [.. path.Select(Dir)]);
 
     // "../../MyDirectory" translates to Rel<FileSystem>(2, "MyDirectory")
     public static Path Rel<TFileSystem>(Byte offset, params DirectoryName[] path)
-    where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path);
+        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), path);
+    internal static Path Rel<TFileSystem>(Byte offset, params String[] path)
+        where TFileSystem : IFileSystemState => new(TFileSystem.CurrentDirectory.Antecedent(offset), [.. path.Select(Dir)]);
     public static Path Parse<TFileSystem>(String path)
         where TFileSystem : IFileSystemState => Match.Path(TFileSystem.Root, path, separators);
 

@@ -1,4 +1,4 @@
-using Atmoos.World.Algorithms;
+﻿using Atmoos.World.Algorithms;
 
 namespace Atmoos.World.Test.Algorithms;
 
@@ -29,23 +29,25 @@ public sealed class MatchTest
     }
 
     [Fact]
-    public void MatchAllElementsReturnsPathWithZeroUnmatchedSegments()
+    public void MatchAllElementsReturnsPathWithRootAndZeroUnmatchedSegments()
     {
         var root = new TestDir(RootName);
         String[] querySegments = ["s", "t", "v"];
+        DirectoryName[] expectedDistance = [.. querySegments.Select(segment => new DirectoryName(segment))];
         var expectedPathRoot = TestDir.Chain(root, querySegments);
         var queryPath = System.IO.Path.Combine([root.Name, .. querySegments]);
 
         var path = Match.Path(root, queryPath, System.IO.Path.DirectorySeparatorChar);
 
         Assert.Same(expectedPathRoot, path.Root);
-        Assert.Equal(0, path.Count);
-        Assert.Empty(path);
+        Assert.Equal(querySegments.Length + 1, path.Count);
+        Assert.Equal(expectedDistance.Prepend(root.Name), path);
     }
 
     private static void AssertRootedMatch(TestDir root, Char separator)
     {
-        var tip = TestDir.Chain(root, "a", "b", "c");
+        String[] prefix = ["a", "b", "c"];
+        var tip = TestDir.Chain(root, prefix);
         tip.AddDirectory("d");
         var anchor = tip.AddDirectory("r");
         String[] unmatchedTail = ["s", "t", "v"];
@@ -53,8 +55,8 @@ public sealed class MatchTest
         var queryPath = String.Join(separator, querySegments);
 
         var path = Match.Path(root, queryPath, separator);
-
+        var expectedSegments = prefix.Prepend(root.Name).Append("r").Concat(unmatchedTail);
         Assert.Same(anchor, path.Root);
-        Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
+        Assert.Equal(expectedSegments.Select(e => new DirectoryName(e)), path);
     }
 }

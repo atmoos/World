@@ -1,8 +1,8 @@
-using Atmoos.Sphere.Functional;
+﻿using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World;
 
-public interface IFileSystem :
+public interface IFileSystem : // The sum of all file system operations.
     IFileCreation,
     IFileDeletion,
     IDirectoryCreation,
@@ -10,8 +10,7 @@ public interface IFileSystem :
     IFileManipulation,
     IDirectoryManipulation,
     IFileSystemQueries,
-    IFileSystemState
-{ /* The sum of all file system operations. */ }
+    IFileSystemState;
 
 public interface IFileSystemState
 {

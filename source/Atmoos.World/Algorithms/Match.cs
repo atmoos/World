@@ -29,7 +29,7 @@ internal static class Match
                 return World.Path.Abs(current, [.. segments[index..].Select(s => new DirectoryName(s))]);
             }
             current = next;
-            return World.Path.Abs(current);
         }
+        return World.Path.Abs(current);
     }
 }
