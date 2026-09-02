@@ -9,6 +9,7 @@ public sealed class TimeInitializationTest
     [Fact]
     public void TimeNowIsSetToCurrentTime()
     {
+        GC.KeepAlive(Time.Now); // Warm up the static constructor
         (DateTime pre, DateTime inMemory, DateTime post) = (DateTime.UtcNow, Time.Now, DateTime.UtcNow);
         Assert.InRange(inMemory, pre - tol, post + tol);
     }
