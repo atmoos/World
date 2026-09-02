@@ -63,7 +63,7 @@ public sealed class ExtensionsTest
 
         var actualPath = directory.ToPath();
 
-        var rootName = root.Name == "/" ? String.Empty : root.Name;
+        String rootName = root.Name == "/" ? String.Empty : root.Name;
         var expectedPath = String.Join(Separator, expectedSegments.Prepend(rootName));
         Assert.Equal(expectedPath, actualPath);
     }

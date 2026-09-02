@@ -1,4 +1,4 @@
-namespace Atmoos.World.Algorithms;
+﻿namespace Atmoos.World.Algorithms;
 
 internal static class Match
 {
@@ -26,7 +26,7 @@ internal static class Match
             }
             var next = current.Children().SingleOrDefault(child => child.Name == segment);
             if (next == null) {
-                return World.Path.Abs(current, segments[index..]);
+                return World.Path.Abs(current, [.. segments[index..].Select(s => new DirectoryName(s))]);
             }
             current = next;
         }

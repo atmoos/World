@@ -8,87 +8,97 @@ public static class Extensions
     private const Int32 bufferSize = 65536;
     private static readonly Encoding encoding = Encoding.UTF8;
     private static readonly Char dirSeparator = System.IO.Path.DirectorySeparatorChar;
-    public static String ToPath(this IEnumerable<DirectoryName> segment) => String.Join(dirSeparator, segment);
-    public static IEnumerable<IDirectory> Trail(this IDirectory tail)
+
+    extension(IFile file)
     {
-        var current = tail;
-        var trail = new Stack<IDirectory>();
-        for (; current != current.Parent; current = current.Parent) {
+        public FilePath Path => new() { Path = file.Parent.Path, Name = file.Name };
+
+        public String ToPath() => file.ToPath(dirSeparator);
+        public String ToPath(Char separator)
+            => String.Join(separator, file.Parent.ToPath(separator), file.Name);
+    }
+
+    extension(IDirectory directory)
+    {
+        public Path Path => Path.Abs(directory);
+        public IEnumerable<IDirectory> Trail()
+        {
+            var current = directory;
+            var trail = new Stack<IDirectory>();
+            for (; current != current.Parent; current = current.Parent) {
+                trail.Push(current);
+            }
             trail.Push(current);
+            return trail;
         }
-        trail.Push(current);
-        return trail;
-    }
-    public static IEnumerable<IDirectory> Trail(this IDirectory tail, IDirectory until)
-    {
-        var trail = new Stack<IDirectory>();
-        for (var current = tail; current != until && current != current.Parent; current = current.Parent) {
-            trail.Push(current);
+        public IEnumerable<IDirectory> Trail(IDirectory until)
+        {
+            var trail = new Stack<IDirectory>();
+            for (var current = directory; current != until && current != current.Parent; current = current.Parent) {
+                trail.Push(current);
+            }
+            return trail;
         }
-        return trail;
-    }
 
-    public static IEnumerable<IDirectory> Antecedents(this IDirectory tail) => tail.Parent.Trail();
+        public IEnumerable<IDirectory> Antecedents() => directory.Parent.Trail();
 
-    public static IDirectory Antecedent(this IDirectory tail, Byte depth)
-    {
-        IDirectory current = tail;
-        for (Int32 i = 0; i < depth; ++i) {
-            current = current.Parent;
+        public IDirectory Antecedent(Byte depth)
+        {
+            IDirectory current = directory;
+            for (Int32 i = 0; i < depth; ++i) {
+                current = current.Parent;
+            }
+            return current;
         }
-        return current;
-    }
 
-    public static Boolean IsRoot(this IDirectory directory) => ReferenceEquals(directory.Parent, directory);
-    public static IDirectory Root(this IDirectory directory)
-    {
-        IDirectory current = directory;
-        while (ReferenceEquals(current.Parent, current) == false) {
-            current = current.Parent;
+        public Boolean IsRoot() => ReferenceEquals(directory.Parent, directory);
+        public IDirectory Root()
+        {
+            IDirectory current = directory;
+            while (ReferenceEquals(current.Parent, current) == false) {
+                current = current.Parent;
+            }
+            return current;
         }
-        return current;
-    }
 
-    public static String ToPath(this IFile file) => file.ToPath(dirSeparator);
-    public static String ToPath(this IFile file, Char separator)
-        => String.Join(separator, file.Parent.ToPath(separator), file.Name);
-    public static String ToPath(this IDirectory directory) => directory.ToPath(dirSeparator);
-    public static String ToPath(this IDirectory directory, Char separator)
-        => String.Join(separator, directory.Trail().Select(dir => dir.Name)) switch {
-            ['/', '/', .. var tail] => $"/{tail}",
-            var path => path,
-        };
+        public String ToPath() => directory.ToPath(dirSeparator);
+        public String ToPath(Char separator)
+            => String.Join(separator, directory.Trail().Select(dir => dir.Name)) switch {
+                ['/', '/', .. var tail] => $"/{tail}",
+                var path => path,
+            };
 
-    public static Result<IFile> Search(this IDirectory directory, FileName name)
-        => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");
+        public Result<IFile> Search(FileName name)
+            => directory.SingleOrDefault(file => file.Name == name).ToResult(() => $"File '{name}' not found in '{directory}'.");
 
-    public static Result<IDirectory> Search(this IDirectory directory, DirectoryName name)
-        => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
+        public Result<IDirectory> Search(DirectoryName name)
+            => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
 
-    public static IEnumerable<IFile> Find(this IDirectory directory, FileName file, Boolean recursive = true)
-        => directory.Find((IFile f) => f.Name == file, recursive);
+        public IEnumerable<IFile> Find(FileName file, Boolean recursive = true)
+            => directory.Find((IFile f) => f.Name == file, recursive);
 
-    public static IEnumerable<IFile> Find(this IDirectory directory, Func<IFile, Boolean> predicate, Boolean recursive = true)
-        => recursive ? directory.Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Where(predicate);
+        public IEnumerable<IFile> Find(Func<IFile, Boolean> predicate, Boolean recursive = true)
+            => recursive ? directory.Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Where(predicate);
 
-    public static IEnumerable<IDirectory> Find(this IDirectory directory, DirectoryName directoryName, Boolean recursive = true)
-            => directory.Find((IDirectory d) => d.Name == directoryName, recursive);
+        public IEnumerable<IDirectory> Find(DirectoryName directoryName, Boolean recursive = true)
+                => directory.Find((IDirectory d) => d.Name == directoryName, recursive);
 
-    public static IEnumerable<IDirectory> Find(this IDirectory directory, Func<IDirectory, Boolean> predicate, Boolean recursive = true)
-            => recursive ? directory.Children().Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Children().Where(predicate);
+        public IEnumerable<IDirectory> Find(Func<IDirectory, Boolean> predicate, Boolean recursive = true)
+                => recursive ? directory.Children().Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Children().Where(predicate);
 
-    /// <summary>
-    /// Recursively looks upward toward parent directories for the leaf directory
-    /// <paramref name="leafDirectoryName"/> starting at <paramref name="anchor"/>.
-    /// </summary>
-    public static Result<IDirectory> FindLeaf(this IDirectory anchor, DirectoryName leafDirectoryName)
-    {
-        Result<IDirectory> result;
-        IDirectory directory = anchor;
-        while ((result = directory.Search(leafDirectoryName)) is Failure<IDirectory> && !directory.IsRoot()) {
-            directory = directory.Parent;
+        /// <summary>
+        /// Recursively looks upward toward parent directories for the leaf directory
+        /// <paramref name="leafDirectoryName"/> starting at <paramref name="anchor"/>.
+        /// </summary>
+        public Result<IDirectory> FindLeaf(DirectoryName leafDirectoryName)
+        {
+            Result<IDirectory> result;
+            IDirectory current = directory;
+            while ((result = current.Search(leafDirectoryName)) is Failure<IDirectory> && !current.IsRoot()) {
+                current = current.Parent;
+            }
+            return result;
         }
-        return result;
     }
 
     /// <summary>
@@ -98,25 +108,30 @@ public static class Extensions
     public static Result<IDirectory> FindLeaf<TFileSystem>(DirectoryName leafDirectoryName)
         where TFileSystem : IFileSystemState => TFileSystem.CurrentDirectory.FindLeaf(leafDirectoryName);
 
-    public static async Task CopyTo(this IRead source, IWrite target, CancellationToken token = default)
+    extension(IRead reader)
     {
-        using var reader = source.OpenRead();
-        using var writer = target.OpenWrite();
-        await reader.CopyToAsync(writer, token).ConfigureAwait(false);
+        public async Task CopyTo(IWrite target, CancellationToken token = default)
+        {
+            using var source = reader.OpenRead();
+            using var writer = target.OpenWrite();
+            await source.CopyToAsync(writer, token).ConfigureAwait(false);
+        }
+
+        public StreamReader OpenText() => reader.OpenText(encoding);
+        public StreamReader OpenText(Encoding textEncoding)
+            => new(reader.OpenRead(), textEncoding, leaveOpen: false, bufferSize: bufferSize);
     }
 
-    public static StreamReader OpenText(this IRead reader)
-        => OpenText(reader, encoding);
-    public static StreamReader OpenText(this IRead reader, Encoding encoding)
-        => new(reader.OpenRead(), encoding, leaveOpen: false, bufferSize: bufferSize);
-    public static StreamWriter AppendText(this IWrite writer)
-        => AppendText(writer, encoding);
-    public static StreamWriter AppendText(this IWrite writer, Encoding encoding)
+    extension(IWrite writer)
     {
-        var stream = writer.OpenWrite();
-        if (stream.CanSeek) {
-            stream.Seek(0, SeekOrigin.End);
+        public StreamWriter AppendText() => writer.AppendText(encoding);
+        public StreamWriter AppendText(Encoding textEncoding)
+        {
+            var stream = writer.OpenWrite();
+            if (stream.CanSeek) {
+                stream.Seek(0, SeekOrigin.End);
+            }
+            return new(stream, textEncoding, leaveOpen: false, bufferSize: bufferSize);
         }
-        return new(stream, encoding, leaveOpen: false, bufferSize: bufferSize);
     }
 }

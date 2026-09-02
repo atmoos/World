@@ -2,30 +2,30 @@
 
 public sealed class PathTest
 {
-    private static readonly IDirectory root = FileSystem.CurrentDirectory;
-    private static readonly DirectoryName[] pathSegment = new String[] { "MyDirectory", "MySubDirectory" }.Select(n => new DirectoryName(n)).ToArray();
-    public PathTest() => FileSystem.CurrentDirectory = root;
+    private static readonly (IDirectory dir, DirectoryName[] segments) root = SetUp("root");
+    private static readonly DirectoryName[] pathSegment = [.. (new[] { "MyDirectory", "MySubDirectory" }).Select(n => new DirectoryName(n))];
+    public PathTest() => FileSystem.CurrentDirectory = root.dir;
 
     [Fact]
-    public void PathCountIsPathLengthExcludingRoot()
+    public void PathCountIsPathLengthIncludingRoot()
     {
-        var path = Path.Abs(root, pathSegment);
+        var path = Path.Abs(root.dir, pathSegment);
 
-        Assert.Equal(pathSegment.Length, path.Count);
+        Assert.Equal(pathSegment.Length + root.segments.Length, path.Count);
     }
 
     [Fact]
-    public void PathEnumeratesAllPathSegmentExcludingRoot()
+    public void PathEnumeratesAllPathSegmentsIncludingRoot()
     {
-        var path = Path.Abs(root, pathSegment);
+        var path = Path.Abs(root.dir, pathSegment);
 
-        Assert.Equal(pathSegment, path);
+        Assert.Equal(root.segments.Concat(pathSegment), path);
     }
 
     [Fact]
     public void PathRootIsRoot()
     {
-        var anyRoot = TestDir.Chain(root, "AnyRoot");
+        var anyRoot = TestDir.Chain(root.dir, "AnyRoot");
 
         var path = Path.Abs(anyRoot);
 
@@ -33,44 +33,44 @@ public sealed class PathTest
     }
 
     [Fact]
-    public void TheEmptyAbsolutePathHasLengthZero()
+    public void TheTaillessAbsolutePathIncludesItsRoot()
     {
-        var path = Path.Abs(root);
+        var path = Path.Abs(root.dir);
 
-        Assert.Equal(0, path.Count);
-        Assert.Empty(path);
+        Assert.Equal(1, path.Count);
+        Assert.Single(path);
     }
 
     [Fact]
-    public void TheEmptyRelativePathHasLengthZero()
+    public void TheTaillessRelativePathIncludesItsRoot()
     {
         var path = Path.Rel<FileSystem>();
 
-        Assert.Equal(0, path.Count);
-        Assert.Empty(path);
+        Assert.Equal(1, path.Count);
+        Assert.Single(path);
     }
 
     [Fact]
     public void RelativePathWithTailArgumentsIsRootedOnTheCurrentDirectoryWithNonZeroTail()
     {
-        String[] tail = ["Any", "Length", "Of", "Sub", "Directories"];
-        FileSystem.CurrentDirectory = TestDir.Chain(root, "SomeDirectory");
+        DirectoryName[] tail = [.. (new[] { "Any", "Length", "Of", "Sub", "Directories" }).Select(n => new DirectoryName(n))];
+        IDirectory current = FileSystem.CurrentDirectory = TestDir.Chain(root.dir, "SomeDirectory");
 
         var path = Path.Rel<FileSystem>(tail);
 
         Assert.Same(FileSystem.CurrentDirectory, path.Root);
-        Assert.Equal(tail, path.Select(s => s.Value));
+        Assert.Equal(root.segments.Concat(tail.Prepend(current.Name)), path);
     }
 
     [Fact]
     public void RelativePathWithoutArgumentIsRootedOnTheCurrentDirectoryWithZeroTail()
     {
-        FileSystem.CurrentDirectory = TestDir.Chain(root, "SomeDir");
+        IDirectory current = FileSystem.CurrentDirectory = TestDir.Chain(root.dir, "SomeDirectory");
 
         var path = Path.Rel<FileSystem>();
 
         Assert.Same(FileSystem.CurrentDirectory, path.Root);
-        Assert.Empty(path);
+        Assert.Equal(root.segments.Append(current.Name), path);
     }
 
     [Fact]
@@ -78,72 +78,34 @@ public sealed class PathTest
     {
         var leafDirectory = new DirectoryName("LeafDirectory");
         String[] threeLevelsDown = ["Three", "Levels", "Down"];
-        var top = TestDir.Chain(root, "TopLevel");
+        var top = TestDir.Chain(root.dir, "TopLevel");
         var expectedAntecedent = TestDir.Chain(top, "Antecedent");
         var antecedentSibling = TestDir.Chain(top, "AntecedentSibling");
+        var segments = new[] { top.Name, expectedAntecedent.Name, leafDirectory };
         FileSystem.CurrentDirectory = TestDir.Chain(expectedAntecedent, threeLevelsDown);
 
         var path = Path.Rel<FileSystem>((Byte)threeLevelsDown.Length, leafDirectory);
 
         Assert.Same(expectedAntecedent, path.Root);
-        Assert.Equal(Enumerable.Repeat(leafDirectory, 1), path);
+        Assert.Equal(root.segments.Concat(segments), path);
         Assert.NotStrictEqual(antecedentSibling, path.Root);
-    }
-
-    [Fact]
-    public void PathFromStringsIsSameAsPathFromDirectoryNames()
-    {
-        String[] stringPath = ["SomeDir", "SomeSubDir"];
-        DirectoryName[] namePath = stringPath.Select(n => new DirectoryName(n)).ToArray();
-
-        var pathFromNames = Path.Abs(root, namePath);
-        var pathFromStrings = Path.Abs(root, stringPath);
-
-        Assert.Equal(pathFromNames, pathFromStrings);
-        Assert.Same(pathFromNames.Root, pathFromStrings.Root);
-    }
-
-    [Fact]
-    public void RelativePathFromStringsIsSameAsPathFromDirectoryNames()
-    {
-        String[] stringPath = ["SomeDir", "SomeSubDir"];
-        DirectoryName[] namePath = stringPath.Select(n => new DirectoryName(n)).ToArray();
-
-        var pathFromNames = Path.Rel<FileSystem>(namePath);
-        var pathFromStrings = Path.Rel<FileSystem>(stringPath);
-
-        Assert.Equal(pathFromNames, pathFromStrings);
-        Assert.Same(pathFromNames.Root, pathFromStrings.Root);
-    }
-
-    [Fact]
-    public void PathWithOffsetFromStringsIsSameAsPathWithOffsetFromDirectoryNames()
-    {
-        const Byte offset = 2;
-        String[] stringPath = ["AnySubDir", "ChildSubDir", "GrandChildSubDir"];
-        DirectoryName[] namePath = stringPath.Select(n => new DirectoryName(n)).ToArray();
-        FileSystem.CurrentDirectory = TestDir.Chain(root, Enumerable.Repeat("SomeDir", offset + 1).ToArray());
-
-        var pathFromNames = Path.Rel<FileSystem>(offset, namePath);
-        var pathFromStrings = Path.Rel<FileSystem>(offset, stringPath);
-
-        Assert.Equal(pathFromNames, pathFromStrings);
-        Assert.Same(pathFromNames.Root, pathFromStrings.Root);
     }
 
     [Fact]
     public void ParsePathOnCurrentOperatingSystemFindsExpectedPath()
     {
-        var parent = TestDir.Chain(PathParseFs.Root, "parent");
+
+        var root = PathParseFs.Root;
+        var parent = TestDir.Chain(root, "parent");
         parent.AddDirectory("SomeSibling");
         var anchor = parent.AddDirectory("anchor");
         String[] unmatchedTail = ["in", "the", "slick"];
-        var queryPath = System.IO.Path.Combine([$"{PathParseFs.Root}", "parent", "anchor", .. unmatchedTail]);
+        var queryPath = System.IO.Path.Combine([$"{root}", "parent", "anchor", .. unmatchedTail]);
 
         var path = Path.Parse<PathParseFs>(queryPath);
 
         Assert.Same(anchor, path.Root);
-        Assert.Equal(unmatchedTail, path.Select(dir => dir.ToString()));
+        Assert.Equal([root.Name, "parent", "anchor", .. unmatchedTail], path.Select(dir => dir.ToString()));
     }
 
     [Fact]
@@ -156,15 +118,15 @@ public sealed class PathTest
         var path = Path.Parse<PathParseFs>(queryPath);
 
         Assert.Same(expectedPathRoot, path.Root);
-        Assert.Equal(1, path.Count);
-        Assert.Equal(["u"], path.Select(d => d.ToString()));
+        Assert.Equal(5, path.Count);
+        Assert.Equal([root.Name, "s", "t", "v", "u"], path.Select(d => d.ToString()));
     }
 
     [Fact]
     public void ToStringProducesHumanReadableRepresentation()
     {
         var sep = System.IO.Path.PathSeparator;
-        var pathRoot = TestDir.Chain(root, "t", "a");
+        var pathRoot = TestDir.Chain(root.dir, "t", "a");
         var anchor = String.Join(sep, pathRoot.Trail().Select(d => d.ToString()));
         var tail = String.Join(sep, "i", "l");
         var expected = $"[{anchor}]{sep}{tail}";
@@ -177,7 +139,7 @@ public sealed class PathTest
     [Fact]
     public void SubtractionOperatorWithCommonRoot()
     {
-        var common = TestDir.Chain(root, "parent");
+        var common = TestDir.Chain(root.dir, "parent");
         var left = Path.Abs(common, "puff", "goes", "the", "weasel");
         var right = Path.Abs(common, "here", "be", "dragons");
         var expectedDistance = new[] { "here", "be", "dragons" }.Select(n => new DirectoryName(n)).ToArray();
@@ -185,14 +147,14 @@ public sealed class PathTest
         var (commonPath, distance) = left - right;
 
         Assert.Same(common, commonPath.Root);
-        Assert.Empty(commonPath);
+        Assert.Equal(root.segments.Append(common.Name), commonPath);
         Assert.Equal(expectedDistance, distance);
     }
 
     [Fact]
     public void SubtractionOperatorWithCommonTail()
     {
-        var common = TestDir.Chain(root, "parent");
+        var common = TestDir.Chain(root.dir, "parent");
         var commonTail = new DirectoryName("child");
         var left = Path.Abs(common, commonTail, "puff", "goes", "the", "weasel");
         var right = Path.Abs(common, commonTail, "here", "be", "dragons");
@@ -201,9 +163,42 @@ public sealed class PathTest
         var (commonPath, distance) = left - right;
 
         Assert.Same(common, commonPath.Root);
-        Assert.Equal([commonTail], commonPath);
+        Assert.Equal(root.segments.Append(common.Name).Append(commonTail), commonPath);
         Assert.Equal(expectedDistance, distance);
     }
+
+    [Fact]
+    public void NormalizeRemovesDotAndDotDotSegments()
+    {
+        var segments = new[] { "parent", ".", ".", "irrelevant", "child", "..", "sibling", "..", "..", "current", ".", "dir", "." };
+        var path = Path.Abs(root.dir, segments);
+
+        var normalized = path.Normalize();
+
+        DirectoryName[] expected = [.. new[] { root.dir.Name, "parent", "current", "dir" }.Select(n => new DirectoryName(n))];
+        Assert.Equal(expected, normalized);
+    }
+
+    [Fact]
+    public void NormalizeJumpsToParentOnDotDot()
+    {
+        var parent = TestDir.Chain(root.dir, "parent");
+        var path = Path.Abs(parent, "..", "current", "dir");
+
+        var normalized = path.Normalize();
+
+        DirectoryName[] expected = [.. new[] { root.dir.Name, "current", "dir" }.Select(n => new DirectoryName(n))];
+        Assert.Equal(expected, normalized);
+    }
+
+    private static (IDirectory dir, DirectoryName[] segments) SetUp(String rootName)
+    {
+        var root = new TestDir(rootName);
+        FileSystem.Root = root;
+        FileSystem.CurrentDirectory = root;
+        return (root, [new DirectoryName(rootName)]);
+    }
+
     private sealed class PathParseFs : IFileSystemState
     {
         private static readonly TestDir root = new(RootName);
