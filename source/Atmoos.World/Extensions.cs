@@ -101,12 +101,6 @@ public static class Extensions
         }
     }
 
-    extension(DirectoryName)
-    {
-        public static String Join(DirectoryName[] directoryName)
-            => String.Join(dirSeparator, directoryName.Select(d => d.ToString()));
-    }
-
     extension(IRead reader)
     {
         public async Task CopyTo(IWrite target, CancellationToken token = default)
@@ -133,6 +127,9 @@ public static class Extensions
             return new(stream, textEncoding, leaveOpen: false, bufferSize: bufferSize);
         }
     }
+
+    public static String Join(this DirectoryName[] directoryName)
+        => String.Join(dirSeparator, directoryName.Select(d => d.ToString()));
 
     /// <summary>
     /// Recursively looks upward toward parent directories for the leaf directory
