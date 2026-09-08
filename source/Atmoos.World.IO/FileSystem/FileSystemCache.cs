@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.IO.FileSystem;
@@ -59,7 +59,7 @@ internal sealed class FileSystemCache
     public Result<IDirectory> Search(Path query)
     {
         Result<IDirectory> root = Find(query.Root);
-        return query.Aggregate(root, (d, name) => d.SelectMany(directory => directory.Search(name)));
+        return query.Tail.Aggregate(root, (d, name) => d.SelectMany(directory => directory.Search(name)));
     }
 
     public void Purge()

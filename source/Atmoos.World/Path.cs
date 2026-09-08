@@ -19,6 +19,7 @@ public sealed class Path : ICountable<DirectoryName>
     private readonly IReadOnlyCollection<DirectoryName> tail;
     public Int32 Count => this.tail.Count + this.root.Trail().Count();
     public IDirectory Root => this.root;
+    public IEnumerable<DirectoryName> Tail => this.tail;
     private Path(IDirectory root, IReadOnlyCollection<DirectoryName> tail) => (this.root, this.tail) = (root, tail);
 
     public Path Normalize()

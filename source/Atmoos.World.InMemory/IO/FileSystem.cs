@@ -76,7 +76,7 @@ internal sealed class FileSystem
         IDirectory info = query.Root;
         Trie<IDirectory, Directory> directory = Trie(query.Root);
         List<String> traversedPath = [info.Name];
-        foreach (var subDir in query) {
+        foreach (var subDir in query.Tail) {
             if (directory.FindKey(info => info.Name == subDir) is Success<IDirectory> next) {
                 info = next.Value();
                 directory = directory.Node(info);

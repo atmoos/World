@@ -1,8 +1,9 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace Atmoos.World.InMemory.IO;
 
-internal sealed class Directory : IDirectory
+internal sealed class Directory : IEquatable<Directory>, IDirectory
 {
     private readonly Func<Boolean> exists;
     private readonly Trie<IDirectory, Directory> node;
@@ -55,6 +56,10 @@ internal sealed class Directory : IDirectory
 
     public Boolean Contains(IFile file) => this.files.ContainsKey(file);
     public void Remove(IFile file) => this.files.TryRemove(file, out _);
+    public Boolean Equals(IDirectory? other) => ReferenceEquals(this, other);
+    public Boolean Equals(Directory? other) => ReferenceEquals(this, other);
+    public override Boolean Equals(Object? obj) => Equals(obj as Directory);
+    public override Int32 GetHashCode() => RuntimeHelpers.GetHashCode(this);
     public override String ToString() => Name;
     public IEnumerator<IFile> GetEnumerator() => this.files.Values.GetEnumerator();
     Boolean ChildExists() => this.node.Value.Exists && this.node.Contains(this);

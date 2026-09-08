@@ -23,7 +23,7 @@ public sealed class Current : IFileSystem
         return cache[directory] = directory;
     }
 
-    public static IDirectory Create(Path path) => path.Aggregate(path.Root, Create);
+    public static IDirectory Create(Path path) => path.Tail.Aggregate(path.Root, Create);
 
     public static void Delete(IFile file)
     {
