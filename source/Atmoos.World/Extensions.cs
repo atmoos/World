@@ -101,12 +101,11 @@ public static class Extensions
         }
     }
 
-    /// <summary>
-    /// Recursively looks upward toward parent directories for the leaf directory
-    /// <paramref name="leafDirectoryName"/> starting at the current directory.
-    /// </summary>
-    public static Result<IDirectory> FindLeaf<TFileSystem>(DirectoryName leafDirectoryName)
-        where TFileSystem : IFileSystemState => TFileSystem.CurrentDirectory.FindLeaf(leafDirectoryName);
+    extension(DirectoryName)
+    {
+        public static String Join(DirectoryName[] directoryName)
+            => String.Join(dirSeparator, directoryName.Select(d => d.ToString()));
+    }
 
     extension(IRead reader)
     {
@@ -134,4 +133,11 @@ public static class Extensions
             return new(stream, textEncoding, leaveOpen: false, bufferSize: bufferSize);
         }
     }
+
+    /// <summary>
+    /// Recursively looks upward toward parent directories for the leaf directory
+    /// <paramref name="leafDirectoryName"/> starting at the current directory.
+    /// </summary>
+    public static Result<IDirectory> FindLeaf<TFileSystem>(DirectoryName leafDirectoryName)
+        where TFileSystem : IFileSystemState => TFileSystem.CurrentDirectory.FindLeaf(leafDirectoryName);
 }
