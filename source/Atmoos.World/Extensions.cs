@@ -101,13 +101,6 @@ public static class Extensions
         }
     }
 
-    /// <summary>
-    /// Recursively looks upward toward parent directories for the leaf directory
-    /// <paramref name="leafDirectoryName"/> starting at the current directory.
-    /// </summary>
-    public static Result<IDirectory> FindLeaf<TFileSystem>(DirectoryName leafDirectoryName)
-        where TFileSystem : IFileSystemState => TFileSystem.CurrentDirectory.FindLeaf(leafDirectoryName);
-
     extension(IRead reader)
     {
         public async Task CopyTo(IWrite target, CancellationToken token = default)
@@ -134,4 +127,14 @@ public static class Extensions
             return new(stream, textEncoding, leaveOpen: false, bufferSize: bufferSize);
         }
     }
+
+    public static String Join(this DirectoryName[] directoryName)
+        => String.Join(dirSeparator, directoryName.Select(d => d.ToString()));
+
+    /// <summary>
+    /// Recursively looks upward toward parent directories for the leaf directory
+    /// <paramref name="leafDirectoryName"/> starting at the current directory.
+    /// </summary>
+    public static Result<IDirectory> FindLeaf<TFileSystem>(DirectoryName leafDirectoryName)
+        where TFileSystem : IFileSystemState => TFileSystem.CurrentDirectory.FindLeaf(leafDirectoryName);
 }

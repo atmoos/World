@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Atmoos.Sphere.Functional;
 using Xunit;
 using Xunit.Abstractions;
@@ -32,7 +32,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
     public void CreateFileInAntecedentDirs()
     {
         var name = new FileName("file", "txt");
-        String[] antecedents = ["some", "antecedent", "directory"];
+        DirectoryName[] antecedents = [new("some"), new("antecedent"), new("directory")];
         var command = Path.Abs(root, antecedents) + name;
         var file = FileSystem.Create(command);
 
@@ -40,8 +40,8 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Assert.Equal(Time.Now, file.CreationTime, tol);
         Assert.True(file.Exists, "The file should exist after creation.");
 
-        var expectedAntecedents = root.Trail().Select(a => a.Name.Value).Concat(antecedents).ToArray();
-        var actualAntecedents = file.Parent.Trail().Select(a => a.Name.Value).ToArray();
+        var expectedAntecedents = root.Trail().Select(a => a.Name).Concat(antecedents).ToArray();
+        var actualAntecedents = file.Parent.Trail().Select(a => a.Name).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
@@ -58,8 +58,8 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 
     public void CreateDirectoryInAntecedentDirs()
     {
-        var name = "SomeNewDirectory";
-        String[] antecedents = ["some", "antecedent", "directory"];
+        var name = new DirectoryName("SomeNewDirectory");
+        DirectoryName[] antecedents = [new("some"), new("antecedent"), new("directory")];
         var command = Path.Abs(root, [.. antecedents, name]);
         var directory = FileSystem.Create(command);
 
@@ -67,16 +67,16 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
         Assert.Equal(Time.Now, directory.CreationTime, tol);
         Assert.True(directory.Exists, "The directory should exist after creation.");
 
-        var expectedAntecedents = root.Trail().Select(a => a.Name.Value).Concat(antecedents).ToArray();
-        var actualAntecedents = directory.Antecedents().Select(a => a.Name.Value).ToArray();
+        var expectedAntecedents = root.Trail().Select(a => a.Name).Concat(antecedents).ToArray();
+        var actualAntecedents = directory.Antecedents().Select(a => a.Name).ToArray();
         Assert.Equal(expectedAntecedents, actualAntecedents);
     }
 
     public void AntecedentDirectoriesAreNotOverwritten()
     {
-        String[] antecedents = ["some", "antecedent", "directory"];
-        var firstCommand = Path.Abs(root, [.. antecedents, "FirstDir"]);
-        var secondCommand = Path.Abs(root, [.. antecedents, "SecondDir"]);
+        DirectoryName[] antecedents = [new("some"), new("antecedent"), new("directory")];
+        var firstCommand = Path.Abs(root, [.. antecedents, new DirectoryName("FirstDir")]);
+        var secondCommand = Path.Abs(root, [.. antecedents, new DirectoryName("SecondDir")]);
         var firstDir = FileSystem.Create(firstCommand);
         var secondDir = FileSystem.Create(secondCommand);
 
@@ -106,7 +106,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 
     public void DeleteDirectoryContainingFilesThrows()
     {
-        var command = Path.Abs(root, "FirstNonEmpty") + new FileName("File", "txt");
+        var command = Path.Abs(root, new DirectoryName("FirstNonEmpty")) + new FileName("File", "txt");
         var spuriousFile = FileSystem.Create(command);
 
         AssertNonEmptyDirectoryRemovalThrows<IOException>(spuriousFile.Parent, spuriousFile);
@@ -114,7 +114,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 
     public void DeleteDirectoryContainingOtherDirectoriesThrows()
     {
-        var command = Path.Abs(root, "SecondNonEmpty", "Child");
+        var command = Path.Abs(root, new DirectoryName("SecondNonEmpty"), new DirectoryName("Child"));
         var subDir = FileSystem.Create(command);
 
         AssertNonEmptyDirectoryRemovalThrows<IOException>(subDir.Parent, subDir);
@@ -170,7 +170,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 
     public void SearchForNonExistentDirectoryFails()
     {
-        String[] dirs = ["FreshlyCreated", "SomeSubDir", "AnotherSubDir"];
+        DirectoryName[] dirs = [new("FreshlyCreated"), new("SomeSubDir"), new("AnotherSubDir")];
         FileSystem.Create(Path.Abs(root, dirs));
         var thisDoesNotExist = new DirectoryName("ThisDoesNotExist");
         var thisDoesNotEither = new DirectoryName("NoNoNo");
@@ -188,7 +188,7 @@ public sealed class FileSystemScenarios<FileSystem, Time>(IDirectory root, ITest
 
     public void SearchForExistingDirectorySucceeds()
     {
-        var query = Path.Abs(root, "TheNewestOfDirs", "SomeSubDir", "TheTailEnd");
+        var query = Path.Abs(root, new DirectoryName("TheNewestOfDirs"), new DirectoryName("SomeSubDir"), new DirectoryName("TheTailEnd"));
 
         var expectedFind = FileSystem.Create(query);
 

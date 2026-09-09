@@ -220,6 +220,19 @@ public sealed class ExtensionsTest
 
         Assert.Equal(content, sink.ToArray());
     }
+
+    [Fact]
+    public void JoiningDirectoryNamesIsOsDependent()
+    {
+        const String part1 = "part1";
+        const String part2 = "part2";
+        var parts = new DirectoryName[] { new(part1), new(part2) };
+        var expected = $"{part1}{System.IO.Path.DirectorySeparatorChar}{part2}";
+
+        var actual = parts.Join();
+
+        Assert.Equal(expected, actual);
+    }
 }
 
 file sealed class Read(Byte[] content) : IRead

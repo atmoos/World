@@ -1,6 +1,6 @@
-namespace Atmoos.World.InMemory;
+﻿namespace Atmoos.World.InMemory;
 
-public sealed class Time : ITime
+public sealed class Time : ITime, IManualClock
 {
     private static DateTime now = DateTime.UtcNow;
     public static DateTime Now

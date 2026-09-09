@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.Sphere" Version="0.4.1" />
-    <PackageReference Include="Atmoos.World" Version="0.2.1" />
+    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Atmoos.Sphere" Version="0.4.2" />
   </ItemGroup>
 
 </Project>

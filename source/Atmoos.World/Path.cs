@@ -21,6 +21,8 @@ public sealed class Path : ICountable<DirectoryName>
     public IDirectory Root => this.root;
     private Path(IDirectory root, IReadOnlyCollection<DirectoryName> tail) => (this.root, this.tail) = (root, tail);
 
+    public TResult Extend<TResult>(Func<IDirectory, IEnumerable<DirectoryName>, TResult> extender) => extender(this.root, this.tail);
+
     public Path Normalize()
     {
         var root = this.root;

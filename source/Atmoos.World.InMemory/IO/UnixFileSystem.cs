@@ -18,7 +18,7 @@ public sealed class UnixFileSystem<Time> : IFileSystem
     public static IFile Create(FilePath file)
         => Create(new NewFile { Parent = Create(file.Path), Name = file.Name });
 
-    public static IDirectory Create(Path path) => path.Aggregate(path.Root, Create);
+    public static IDirectory Create(Path path) => path.Extend((root, tail) => tail.Aggregate(root, Create));
 
     public static IDirectory Create(IDirectory parent, DirectoryName name)
         => fileSystem.Add(new NewDirectory { Parent = parent, Name = name }, Time.Now);
