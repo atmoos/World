@@ -3,16 +3,13 @@
   <Import Project="../Atmoos.World.Pack.targets" />
 
   <PropertyGroup>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <Description>Atmoos World InMemory: In memory representation of The World.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Atmoos.Sphere" Version="0.4.2" />
+    <PackageReference Include="Atmoos.World" Version="0.2.5" />
   </ItemGroup>
 
 </Project>
