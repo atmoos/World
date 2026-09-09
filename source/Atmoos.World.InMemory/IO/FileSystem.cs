@@ -72,22 +72,23 @@ internal sealed class FileSystem
     }
 
     public Result<IDirectory> Search(Path query)
-    {
-        IDirectory info = query.Root;
-        Trie<IDirectory, Directory> directory = Trie(query.Root);
-        List<String> traversedPath = [info.Name];
-        foreach (var subDir in query.Tail) {
-            if (directory.FindKey(info => info.Name == subDir) is Success<IDirectory> next) {
-                info = next.Value();
-                directory = directory.Node(info);
-                traversedPath.Add(subDir);
-                continue;
+        => query.Extend((root, tail) =>
+        {
+            IDirectory info = root;
+            Trie<IDirectory, Directory> directory = Trie(root);
+            List<String> traversedPath = [info.Name];
+            foreach (var subDir in tail) {
+                if (directory.FindKey(info => info.Name == subDir) is Success<IDirectory> next) {
+                    info = next.Value();
+                    directory = directory.Node(info);
+                    traversedPath.Add(subDir);
+                    continue;
+                }
+                var path = String.Join(this.Separator, traversedPath);
+                return Result.Failure<IDirectory>($"No directory '{subDir}' in [{path}].");
             }
-            var path = String.Join(this.Separator, traversedPath);
-            return Result.Failure<IDirectory>($"No directory '{subDir}' in [{path}].");
-        }
-        return Result.Success(info);
-    }
+            return Result.Success(info);
+        });
 
     private Trie<IDirectory, Directory> Trie(IDirectory directory) => directory switch {
         var dir when ReferenceEquals(this.root, dir) => this.directories,

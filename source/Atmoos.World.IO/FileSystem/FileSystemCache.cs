@@ -59,7 +59,7 @@ internal sealed class FileSystemCache
     public Result<IDirectory> Search(Path query)
     {
         Result<IDirectory> root = Find(query.Root);
-        return query.Tail.Aggregate(root, (d, name) => d.SelectMany(directory => directory.Search(name)));
+        return query.Extend((_, tail) => tail.Aggregate(root, (d, name) => d.SelectMany(directory => directory.Search(name))));
     }
 
     public void Purge()
