@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Atmoos.World\Atmoos.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="xunit.assert" Version="2.9.3" />
     <PackageReference Include="xunit.abstractions" Version="2.0.3" />
-    <PackageReference Include="Atmoos.World" Version="0.2.5" />
   </ItemGroup>
   
 </Project>
