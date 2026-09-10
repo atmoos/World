@@ -1,4 +1,4 @@
-using Atmoos.Sphere.Collections;
+﻿using Atmoos.Sphere.Collections;
 using Atmoos.World.FileSystemTests;
 using Directory = Atmoos.World.InMemory.IO.Directory;
 using File = Atmoos.World.InMemory.IO.File;
@@ -113,6 +113,35 @@ public sealed class FileTest : IFileProperties
             Assert.Contains(name, e.Message);
             Assert.Contains(nameof(File.OpenWrite), e.Message);
         }
+    }
+
+    [Fact]
+    public void ConcurrentOpenWriteAllowsOnlyOneWriterAtATime()
+    {
+        const Int32 attempts = 32;
+        using var env = new FileEnv("raceWrite.txt");
+        using var start = new Barrier(attempts);
+        using var attempted = new Barrier(attempts);
+        var streams = new Stream?[attempts];
+        var successes = 0;
+
+        Parallel.For(0, attempts, i =>
+        {
+            start.SignalAndWait();
+            try {
+                streams[i] = env.File.OpenWrite();
+                Interlocked.Increment(ref successes);
+            }
+            catch (IOException) {
+                // Expected for every attempt but the one that wins the race.
+            }
+            attempted.SignalAndWait();
+        });
+        foreach (var stream in streams) {
+            stream?.Dispose();
+        }
+
+        Assert.Equal(1, successes);
     }
 
     [Fact]

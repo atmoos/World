@@ -1,17 +1,16 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Atmoos.World.InMemory.IO;
 
 internal sealed class File(Directory directory) : IFile
 {
     private const Int32 minCapacity = 64;
-    private const Int32 notWriting = 0;
-    private const Int32 writeInProgress = 1;
+    private readonly Lock gate = new();
     private readonly Directory directory = directory;
     private Byte[] content = [];
     private Int32 reads = 0;
-    private Int32 writing = notWriting;
-    public Int64 Size => Exists && this.writing == notWriting ? this.content.Length : 0;
+    private Boolean writing = false;
+    public Int64 Size => Exists && !this.writing ? this.content.Length : 0;
     public required FileName Name { get; init; }
     public Boolean Exists => this.directory.Exists && this.directory.Contains(this);
     public IDirectory Parent => this.directory;
@@ -33,10 +32,13 @@ internal sealed class File(Directory directory) : IFile
         if (!Exists) {
             throw new FileNotFoundException($"Cannot call '{operation}' on non-existent file '{Name}' in '{Parent}'.", Name);
         }
-        if (this.writing != notWriting) {
-            throw new IOException($"Cannot call '{operation}' on file '{Name}', it is already being written to. Path: {Parent}");
+        // Checking and mutating reads/writing must be atomic to prevent concurrent readers/writers from racing past each other.
+        lock (this.gate) {
+            if (this.writing) {
+                throw new IOException($"Cannot call '{operation}' on file '{Name}', it is already being written to. Path: {Parent}");
+            }
+            return ok(this);
         }
-        return ok(this);
     }
 
     private sealed class ThisStream : MemoryStream
@@ -45,7 +47,7 @@ internal sealed class File(Directory directory) : IFile
         private ThisStream(File file)
             : base(file.content, writable: false)
         {
-            Interlocked.Increment(ref file.reads);
+            ++file.reads;
             this.file = file;
         }
 
@@ -53,23 +55,28 @@ internal sealed class File(Directory directory) : IFile
             : base(Math.Max(2 * head.Length, minCapacity))
         {
             SetLength(head.Length);
-            Interlocked.Exchange(ref file.writing, writeInProgress);
+            file.writing = true;
             head.CopyTo(GetBuffer(), 0);
             this.file = file;
         }
 
         protected override void Dispose(Boolean disposing)
         {
-            if (disposing && CanWrite) {
-                Interlocked.Exchange(ref this.file.content, ToArray());
-                Interlocked.Exchange(ref this.file.writing, notWriting);
-            }
-            if (CanRead) {
-                Interlocked.Decrement(ref this.file.reads);
+            if (disposing) {
+                lock (this.file.gate) {
+                    if (CanWrite) {
+                        this.file.content = ToArray();
+                        this.file.writing = false;
+                    }
+                    if (CanRead) {
+                        --this.file.reads;
+                    }
+                }
             }
             base.Dispose(disposing);
         }
 
+        // Invoked while holding file.gate.
         public static ThisStream Read(File file) => new(file);
         public static ThisStream Write(File file)
         {
