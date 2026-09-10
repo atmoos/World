@@ -6,14 +6,15 @@ namespace Atmoos.World.InMemory.IO;
 internal sealed class Directory : IEquatable<Directory>, IDirectory
 {
     private readonly Func<Boolean> exists;
-    private readonly Trie<IDirectory, Directory> node;
+    private readonly Trie<IDirectory, Directory> self;
+    private readonly Trie<IDirectory, Directory> parent;
     private readonly ConcurrentDictionary<IFile, File> files = [];
     public Int32 Count => this.files.Count;
 
     public File this[IFile file] => this.files[file];
     public DirectoryName Name { get; }
     public Boolean Exists => this.exists();
-    public IDirectory Parent => this.node.Value;
+    public IDirectory Parent => this.parent.Value;
     public DateTime CreationTime { get; }
 
     private Directory(DirectoryName name, DateTime creationTime)
@@ -21,18 +22,18 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
         Name = name;
         CreationTime = creationTime;
         this.exists = () => true; // root always exists.
-        this.node = new Trie<IDirectory, Directory>(this);
+        this.parent = this.self = new Trie<IDirectory, Directory>(this);
     }
 
     public Directory(Trie<IDirectory, Directory> parentNode, DirectoryName name, DateTime creationTime)
     {
         Name = name;
         CreationTime = creationTime;
-        this.node = parentNode;
-        this.exists = ChildExists;
-        parentNode[this] = this;
+        this.parent = parentNode;
+        this.exists = () => this.parent.Value.Exists && this.parent.Contains(this);
+        this.self = parentNode.Add(this, this);
     }
-    public IEnumerable<IDirectory> Children() => this.node.Select(t => t.key);
+    public IEnumerable<IDirectory> Children() => this.self.Select(t => t.key);
     public File Add(FileName name, DateTime creationTime)
     {
         if (this.files.Values.Any(file => file.Name == name)) {
@@ -62,7 +63,6 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
     public override Int32 GetHashCode() => RuntimeHelpers.GetHashCode(this);
     public override String ToString() => Name;
     public IEnumerator<IFile> GetEnumerator() => this.files.Values.GetEnumerator();
-    Boolean ChildExists() => this.node.Value.Exists && this.node.Contains(this);
 
     private IOException FileExists(FileName name) => new($"Directory '{this}' already contains a file '{name}'.");
     private HashSet<FileName> Intersect(IEnumerable<FileName> other)
@@ -75,6 +75,6 @@ internal sealed class Directory : IEquatable<Directory>, IDirectory
     public static (Directory root, Trie<IDirectory, Directory> trie) CreateRoot(DirectoryName name, DateTime creationTime)
     {
         var root = new Directory(name, creationTime);
-        return (root, root.node);
+        return (root, root.parent);
     }
 }

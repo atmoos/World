@@ -1,8 +1,9 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Atmoos.Sphere.Functional;
 
 namespace Atmoos.World.InMemory;
+
 internal sealed class Trie<TKey, TValue>(TValue value) : ICountable<(TKey key, TValue value)>
     where TKey : notnull
     where TValue : notnull
@@ -46,5 +47,10 @@ internal sealed class Trie<TKey, TValue>(TValue value) : ICountable<(TKey key, T
     private Boolean TryGetNode(TKey key, [MaybeNullWhen(false)] out Trie<TKey, TValue> child)
         => this.children.TryGetValue(key, out child);
 
-    public IEnumerator<(TKey key, TValue value)> GetEnumerator() => this.children.Select(kv => (kv.Key, kv.Value.Value)).GetEnumerator();
+    public IEnumerator<(TKey key, TValue value)> GetEnumerator()
+    {
+        foreach (var kv in this.children) {
+            yield return (kv.Key, kv.Value.Value);
+        }
+    }
 }

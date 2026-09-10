@@ -124,7 +124,7 @@ public sealed class ExtensionsTest
     }
 
     [Fact]
-    public void FindByExtensionRecursesAcrossChildren()
+    public void EnumerateByExtensionRecursesAcrossChildren()
     {
         var root = new TestDir("root");
         var parent = root.AddDirectory("parent");
@@ -134,76 +134,78 @@ public sealed class ExtensionsTest
         var nestedFile = nested.Add(new FileName("nested", "txt"));
         nested.Add(new FileName("ignore", "md"));
 
-        var actual = root.Find(f => f.Name.Extension == "txt").ToArray();
+        var actual = root.Enumerate(f => f.Name.Extension == "txt").ToArray();
 
         Assert.Equal([rootFile, parentFile, nestedFile], actual);
     }
 
     [Fact]
-    public void FindByFileNameMatchesExactly()
+    public void EnumerateByFileNameMatchesExactly()
     {
         var root = new TestDir("root");
         var parent = root.AddDirectory("parent");
         var sameNameDifferentExtension = root.Add(new FileName("config", "md"));
         var expected = parent.Add(new FileName("config", "txt"));
         var nested = parent.AddDirectory("nested");
-        var nestedMatch = nested.Add(new FileName("config", "txt"));
+        var expectedFileName = new FileName("config", "txt");
+        var nestedMatch = nested.Add(expectedFileName);
 
-        var actual = root.Find(new FileName("config", "txt")).ToArray();
+        var actual = root.Enumerate((IFile file) => file.Name == expectedFileName).ToArray();
 
         Assert.Equal([expected, nestedMatch], actual);
         Assert.DoesNotContain(sameNameDifferentExtension, actual);
     }
 
     [Fact]
-    public void FindByPredicateDoesNotRecurseWhenRecursiveIsFalse()
+    public void EnumerateByPredicateDoesNotRecurseWhenRecursiveIsFalse()
     {
         var root = new TestDir("root");
         var rootFile = root.Add(new FileName("root", "txt"));
         var child = root.AddDirectory("child");
         child.Add(new FileName("child", "txt"));
 
-        var actual = root.Find(file => file.Name.Extension == "txt", recursive: false).ToArray();
+        var actual = root.Where(file => file.Name.Extension == "txt").ToArray();
 
         Assert.Equal([rootFile], actual);
     }
 
     [Fact]
-    public void FindByPredicateReturnsEmptyWhenNothingMatches()
+    public void EnumerationByPredicateReturnsEmptyWhenNothingMatches()
     {
         var root = new TestDir("root");
         var rootFile = root.Add(new FileName("root", "txt"));
         var child = root.AddDirectory("child");
         child.Add(new FileName("child", "txt"));
 
-        var actual = root.Find((IFile _) => false, recursive: false).ToArray();
+        var actual = root.Where((IFile _) => false).ToArray();
 
         Assert.Empty(actual);
     }
 
     [Fact]
-    public void FindDirectoryByNameRecursesAcrossChildren()
+    public void EnumerateDirectoriesAcrossChildren()
     {
         var root = new TestDir("root");
         var parent = root.AddDirectory("parent");
         var nested = parent.AddDirectory("nested");
         var expected = parent.AddDirectory("target");
         var nestedMatch = nested.AddDirectory("target");
+        var expectedDirectoryName = new DirectoryName("target");
 
-        var actual = root.Find(new DirectoryName("target")).ToArray();
+        var actual = root.Enumerate((IDirectory dir) => dir.Name == expectedDirectoryName).ToArray();
 
         Assert.Equal([expected, nestedMatch], actual);
     }
 
     [Fact]
-    public void FindDirectoryByPredicateDoesNotRecurseWhenRecursiveIsFalse()
+    public void EnumerateDirectoriesByPredicateDoesNotRecurseWhenRecursiveIsFalse()
     {
         var root = new TestDir("root");
         var child = root.AddDirectory("child");
         var unexpected = child.AddDirectory("nested");
 
 
-        var actual = root.Find((IDirectory directory) => directory.Name == unexpected.Name, recursive: false).ToArray();
+        var actual = root.Children().Where(directory => directory.Name == unexpected.Name).ToArray();
 
         Assert.Empty(actual);
     }

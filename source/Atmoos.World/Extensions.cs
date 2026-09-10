@@ -74,17 +74,31 @@ public static class Extensions
         public Result<IDirectory> Search(DirectoryName name)
             => directory.Children().SingleOrDefault(child => child.Name == name).ToResult(() => $"Directory '{name}' not found in '{directory}'.");
 
-        public IEnumerable<IFile> Find(FileName file, Boolean recursive = true)
-            => directory.Find((IFile f) => f.Name == file, recursive);
+        public IEnumerable<IFile> Enumerate(Func<IFile, Boolean> predicate)
+        {
+            foreach (var file in directory) {
+                if (predicate(file)) {
+                    yield return file;
+                }
+            }
+            foreach (var file in directory.Children()) {
+                foreach (var descendant in file.Enumerate(predicate)) {
+                    yield return descendant;
+                }
+            }
+        }
 
-        public IEnumerable<IFile> Find(Func<IFile, Boolean> predicate, Boolean recursive = true)
-            => recursive ? directory.Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Where(predicate);
-
-        public IEnumerable<IDirectory> Find(DirectoryName directoryName, Boolean recursive = true)
-                => directory.Find((IDirectory d) => d.Name == directoryName, recursive);
-
-        public IEnumerable<IDirectory> Find(Func<IDirectory, Boolean> predicate, Boolean recursive = true)
-                => recursive ? directory.Children().Where(predicate).Concat(directory.Children().SelectMany(child => child.Find(predicate, true))) : directory.Children().Where(predicate);
+        public IEnumerable<IDirectory> Enumerate(Func<IDirectory, Boolean> predicate)
+        {
+            foreach (var child in directory.Children()) {
+                if (predicate(child)) {
+                    yield return child;
+                }
+                foreach (var descendant in child.Enumerate(predicate)) {
+                    yield return descendant;
+                }
+            }
+        }
 
         /// <summary>
         /// Recursively looks upward toward parent directories for the leaf directory
@@ -128,7 +142,7 @@ public static class Extensions
         }
     }
 
-    public static String Join(this DirectoryName[] directoryName)
+    public static String Join(this IEnumerable<DirectoryName> directoryName)
         => String.Join(dirSeparator, directoryName.Select(d => d.ToString()));
 
     /// <summary>
