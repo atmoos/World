@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.World" Version="0.2.5" />
+    <PackageReference Include="Atmoos.World" Version="0.2.6" />
   </ItemGroup>
 
 </Project>
