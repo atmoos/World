@@ -128,7 +128,7 @@ public static class Extensions
         }
     }
 
-    public static String Join(this DirectoryName[] directoryName)
+    public static String Join(this IEnumerable<DirectoryName> directoryName)
         => String.Join(dirSeparator, directoryName.Select(d => d.ToString()));
 
     /// <summary>
