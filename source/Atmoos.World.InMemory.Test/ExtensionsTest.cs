@@ -5,21 +5,32 @@ namespace Atmoos.World.InMemory.Test;
 public class ExtensionsTest
 {
     [Fact]
-    public void FindByExtensionRecursesAcrossChildren()
+    public void EnumerateFilesByExtensionRecursesAcrossChildren()
     {
         var root = CreateTestDirectoryStructure<UnixFileSystem<Time>>();
 
-        var actual = root.Find(f => f.Name.Extension == "txt").ToArray();
+        var actual = root.Enumerate(f => f.Name.Extension == "txt").ToArray();
 
         Assert.Equal(3, actual.Length);
     }
 
     [Fact]
-    public void FindByExtensionRecursesAcrossChildrenForMd()
+    public void EnumerateFilesByExtensionRecursesAcrossChildrenForMd()
     {
         var root = CreateTestDirectoryStructure<UnixFileSystem<Time>>();
 
-        var actual = root.Find(f => f.Name.Extension == "md").ToArray();
+        var actual = root.Enumerate(f => f.Name.Extension == "md").ToArray();
+
+        Assert.Single(actual);
+    }
+
+    [Fact]
+    public void EnumerateDirectoriesByExtensionRecursesAcrossChildren()
+    {
+        var expectedDirectoryName = new DirectoryName("nested");
+        var root = CreateTestDirectoryStructure<UnixFileSystem<Time>>();
+
+        var actual = root.Enumerate((IDirectory dir) => dir.Name == expectedDirectoryName).ToArray();
 
         Assert.Single(actual);
     }
@@ -27,8 +38,8 @@ public class ExtensionsTest
     private static IDirectory CreateTestDirectoryStructure<FileSystem>()
         where FileSystem : IFileSystem
     {
-        var boundary = Path.Rel<FileSystem>(new DirectoryName(Guid.NewGuid().ToString()));
-        var root = FileSystem.Create(boundary);
+        var path = Path.Rel<FileSystem>(new DirectoryName(Guid.NewGuid().ToString()));
+        var root = FileSystem.Create(path);
         var parent = FileSystem.Create(root, new DirectoryName("parent"));
         var nested = FileSystem.Create(parent, new DirectoryName("nested"));
         FileSystem.Create(root, new FileName("root", "txt"));

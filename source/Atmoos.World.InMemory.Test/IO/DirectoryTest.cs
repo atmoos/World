@@ -1,4 +1,4 @@
-using Directory = Atmoos.World.InMemory.IO.Directory;
+﻿using Directory = Atmoos.World.InMemory.IO.Directory;
 
 namespace Atmoos.World.InMemory.Test.IO;
 
@@ -35,5 +35,18 @@ public sealed class DirectoryTest
         var e = Assert.Throws<IOException>(() => source.MoveTo(target, DateTime.Now));
         Assert.Contains(targetName, e.Message);
         Assert.Contains(commonFileName.ToString(), e.Message);
+    }
+
+    [Fact]
+    public void ChildrenOfNestedDirectoryDoesNotReturnItsSiblings()
+    {
+        var parent = new Directory(root.trie, new DirectoryName("parent"), DateTime.Now);
+        var parentNode = root.trie.Node(parent);
+        var nested = new Directory(parentNode, new DirectoryName("nested"), DateTime.Now);
+        new Directory(parentNode, new DirectoryName("sibling"), DateTime.Now);
+
+        var actual = nested.Children();
+
+        Assert.Empty(actual);
     }
 }
